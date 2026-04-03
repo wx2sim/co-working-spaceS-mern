@@ -24,7 +24,7 @@ export const signin = async (req , res ,next) => {
    try {
       const validUser = await User.findOne({email: email});
       if (!validUser){
-      return next(errorHandler(404,'User Not Found!'));
+      return next(errorHandler(404,'User Not Found!!!'));
       }
       const validPassword = bcryptjs.compareSync(password, validUser.password);
       if (!validPassword){
@@ -34,6 +34,7 @@ export const signin = async (req , res ,next) => {
       const {password: pass, ...rest} = validUser._doc;
       res.cookie('access_token', token, {HttpOnly: true}).status(200).json({rest});
       
+
    } catch (error) {
       next(error);
    }
