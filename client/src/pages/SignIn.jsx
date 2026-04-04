@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios';
+import { useDispatch ,  } from 'react-redux'
+import {signInStart, signInSuccess, signInFailure} from '../redux/user/userSlice.js'
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
@@ -10,6 +12,7 @@ export default function SignIn() {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const validate = () => {
     let newErrors = { email: '', password: '' };
@@ -36,12 +39,15 @@ export default function SignIn() {
 
     try {
       setLoading(true);
+      dispatch(signInStart())
       const { data } = await axios.post('/api/auth/signin', formData);
       await new Promise(resolve => setTimeout(resolve, 1500));
+      dispatch(signInSuccess(data));
       setLoading(false);
       navigate('/');
 
     } catch (error) {
+     dispatch(signInFailure()); 
   setLoading(false);
   const message = error.response?.data?.message || '';
 
