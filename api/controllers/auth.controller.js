@@ -12,7 +12,7 @@ export const signup = async (req , res ,next) => {
    const newUser = new User({username , email ,password: HashedPassword});
    try {
       await newUser.save();
-      res.status(201).json('new user created secessfully!');
+      res.status(201).json({seccess: true, message: 'new user created sucessfully! '});
       
    } catch (error) {
      next(error);
