@@ -22,6 +22,7 @@ function Header() {
         <ul className='flex gap-4'>
            <Link to='/'> <li className='hidden sm:inline text-slate-700 hover:underline'>Home</li> </Link>
            <Link to='/about'> <li className='hidden sm:inline text-slate-700 hover:underline'>About</li> </Link>
+           <Link to={'/profile'}>
            {currentUser ? (
             <img 
             src={currentUser.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} 
@@ -29,8 +30,9 @@ function Header() {
               alt='profile'
             />
             ) : ( 
-              <Link to='/signin'>Sign In</Link> 
+              <li to='/signin'>Sign In</li> 
             )}
+            </Link>
         </ul>
         </div>
     </header>
