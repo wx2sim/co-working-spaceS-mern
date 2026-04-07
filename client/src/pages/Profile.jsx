@@ -4,7 +4,7 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/
 import { app } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { Link , useNavigate} from 'react-router-dom';
-import {updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess} from '../redux/user/userSlice.js';
+import {updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserStart, signOutUserFailure, signOutUserSuccess} from '../redux/user/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast'; 
 
@@ -69,7 +69,7 @@ export default function Profile() {
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
-      const { data } = await axios.delete(`/api/user/delete/${currentUser._id}`, formData);
+      const { data } = await axios.delete(`/api/user/delete/${currentUser._id}`);
       if (data.success === false) {
         toast.error(data.message, { duration: 3000 });
         dispatch(deleteUserFailure(data));
@@ -83,7 +83,26 @@ export default function Profile() {
         toast.error(message, { duration: 3000 });
         dispatch(deleteUserFailure(error.message));
     }
-  }
+  };
+  const handleSignOut = async ()=> {
+    try {
+      dispatch(signOutUserStart());
+      const { data } = await axios.post(`/api/auth/signout`);
+      console.log(data);
+      if (data.success === false) {
+        toast.error(data.message, { duration: 3000 });
+        dispatch(signOutUserFailure(data));
+        return;
+      }
+      dispatch(signOutUserSuccess(data));
+       toast.success('User deleted successfully!', { duration: 3000 });
+      
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+        toast.error(message, { duration: 3000 });
+        dispatch(signOutUserFailure(error.message));
+    }
+  };
   const fileRef = useRef(null);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -156,7 +175,7 @@ export default function Profile() {
             <span onClick={handleDeleteUser}  className='text-slate-700 cursor-pointer hover:underline' >
             Delete account
             </span>
-            <span  className='text-slate-700 cursor-pointer hover:underline'>
+            <span onClick={handleSignOut} className='text-slate-700 cursor-pointer hover:underline'>
               Sign out
             </span> 
       </div>

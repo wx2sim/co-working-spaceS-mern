@@ -61,17 +61,17 @@ export default function SignUp() {
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
 
         <div>
-          <input type="text" placeholder='Username' className='border p-3 rounded-lg w-full' id='username' onChange={handleChange} />
+          <input type="text" autoComplete="off" placeholder='Username' className='border p-3 rounded-lg w-full' id='username' onChange={handleChange} />
           {error.username && <span className='text-red-500 text-sm'>{error.username}</span>} 
         </div>
 
         <div>
-          <input type="email" placeholder='Email' className='border p-3 rounded-lg w-full' id='email' onChange={handleChange} />
+          <input type="email" autoComplete="off" placeholder='Email' className='border p-3 rounded-lg w-full' id='email' onChange={handleChange} />
           {error.email && <span className='text-red-500 text-sm'>{error.email}</span>}
         </div>
 
         <div>
-          <input type="password" placeholder='Password' className='border p-3 rounded-lg w-full' id='password' onChange={handleChange} />
+          <input type="password" autoComplete="new-password" placeholder='Password' className='border p-3 rounded-lg w-full' id='password' onChange={handleChange} />
           {error.password && <span className='text-red-500 text-sm'>{error.password}</span>}
         </div>
 
