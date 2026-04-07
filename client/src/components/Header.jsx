@@ -28,6 +28,7 @@ function Header() {
             src={currentUser.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} 
               className='rounded-full w-7 h-7 object-cover cursor-pointer' 
               alt='profile'
+               referrerPolicy='no-referrer'
             />
             ) : ( 
               <li to='/signin'>Sign In</li> 
