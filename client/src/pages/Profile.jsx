@@ -4,7 +4,7 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/
 import { app } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { Link , useNavigate} from 'react-router-dom';
-import {updateUserStart, updateUserSuccess, updateUserFailure} from '../redux/user/userSlice.js';
+import {updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess} from '../redux/user/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast'; 
 
@@ -66,6 +66,24 @@ export default function Profile() {
         dispatch(updateUserFailure(message));
     }
   };
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const { data } = await axios.delete(`/api/user/delete/${currentUser._id}`, formData);
+      if (data.success === false) {
+        toast.error(data.message, { duration: 3000 });
+        dispatch(deleteUserFailure(data));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+       toast.success('User deleted successfully!', { duration: 3000 });
+      
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+        toast.error(message, { duration: 3000 });
+        dispatch(deleteUserFailure(error.message));
+    }
+  }
   const fileRef = useRef(null);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -135,7 +153,7 @@ export default function Profile() {
         </Link>
        </form>
        <div className='flex justify-between mt-5'>
-            <span  className='text-slate-700 cursor-pointer hover:underline' >
+            <span onClick={handleDeleteUser}  className='text-slate-700 cursor-pointer hover:underline' >
             Delete account
             </span>
             <span  className='text-slate-700 cursor-pointer hover:underline'>
