@@ -7,6 +7,7 @@ import { Link , useNavigate} from 'react-router-dom';
 import {updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserStart, signOutUserFailure, signOutUserSuccess} from '../redux/user/userSlice.js';
 import axios from 'axios';
 import toast from 'react-hot-toast'; 
+import { Button, Popconfirm } from 'antd';
 
 
 
@@ -95,7 +96,7 @@ export default function Profile() {
         return;
       }
       dispatch(signOutUserSuccess(data));
-       toast.success('User deleted successfully!', { duration: 3000 });
+       toast.success('User Signed out successfully!', { duration: 3000 });
       
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -108,6 +109,10 @@ export default function Profile() {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
   if (!currentUser) return null;
+  const confirm = () =>
+    new Promise(resolve => {
+      setTimeout(() => resolve(null), 3000);
+    });
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -172,12 +177,16 @@ export default function Profile() {
         </Link>
        </form>
        <div className='flex justify-between mt-5'>
-            <span onClick={handleDeleteUser}  className='text-slate-700 cursor-pointer hover:underline' >
-            Delete account
-            </span>
-            <span onClick={handleSignOut} className='text-slate-700 cursor-pointer hover:underline'>
-              Sign out
-            </span> 
+            <Popconfirm
+                 title="Alert"
+                 description="Do u really want to delete your Account"
+                 okButtonProps={{ danger: true }}
+                 onConfirm={handleDeleteUser}
+                 onOpenChange={() => console.log('open change')}
+               >
+              <Button className='bg-red-500 text-white' type="primary" danger>Delete Account</Button>
+            </Popconfirm>
+            <Button onClick={handleSignOut} type="primary" className="!bg-teal-700 hover:!opacity-80 !border-teal-700 hover:!border-teal-300 !text-white">Sign Out</Button>
       </div>
       
       <button  className='text-green-700 w-full'>
