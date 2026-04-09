@@ -8,6 +8,7 @@ import {updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure
 import axios from 'axios';
 import toast from 'react-hot-toast'; 
 import { Button, Popconfirm } from 'antd';
+import AnimatedPage from '../components/AnimatedPage.jsx'
 
 
 
@@ -114,6 +115,7 @@ export default function Profile() {
       setTimeout(() => resolve(null), 3000);
     });
   return (
+    <AnimatedPage>
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
@@ -201,5 +203,7 @@ export default function Profile() {
          
       </div>
     </div>
+    </AnimatedPage>
   );
+  
 }

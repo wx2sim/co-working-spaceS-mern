@@ -8,6 +8,7 @@ import {
   signInFailure,
 } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
+import AnimatedPage from '../components/AnimatedPage'
 
 
 export default function SignIn() {
@@ -38,6 +39,7 @@ export default function SignIn() {
     }
   };
   return (
+    <AnimatedPage>
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-4xl text-center font-semibold my-7'>Sign In</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
@@ -73,5 +75,6 @@ export default function SignIn() {
       </div>
       {error && <p className='text-red-500 mt-5'>{error}</p>}
     </div>
+    </AnimatedPage>
   );
 }
