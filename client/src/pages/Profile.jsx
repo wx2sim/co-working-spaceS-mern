@@ -8,6 +8,7 @@ import {updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure
 import axios from 'axios';
 import toast from 'react-hot-toast'; 
 import { Button, Popconfirm } from 'antd';
+import SmartButton from '../components/SmartButton.jsx';
 
 
 
@@ -177,16 +178,21 @@ export default function Profile() {
         </Link>
        </form>
        <div className='flex justify-between mt-5'>
-            <Popconfirm
-                 title="Alert"
-                 description="Do u really want to delete your Account"
-                 okButtonProps={{ danger: true }}
-                 onConfirm={handleDeleteUser}
-                 onOpenChange={() => console.log('open change')}
-               >
-              <Button className='bg-red-500 text-white' type="primary" danger>Delete Account</Button>
-            </Popconfirm>
-            <Button onClick={handleSignOut} type="primary" className="!bg-teal-700 hover:!opacity-80 !border-teal-700 hover:!border-teal-300 !text-white">Sign Out</Button>
+        <SmartButton 
+        actionFunction={handleDeleteUser}
+        colorClass="!bg-red-500 hover:!bg-red-600"
+        text="Delete Account"
+        showAlert={true}
+        alertDescription="Do you want to delete your Account?"
+      />
+        <SmartButton 
+        actionFunction={handleSignOut}
+        colorClass="!bg-teal-700 hover:!opacity-80"
+        text="Sign Out"
+        showAlert={false}
+        
+      />   
+           
       </div>
       
       <button  className='text-green-700 w-full'>
