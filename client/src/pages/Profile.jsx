@@ -9,6 +9,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast'; 
 import { Button, Popconfirm } from 'antd';
 import SmartButton from '../components/SmartButton.jsx';
+import SmartModal from '../components/SmartModal.jsx';
 
 
 
@@ -118,6 +119,7 @@ export default function Profile() {
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+        
         <input
           onChange={(e) => setFile(e.target.files[0])}
           type='file'
@@ -178,13 +180,16 @@ export default function Profile() {
         </Link>
        </form>
        <div className='flex justify-between mt-5'>
-        <SmartButton 
-        actionFunction={handleDeleteUser}
-        colorClass="!bg-red-500 hover:!bg-red-600"
-        text="Delete Account"
-        showAlert={true}
-        alertDescription="Do you want to delete your Account?"
-      />
+        <SmartModal 
+        triggerText="Delete Account"
+        triggerColorClass="!bg-red-500 !text-white !border-transparent bg-red-500 hover:!opacity-60 hover:!border-red-500 text-white "
+        modalTitle="Confirmation"
+        modalContent="Do you want to delete your Account?"
+        cancelColorClass="!bg-green-600 hover:!text-white !border-white hover:!bg-green-500 hover:!opacity-80  text-white "
+        okText="Yes, Delete"
+        okColorClass="bg-red-600 !text-white hover:!text-black hover:!opacity-80 hover:!border-red-500 "
+        onOkAction={handleDeleteUser} 
+         />
         <SmartButton 
         actionFunction={handleSignOut}
         colorClass="!bg-teal-700 hover:!opacity-80"
@@ -201,9 +206,8 @@ export default function Profile() {
       
 
      <div className='flex flex-col gap-4'>
-          <h1 className='text-center mt-7 text-2xl font-semibold'>
-            Your Listings
-          </h1>
+      
+          
          
       </div>
     </div>
