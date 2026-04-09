@@ -49,7 +49,7 @@ export default function ProfileDropdown() {
     { type: 'divider' },
     {
       key: '3',
-      label: <span onClick={handleSignOut} na>Sign Out</span>,
+      label: <span onClick={handleSignOut} >Sign Out</span>,
       icon: <LogoutOutlined />,
       danger: true,
     },
