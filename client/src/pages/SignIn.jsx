@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -6,6 +6,7 @@ import {
   signInStart,
   signInSuccess,
   signInFailure,
+  clearError,
 } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
 import AnimatedPage from '../components/AnimatedPage'
@@ -16,6 +17,11 @@ export default function SignIn() {
   const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  useEffect(() => {
+    if (error) {
+      dispatch(clearError());
+    }
+  }, [dispatch]);
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -35,7 +41,10 @@ export default function SignIn() {
       dispatch(signInSuccess(data));
       navigate('/');
     } catch (error) {
-      dispatch(signInFailure(error.message));
+      console.log("Raw Error from Backend:", error.response);
+
+      const errorMessage = error.response?.data?.message || error.message;
+      dispatch(signInFailure(errorMessage));
     }
   };
   return (
