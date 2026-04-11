@@ -132,7 +132,10 @@ export default function CreateListing() {
         return setError('Discount price must be lower than regular price');
       setLoading(true);
       setError(false);
-      console.log('LISTING CREATED SUCCESSFULLY '); //post via axios 
+      const { data } = await axios.post('/api/listing/create', {
+         ...formData,
+         userRef: currentUser._id,
+        });
       setLoading(false);
       if (data.success === false) {
         setError(data.message);
