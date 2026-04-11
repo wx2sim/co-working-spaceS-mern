@@ -38,7 +38,6 @@ export const updateListing = async (req, res, next) => {
   if (req.user.id !== listing.userRef) {
     return next(errorHandler(401, 'You can only update your own listings!'));
   }
-
   try {
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,

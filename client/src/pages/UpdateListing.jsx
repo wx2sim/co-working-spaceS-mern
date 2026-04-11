@@ -8,6 +8,7 @@ import {
 import { app } from '../firebase';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 export default function UpdateListing() {
   const { currentUser } = useSelector((state) => state.user);
@@ -36,8 +37,7 @@ export default function UpdateListing() {
   useEffect(() => {
     const fetchListing = async () => {
       const listingId = params.listingId;
-      const res = await fetch(`/api/listing/get/${listingId}`);
-      const data = await res.json();
+      const { data } = await axios.get(`/api/listing/get/${listingId}`)
       if (data.success === false) {
         console.log(data.message);
         return;
@@ -148,17 +148,7 @@ export default function UpdateListing() {
         return setError('Discount price must be lower than regular price');
       setLoading(true);
       setError(false);
-      const res = await fetch(`/api/listing/update/${params.listingId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          userRef: currentUser._id,
-        }),
-      });
-      const data = await res.json();
+      const { data } = await axios.post(`/api/listing/update/${params.listingId}`);
       setLoading(false);
       if (data.success === false) {
         setError(data.message);
