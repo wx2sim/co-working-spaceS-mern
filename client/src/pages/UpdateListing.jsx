@@ -148,7 +148,7 @@ export default function UpdateListing() {
         return setError('Discount price must be lower than regular price');
       setLoading(true);
       setError(false);
-      const { data } = await axios.post(`/api/listing/update/${params.listingId}`);
+      const { data } = await axios.post(`/api/listing/update/${params.listingId}`, formData);
       setLoading(false);
       if (data.success === false) {
         setError(data.message);
