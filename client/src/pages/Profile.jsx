@@ -127,7 +127,7 @@ export default function Profile() {
         setShowListingsError(true);
         return;
       }
-
+      
       setUserListings(data);
     } catch (error) {
       setShowListingsError(true);
@@ -270,7 +270,7 @@ export default function Profile() {
                 >
                   Delete
                 </button>
-                <Link to={``}>
+                <Link to={`/updatelisting/${listing._id}`}>
                   <button className='text-green-700 uppercase'>Edit</button>
                 </Link>
               </div>
