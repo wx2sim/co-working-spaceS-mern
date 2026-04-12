@@ -143,7 +143,6 @@ export default function Listing() {
               </button>
             )}
             {contact && <Contact listing={listing} />}
-            
           </div>
         </div>
       )}
