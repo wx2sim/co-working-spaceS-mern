@@ -10,6 +10,7 @@ import PrivateRoutes from './components/PrivateRoutes';
 import { AnimatePresence } from 'framer-motion';
 import CreateListing from './pages/CreateListing';
 import UpdateListing from './pages/UpdateListing';
+import Listing from './pages/Listing';
 
 
 function AnimatedRoutes() {
@@ -21,7 +22,7 @@ function AnimatedRoutes() {
         <Route path='/signin' element={<SignIn />} />
         <Route path='/signup' element={<SignUp />} />
         <Route path='/about' element={<About />} />
-        
+        <Route path='/listing/:listingId' element={<Listing />} />
         <Route element={<PrivateRoutes />} >
           <Route path='/profile' element={<Profile />} />
           <Route path='/createlisting' element={<CreateListing/>} />
