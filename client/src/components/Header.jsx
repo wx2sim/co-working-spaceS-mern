@@ -43,9 +43,10 @@ function Header() {
             className='bg-transparent focus:outline-none w-24 sm:w-64'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            
           />
           <button>
-            <FaSearch className='text-slate-600' />
+            <FaSearch className='text-slate-600' onClick={handleSubmit}/>
           </button>
         </form>
         <ul className='flex gap-4'>
