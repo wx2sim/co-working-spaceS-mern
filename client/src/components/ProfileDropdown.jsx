@@ -11,8 +11,7 @@ import {
   signOutUserFailure 
 } from '../redux/user/userSlice';
 
-export default function ProfileDropdown() {
-  const { currentUser } = useSelector((state) => state.user);
+export default function ProfileDropdown({ currentUser }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleSignOut = async ()=> {

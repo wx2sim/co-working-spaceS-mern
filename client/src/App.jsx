@@ -11,6 +11,7 @@ import { AnimatePresence } from 'framer-motion';
 import CreateListing from './pages/CreateListing';
 import UpdateListing from './pages/UpdateListing';
 import Listing from './pages/Listing';
+import Search from './pages/Search';
 
 
 function AnimatedRoutes() {
@@ -23,6 +24,7 @@ function AnimatedRoutes() {
         <Route path='/signup' element={<SignUp />} />
         <Route path='/about' element={<About />} />
         <Route path='/listing/:listingId' element={<Listing />} />
+        <Route path='/search' element={<Search />} />
         <Route element={<PrivateRoutes />} >
           <Route path='/profile' element={<Profile />} />
           <Route path='/createlisting' element={<CreateListing/>} />
