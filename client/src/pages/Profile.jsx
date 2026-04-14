@@ -13,6 +13,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import SmartButton from '../components/SmartButton.jsx';
 import SmartModal from '../components/SmartModal.jsx';
+import CreateListingModal from '../components/CreateListingModal.jsx'
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -24,9 +25,16 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   
+ 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [userListings, setUserListings] = useState([]);
   const [showListingsError, setShowListingsError] = useState(false);
   const [listingsFetched, setListingsFetched] = useState(false); 
+
+
+  const [userAppointments, setUserAppointments] = useState([]);
+  const [showAppointmentsError, setShowAppointmentsError] = useState(false);
+  const [appointmentsFetched, setAppointmentsFetched] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -125,7 +133,6 @@ export default function Profile() {
       setListingsFetched(false);
       return;
     }
-
     try {
       setShowListingsError(false);
       const { data } = await axios.get(`/api/user/listings/${currentUser._id}`);
@@ -154,21 +161,39 @@ export default function Profile() {
     }
   };
 
+
+  const handleShowAppointments = async () => {
+    if (appointmentsFetched) {
+      setUserAppointments([]);
+      setAppointmentsFetched(false);
+      return;
+    }
+    try {
+      setShowAppointmentsError(false);
+     // const { data } = await axios.get(`/api/user/appointments/${currentUser._id}`);
+     // if (data.success === false) {
+     // setShowAppointmentsError(true);
+     //    return;
+     //  }
+     //  setUserAppointments(data);
+     //  setAppointmentsFetched(true);
+    } catch (error) {
+      setShowAppointmentsError(true);
+    }
+  };
+
   if (!currentUser) return null;
 
   return (
     <div className='min-h-screen pt-28 pb-10 px-4 max-w-6xl mx-auto'>
       
-
       <div className='bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-[400px]'>
         
-        
-       <div className='w-full md:w-5/12 p-8 sm:p-10 flex flex-col'>
+      
+        <div className='w-full md:w-5/12 p-8 sm:p-10 flex flex-col'>
           <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>Profile Setup</h1>
           
-         
           <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
-            
             <div className='flex flex-col items-center mb-4'>
               <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
               <div 
@@ -210,7 +235,6 @@ export default function Profile() {
               className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
             />
             
-            
             <div className='pt-2 flex flex-col gap-3'>
               <button disabled={loading} className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all disabled:opacity-70 text-sm'>
                 {loading ? 'Saving...' : 'Save Changes'}
@@ -218,7 +242,6 @@ export default function Profile() {
             </div>
           </form>
 
-          
           <div className='flex items-center justify-between mt-6 pt-4 border-t border-slate-100'>
             <SmartModal 
               triggerText="Delete Account"
@@ -236,101 +259,151 @@ export default function Profile() {
           </div>
         </div>
 
-      
         <div className='hidden md:block w-px bg-slate-100 my-10'></div>
 
-        
+       
         <div className='w-full md:w-7/12 p-8 sm:p-10 bg-slate-50/50 flex flex-col'>
           
-          <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
-            <div>
-              <h2 className='text-2xl font-bold text-slate-900'>My Workspace Listings</h2>
-              <p className='text-sm text-slate-500'>Manage your shared spaces</p>
-            </div>
-            
-           
-            <div className='flex items-center gap-3'>
-              
-              
-              <Link 
-                to='/createlisting' 
-                className='bg-green-600 text-white hover:bg-green-800 px-5 py-2 rounded-full shadow-sm text-sm font-medium transition-all flex items-center gap-1'
-              >
-                <span className='text-lg leading-none mb-[2px]'>+</span> Create New
-              </Link>
-              <SmartButton 
-                actionFunction={handleShowListings}
-                colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
-                text={listingsFetched ? "Hide Listings" : "Show Listings"}
-                showAlert={false}
-              /> 
-            </div>
-          </div>
-
-          
-          <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
-            
-        
-            {showListingsError && (
-              <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching listings!</p>
-            )}
-
-        
-            {listingsFetched && userListings.length === 0 && !showListingsError && (
-              <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
-                <img src="/images/empty-state.svg" alt="No listings" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
-                <p className='text-lg font-semibold text-slate-700'>No listings found</p>
-                <p className='text-sm text-slate-500 mb-4'>You haven't created any workspaces yet.</p>
-                <Link to='/createlisting' className='text-green-600 font-semibold hover:underline text-sm'>
-                  Click here to create one
-                </Link>
+          {currentUser.role === 'client' ? (
+            <>
+              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
+                <div>
+                  <h2 className='text-2xl font-bold text-slate-900'>My Appointments</h2>
+                  <p className='text-sm text-slate-500'>Check your booked workspaces</p>
+                </div>
+                
+                <div className='flex items-center gap-3'>
+                  <SmartButton 
+                    actionFunction={handleShowAppointments}
+                    colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
+                    text={appointmentsFetched ? "Hide Appointments" : "Check Appointments"}
+                    showAlert={false}
+                  /> 
+                </div>
               </div>
-            )}
 
-           
-            {userListings && userListings.length > 0 && (
-              <div className='flex flex-col gap-4'>
-                {userListings.map((listing) => (
-                  <div key={listing._id} className='bg-white border border-slate-100 rounded-2xl p-3 flex justify-between items-center gap-4 hover:shadow-md transition-shadow group'>
-                    
-                    <Link to={`/listing/${listing._id}`} className='flex items-center gap-4 flex-1 truncate'>
-                      <img
-                        src={listing.imageUrls[0]}
-                        alt='listing cover'
-                        className='h-16 w-24 object-cover rounded-lg bg-slate-100'
-                      />
-                      <p className='text-slate-800 font-semibold truncate group-hover:text-green-700 transition-colors'>
-                        {listing.name}
-                      </p>
+              <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
+                {showAppointmentsError && (
+                  <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching appointments!</p>
+                )}
+
+                {appointmentsFetched && userAppointments.length === 0 && !showAppointmentsError && (
+                  <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
+                    <img src="/images/empty-calendar.svg" alt="No appointments" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
+                    <p className='text-lg font-semibold text-slate-700'>No appointments yet</p>
+                    <p className='text-sm text-slate-500 mb-4'>You haven't booked any spaces.</p>
+                    <Link to='/search' className='text-slate-900 font-semibold hover:underline text-sm'>
+                      Explore Workspaces
                     </Link>
-
-                    <div className='flex flex-col md:flex-row gap-2 md:gap-4 px-2'>
-                      <Link to={`/updatelisting/${listing._id}`}>
-                        <button className='text-slate-400 hover:text-slate-900 font-medium text-sm transition-colors'>
-                          Edit
-                        </button>
-                      </Link>
-                      <button onClick={() => handleListingDelete(listing._id)} className='text-red-400 hover:text-red-600 font-medium text-sm transition-colors'>
-                        Delete
-                      </button>
-                    </div>
-
                   </div>
-                ))}
-              </div>
-            )}
-            
-            
-            {!listingsFetched && (
-              <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
-                 <p className='text-sm text-slate-500'>Click "Show Listings" to view your properties.</p>
-              </div>
-            )}
+                )}
 
-          </div>
+                {userAppointments && userAppointments.length > 0 && (
+                  <div className='flex flex-col gap-4'>
+                    {userAppointments.map((appointment) => (
+                      <div key={appointment._id} className='bg-white border border-slate-100 rounded-2xl p-4 flex flex-col gap-2 hover:shadow-md transition-shadow'>
+                        <div className='flex justify-between items-start'>
+                           <h3 className='font-semibold text-slate-800'>{appointment.listingName || 'Workspace Booking'}</h3>
+                           <span className='text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded-full'>{appointment.status || 'Confirmed'}</span>
+                        </div>
+                        <p className='text-sm text-slate-500'>Date: {new Date(appointment.date).toLocaleDateString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {!appointmentsFetched && (
+                  <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
+                     <p className='text-sm text-slate-500'>Click "Check Appointments" to view your schedule.</p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
+                <div>
+                  <h2 className='text-2xl font-bold text-slate-900'>My Workspace Listings</h2>
+                  <p className='text-sm text-slate-500'>Manage your shared spaces</p>
+                </div>
+                
+                <div className='flex items-center gap-3'>
+                  <button 
+                    onClick={() => setIsCreateModalOpen(true)} 
+                    className='bg-slate-900 text-white hover:bg-slate-800 px-5 py-2 rounded-full shadow-sm text-sm font-medium transition-all flex items-center gap-1'
+                  >
+                    <span className='text-lg leading-none mb-[2px]'>+</span> Create New
+                  </button>
+                  <SmartButton 
+                    actionFunction={handleShowListings}
+                    colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
+                    text={listingsFetched ? "Hide Listings" : "Show Listings"}
+                    showAlert={false}
+                  /> 
+                </div>
+              </div>
+
+              <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
+                {showListingsError && (
+                  <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching listings!</p>
+                )}
+
+                {listingsFetched && userListings.length === 0 && !showListingsError && (
+                  <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
+                    <img src="/images/empty-state.svg" alt="No listings" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
+                    <p className='text-lg font-semibold text-slate-700'>No listings found</p>
+                    <p className='text-sm text-slate-500 mb-4'>You haven't created any workspaces yet.</p>
+                    <button onClick={() => setIsCreateModalOpen(true)} className='text-green-600 font-semibold hover:underline text-sm'>
+                      Click here to create one
+                    </button>
+                  </div>
+                )}
+
+                {userListings && userListings.length > 0 && (
+                  <div className='flex flex-col gap-4'>
+                    {userListings.map((listing) => (
+                      <div key={listing._id} className='bg-white border border-slate-100 rounded-2xl p-3 flex justify-between items-center gap-4 hover:shadow-md transition-shadow group'>
+                        <Link to={`/listing/${listing._id}`} className='flex items-center gap-4 flex-1 truncate'>
+                          <img
+                            src={listing.imageUrls[0]}
+                            alt='listing cover'
+                            className='h-16 w-24 object-cover rounded-lg bg-slate-100'
+                          />
+                          <p className='text-slate-800 font-semibold truncate group-hover:text-green-700 transition-colors'>
+                            {listing.name}
+                          </p>
+                        </Link>
+                        <div className='flex flex-col md:flex-row gap-2 md:gap-4 px-2'>
+                          <Link to={`/updatelisting/${listing._id}`}>
+                            <button className='text-slate-400 hover:text-slate-900 font-medium text-sm transition-colors'>
+                              Edit
+                            </button>
+                          </Link>
+                          <button onClick={() => handleListingDelete(listing._id)} className='text-red-400 hover:text-red-600 font-medium text-sm transition-colors'>
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {!listingsFetched && (
+                  <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
+                     <p className='text-sm text-slate-500'>Click "Show Listings" to view your properties.</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
         </div>
-
       </div>
+      
+      <CreateListingModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
     </div>
   );
 }
