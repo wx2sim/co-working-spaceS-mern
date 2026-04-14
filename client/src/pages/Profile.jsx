@@ -25,16 +25,21 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   
- 
+  // (Listings)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [userListings, setUserListings] = useState([]);
   const [showListingsError, setShowListingsError] = useState(false);
   const [listingsFetched, setListingsFetched] = useState(false); 
 
-
+  // (Appointments)
   const [userAppointments, setUserAppointments] = useState([]);
   const [showAppointmentsError, setShowAppointmentsError] = useState(false);
   const [appointmentsFetched, setAppointmentsFetched] = useState(false);
+
+  // (Managed Users)
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [showAdminUsersError, setShowAdminUsersError] = useState(false);
+  const [adminUsersFetched, setAdminUsersFetched] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -126,7 +131,6 @@ export default function Profile() {
       dispatch(signOutUserFailure(error.message));
     }
   };
-
   const handleShowListings = async () => {
     if (listingsFetched) {
       setUserListings([]);
@@ -136,10 +140,7 @@ export default function Profile() {
     try {
       setShowListingsError(false);
       const { data } = await axios.get(`/api/user/listings/${currentUser._id}`);
-      if (data.success === false) {
-        setShowListingsError(true);
-        return;
-      }
+      if (data.success === false) return setShowListingsError(true);
       setUserListings(data);
       setListingsFetched(true);
     } catch (error) {
@@ -150,17 +151,13 @@ export default function Profile() {
   const handleListingDelete = async (listingId) => {
     try {
       const { data } = await axios.delete(`/api/listing/delete/${listingId}`);
-      if (data.success === false) {
-        toast.error(data.message);
-        return;
-      }
+      if (data.success === false) return toast.error(data.message);
       setUserListings((prev) => prev.filter((listing) => listing._id !== listingId));
       toast.success('Listing deleted!');
     } catch (error) {
       console.log(error.message);
     }
   };
-
 
   const handleShowAppointments = async () => {
     if (appointmentsFetched) {
@@ -170,15 +167,29 @@ export default function Profile() {
     }
     try {
       setShowAppointmentsError(false);
-     // const { data } = await axios.get(`/api/user/appointments/${currentUser._id}`);
-     // if (data.success === false) {
-     // setShowAppointmentsError(true);
-     //    return;
-     //  }
-     //  setUserAppointments(data);
-     //  setAppointmentsFetched(true);
+      const { data } = await axios.get(`/api/user/appointments/${currentUser._id}`);
+      if (data.success === false) return setShowAppointmentsError(true);
+      setUserAppointments(data);
+      setAppointmentsFetched(true);
     } catch (error) {
       setShowAppointmentsError(true);
+    }
+  };
+
+  const handleShowAdminUsers = async () => {
+    if (adminUsersFetched) {
+      setAdminUsers([]);
+      setAdminUsersFetched(false);
+      return;
+    }
+    try {
+      setShowAdminUsersError(false);
+      const { data } = await axios.get(`/api/admin/users/${currentUser._id}`);
+      if (data.success === false) return setShowAdminUsersError(true);
+      setAdminUsers(data);
+      setAdminUsersFetched(true);
+    } catch (error) {
+      setShowAdminUsersError(true);
     }
   };
 
@@ -186,73 +197,79 @@ export default function Profile() {
 
   return (
     <div className='min-h-screen pt-28 pb-10 px-4 max-w-6xl mx-auto'>
-      
       <div className='bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-[400px]'>
         
-      
+        {/* ================= LEFT PANEL (Profile Info) ================= */}
         <div className='w-full md:w-5/12 p-8 sm:p-10 flex flex-col'>
-          <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>Profile Setup</h1>
+          <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>
+            {currentUser.role === 'admin' ? 'Account Details' : 'Profile Setup'}
+          </h1>
           
-          <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
-            <div className='flex flex-col items-center mb-4'>
-              <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
-              <div 
-                onClick={() => fileRef.current.click()} 
-                className='relative group cursor-pointer'
-              >
+          {currentUser.role === 'admin' ? (
+            /* --- ADMIN ONLY  --- */
+            <div className='flex flex-col gap-5 flex-grow mt-4'>
+              <div className='flex flex-col items-center mb-6'>
                 <img
-                  src={formData.avatar || currentUser?.avatar}
+                  src={currentUser?.avatar}
                   alt='profile'
-                  className='rounded-full h-24 w-24 object-cover border-4 border-slate-50 group-hover:opacity-80 transition-opacity shadow-sm'
+                  className='rounded-full h-24 w-24 object-cover border-4 border-slate-50 shadow-sm'
                 />
-                <div className='absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
-                  <span className='text-white text-xs font-semibold'>Edit</span>
-                </div>
+                <span className='mt-3 text-xs font-bold px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-wider'>
+                  Administrator
+                </span>
               </div>
-              <p className='text-xs mt-3 text-center'>
-                {fileUploadError ? (
-                  <span className='text-red-500 font-medium'>Upload failed (Max 2MB)</span>
-                ) : filePerc > 0 && filePerc < 100 ? (
-                  <span className='text-slate-500'>Uploading {filePerc}%</span>
-                ) : filePerc === 100 ? (
-                  <span className='text-green-500 font-medium'>Upload complete!</span>
-                ) : (
-                  <span className='text-slate-400'>Click image to change</span>
-                )}
-              </p>
-            </div>
+              
+              <div className='flex flex-col gap-1'>
+                <label className='text-xs font-medium text-slate-500 ml-1'>Username</label>
+                <input type='text' disabled value={currentUser.username} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 cursor-not-allowed' />
+              </div>
+              
+              <div className='flex flex-col gap-1'>
+                <label className='text-xs font-medium text-slate-500 ml-1'>Email</label>
+                <input type='email' disabled value={currentUser.email} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 cursor-not-allowed' />
+              </div>
 
-            <input
-              type='text' placeholder='Username' id='username' defaultValue={currentUser.username} onChange={handleChange}
-              className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
-            />
-            <input
-              type='email' placeholder='Email' id='email' defaultValue={currentUser.email} onChange={handleChange}
-              className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
-            />
-            <input
-              type='password' placeholder='New Password (Optional)' id='password' onChange={handleChange}
-              className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
-            />
+              <div className='mt-auto p-4 bg-amber-50 border border-amber-100 rounded-xl text-center'>
+                <p className='text-xs text-amber-700 font-medium'>
+                  Your account details and password are strictly managed by the Super Admin.
+                </p>
+              </div>
+            </div>
+          ) : (
             
-            <div className='pt-2 flex flex-col gap-3'>
-              <button disabled={loading} className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all disabled:opacity-70 text-sm'>
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </form>
+            <form onSubmit={handleSubmit} className='flex flex-col gap-5 flex-grow mt-4'>
+              <div className='flex flex-col items-center mb-4'>
+                <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
+                <div onClick={() => fileRef.current.click()} className='relative group cursor-pointer'>
+                  <img src={formData.avatar || currentUser?.avatar} alt='profile' className='rounded-full h-24 w-24 object-cover border-4 border-slate-50 group-hover:opacity-80 transition-opacity shadow-sm' />
+                  <div className='absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
+                    <span className='text-white text-xs font-semibold'>Edit</span>
+                  </div>
+                </div>
+                <p className='text-xs mt-3 text-center'>
+                  {fileUploadError ? <span className='text-red-500 font-medium'>Upload failed (Max 2MB)</span> : filePerc > 0 && filePerc < 100 ? <span className='text-slate-500'>Uploading {filePerc}%</span> : filePerc === 100 ? <span className='text-green-500 font-medium'>Upload complete!</span> : <span className='text-slate-400'>Click image to change</span>}
+                </p>
+              </div>
 
-          <div className='flex items-center justify-between mt-6 pt-4 border-t border-slate-100'>
-            <SmartModal 
-              triggerText="Delete Account"
-              triggerColorClass="!bg-transparent !text-red-500 hover:!bg-red-50 !font-semibold text-sm px-4 py-2 rounded-lg transition-colors"
-              modalTitle="Delete Account"
-              modalContent="Are you absolutely sure? This action cannot be undone."
-              cancelColorClass="!bg-white text-slate-700 hover:!bg-slate-100"
-              okText="Yes, Delete"
-              okColorClass="bg-red-600 !text-white hover:!bg-red-700"
-              onOkAction={handleDeleteUser} 
-            />
+              <input type='text' placeholder='Username' id='username' defaultValue={currentUser.username} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              <input type='email' placeholder='Email' id='email' defaultValue={currentUser.email} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              <input type='password' placeholder='New Password (Optional)' id='password' onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              
+              <div className='pt-2 flex flex-col gap-3'>
+                <button disabled={loading} className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all disabled:opacity-70 text-sm'>
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          )}
+          <div className={`flex items-center mt-6 pt-4 border-t border-slate-100 ${currentUser.role === 'admin' ? 'justify-end' : 'justify-between'}`}>
+            {currentUser.role !== 'admin' && (
+              <SmartModal 
+                triggerText="Delete Account" triggerColorClass="!bg-transparent !text-red-500 hover:!bg-red-50 !font-semibold text-sm px-4 py-2 rounded-lg transition-colors"
+                modalTitle="Delete Account" modalContent="Are you absolutely sure? This action cannot be undone."
+                cancelColorClass="!bg-white text-slate-700 hover:!bg-slate-100" okText="Yes, Delete" okColorClass="bg-red-600 !text-white hover:!bg-red-700" onOkAction={handleDeleteUser} 
+              />
+            )}
             <button onClick={handleSignOut} className='text-slate-500 hover:text-slate-800 font-semibold text-sm px-4 py-2 transition-colors'>
               Sign Out
             </button>
@@ -261,10 +278,66 @@ export default function Profile() {
 
         <div className='hidden md:block w-px bg-slate-100 my-10'></div>
 
-       
+        
         <div className='w-full md:w-7/12 p-8 sm:p-10 bg-slate-50/50 flex flex-col'>
           
-          {currentUser.role === 'client' ? (
+          {currentUser.role === 'admin' ? (
+            <>
+              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
+                <div>
+                  <h2 className='text-2xl font-bold text-slate-900'>My Team</h2>
+                  <p className='text-sm text-slate-500'>Manage your assigned users</p>
+                </div>
+                
+                <div className='flex items-center gap-3'>
+                  <SmartButton 
+                    actionFunction={handleShowAdminUsers}
+                    colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
+                    text={adminUsersFetched ? "Hide Users" : "Show Users"}
+                    showAlert={false}
+                  /> 
+                </div>
+              </div>
+
+              <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
+                {showAdminUsersError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching users!</p>}
+
+                {adminUsersFetched && adminUsers.length === 0 && !showAdminUsersError && (
+                  <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
+                    <img src="https://cdn-icons-png.flaticon.com/512/6124/6124997.png" alt="No users" className="w-24 h-24 mb-4 opacity-30 grayscale" />
+                    <p className='text-lg font-semibold text-slate-700'>No users assigned</p>
+                    <p className='text-sm text-slate-500'>You currently don't have any users to manage.</p>
+                  </div>
+                )}
+
+                {adminUsers && adminUsers.length > 0 && (
+                  <div className='flex flex-col gap-4'>
+                    {adminUsers.map((user) => (
+                      <div key={user._id} className='bg-white border border-slate-100 rounded-2xl p-4 flex justify-between items-center gap-4 hover:shadow-md transition-shadow'>
+                        <div className='flex items-center gap-4'>
+                          <img src={user.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} alt='user' className='w-12 h-12 rounded-full object-cover border border-slate-200' />
+                          <div>
+                            <p className='font-semibold text-slate-800'>{user.username}</p>
+                            <p className='text-xs text-slate-500'>{user.email}</p>
+                          </div>
+                        </div>
+                        <button className='text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg font-medium text-sm transition-colors'>
+                          Manage
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {!adminUsersFetched && (
+                  <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
+                     <p className='text-sm text-slate-500'>Click "Show Users" to view your team members.</p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : currentUser.role === 'client' ? (
+           
             <>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
                 <div>
@@ -283,9 +356,7 @@ export default function Profile() {
               </div>
 
               <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
-                {showAppointmentsError && (
-                  <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching appointments!</p>
-                )}
+                {showAppointmentsError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching appointments!</p>}
 
                 {appointmentsFetched && userAppointments.length === 0 && !showAppointmentsError && (
                   <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
@@ -320,6 +391,7 @@ export default function Profile() {
               </div>
             </>
           ) : (
+            
             <>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
                 <div>
@@ -328,34 +400,22 @@ export default function Profile() {
                 </div>
                 
                 <div className='flex items-center gap-3'>
-                  <button 
-                    onClick={() => setIsCreateModalOpen(true)} 
-                    className='bg-slate-900 text-white hover:bg-slate-800 px-5 py-2 rounded-full shadow-sm text-sm font-medium transition-all flex items-center gap-1'
-                  >
+                  <button onClick={() => setIsCreateModalOpen(true)} className='bg-slate-900 text-white hover:bg-slate-800 px-5 py-2 rounded-full shadow-sm text-sm font-medium transition-all flex items-center gap-1'>
                     <span className='text-lg leading-none mb-[2px]'>+</span> Create New
                   </button>
-                  <SmartButton 
-                    actionFunction={handleShowListings}
-                    colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
-                    text={listingsFetched ? "Hide Listings" : "Show Listings"}
-                    showAlert={false}
-                  /> 
+                  <SmartButton actionFunction={handleShowListings} colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all" text={listingsFetched ? "Hide Listings" : "Show Listings"} showAlert={false}/> 
                 </div>
               </div>
 
               <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
-                {showListingsError && (
-                  <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching listings!</p>
-                )}
+                {showListingsError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching listings!</p>}
 
                 {listingsFetched && userListings.length === 0 && !showListingsError && (
                   <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
                     <img src="/images/empty-state.svg" alt="No listings" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
                     <p className='text-lg font-semibold text-slate-700'>No listings found</p>
                     <p className='text-sm text-slate-500 mb-4'>You haven't created any workspaces yet.</p>
-                    <button onClick={() => setIsCreateModalOpen(true)} className='text-green-600 font-semibold hover:underline text-sm'>
-                      Click here to create one
-                    </button>
+                    <button onClick={() => setIsCreateModalOpen(true)} className='text-green-600 font-semibold hover:underline text-sm'>Click here to create one</button>
                   </div>
                 )}
 
@@ -364,24 +424,12 @@ export default function Profile() {
                     {userListings.map((listing) => (
                       <div key={listing._id} className='bg-white border border-slate-100 rounded-2xl p-3 flex justify-between items-center gap-4 hover:shadow-md transition-shadow group'>
                         <Link to={`/listing/${listing._id}`} className='flex items-center gap-4 flex-1 truncate'>
-                          <img
-                            src={listing.imageUrls[0]}
-                            alt='listing cover'
-                            className='h-16 w-24 object-cover rounded-lg bg-slate-100'
-                          />
-                          <p className='text-slate-800 font-semibold truncate group-hover:text-green-700 transition-colors'>
-                            {listing.name}
-                          </p>
+                          <img src={listing.imageUrls[0]} alt='listing cover' className='h-16 w-24 object-cover rounded-lg bg-slate-100' />
+                          <p className='text-slate-800 font-semibold truncate group-hover:text-green-700 transition-colors'>{listing.name}</p>
                         </Link>
                         <div className='flex flex-col md:flex-row gap-2 md:gap-4 px-2'>
-                          <Link to={`/updatelisting/${listing._id}`}>
-                            <button className='text-slate-400 hover:text-slate-900 font-medium text-sm transition-colors'>
-                              Edit
-                            </button>
-                          </Link>
-                          <button onClick={() => handleListingDelete(listing._id)} className='text-red-400 hover:text-red-600 font-medium text-sm transition-colors'>
-                            Delete
-                          </button>
+                          <Link to={`/updatelisting/${listing._id}`}><button className='text-slate-400 hover:text-slate-900 font-medium text-sm transition-colors'>Edit</button></Link>
+                          <button onClick={() => handleListingDelete(listing._id)} className='text-red-400 hover:text-red-600 font-medium text-sm transition-colors'>Delete</button>
                         </div>
                       </div>
                     ))}
@@ -400,10 +448,7 @@ export default function Profile() {
         </div>
       </div>
       
-      <CreateListingModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
-      />
+      <CreateListingModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </div>
   );
 }
