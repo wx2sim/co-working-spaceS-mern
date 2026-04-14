@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import SmartModal from '../components/SmartModal';
 import {
   signInStart,
   signInSuccess,
@@ -16,12 +17,15 @@ export default function SignIn() {
   const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  
   useEffect(() => {
-    if (error) {
-      dispatch(clearError());
+    if (error) {const timer = setTimeout(() => {
+        dispatch(clearError());
+      }, 3500); 
+      
+      return () => clearTimeout(timer); 
     }
-  }, [dispatch]);
+  }, [error, dispatch]);
 
   const handleChange = (e) => {
     setFormData({
@@ -102,12 +106,19 @@ export default function SignIn() {
 
           {/* Error Message */}
           {error && (
-            <div className='mt-5 p-3 bg-red-50 border border-red-100 rounded-lg text-center'>
-              <p className='text-red-500 text-sm'>{error}</p>
-            </div>
+           <SmartModal 
+            showTrigger={false} 
+            showCancel={false}  
+            isOpen={!!error}   
+            onClose={() => dispatch(clearError())} 
+            modalTitle="Authentication Failed"
+            modalContent={<span className="text-red-500 font-medium">{error}</span>}
+            okText="Got it"
+            okColorClass="bg-red-600 hover:bg-red-700 text-white"
+          />
           )}
 
-          {/* Footer Link */}
+        
           <div className='flex justify-center gap-2 mt-4 text-slate-600'>
             <p>Don't have an account?</p>
             <Link to='/signup' className='text-slate-900 font-semibold hover:underline transition-all'>

@@ -4,5 +4,10 @@
 
 body {
     background-color: rgb(500, 300, 400);
+    overflow-x: hidden; 
 }
 
+html {
+  scrollbar-gutter: stable;
+  overflow-x: hidden; 
+} 

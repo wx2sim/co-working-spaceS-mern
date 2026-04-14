@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dropdown } from 'antd';
-import { SettingOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { SettingOutlined, UserOutlined, LogoutOutlined, LoginOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
@@ -14,6 +14,7 @@ import {
 export default function ProfileDropdown({ currentUser }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleSignOut = async ()=> {
       try {
         dispatch(signOutUserStart());
@@ -34,7 +35,8 @@ export default function ProfileDropdown({ currentUser }) {
       }
     };
 
-  const items = [
+  
+  const loggedInItems = [
     {
       key: '1',
       label: <Link to="/profile">Profile</Link>,
@@ -48,17 +50,27 @@ export default function ProfileDropdown({ currentUser }) {
     { type: 'divider' },
     {
       key: '3',
-      label: <span onClick={handleSignOut} >Sign Out</span>,
+      label: <span onClick={handleSignOut}>Sign Out</span>,
       icon: <LogoutOutlined />,
       danger: true,
     },
   ];
 
+  const loggedOutItems = [
+    {
+      key: '1',
+      label: <Link to="/signin">Sign in / Sign up</Link>,
+      icon: <LoginOutlined />,
+    },
+  ];
+
+  const currentItems = currentUser ? loggedInItems : loggedOutItems;
+
   return (
-    <Dropdown menu={{ items }} placement="bottomRight" arrow>
+    <Dropdown menu={{ items: currentItems }} placement="bottomRight" arrow>
       <div className="cursor-pointer">
         <img
-          className="rounded-full h-8 w-8 object-cover"
+          className="rounded-full h-8 w-8 object-cover border border-slate-200"
           src={currentUser?.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
           alt="profile"
         />
