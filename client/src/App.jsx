@@ -8,8 +8,6 @@ import About from './pages/About';
 import Header from './components/Header';
 import PrivateRoutes from './components/PrivateRoutes';
 import { AnimatePresence } from 'framer-motion';
-import CreateListing from './pages/CreateListing';
-import UpdateListing from './pages/UpdateListing';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
 
@@ -27,8 +25,6 @@ function AnimatedRoutes() {
         <Route path='/search' element={<Search />} />
         <Route element={<PrivateRoutes />} >
           <Route path='/profile' element={<Profile />} />
-          <Route path='/createlisting' element={<CreateListing/>} />
-          <Route path='/updatelisting/:listingId' element={<UpdateListing/>} />
         </Route>      
 
       </Routes>
