@@ -13,7 +13,8 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import SmartButton from '../components/SmartButton.jsx';
 import SmartModal from '../components/SmartModal.jsx';
-import CreateListingModal from '../components/CreateListingModal.jsx'
+import CreateListingModal from '../components/CreateListingModal.jsx';
+import UpdateListingModal from '../components/UpdateListingModal.jsx';
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -25,18 +26,18 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   
-  // (Listings)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [userListings, setUserListings] = useState([]);
   const [showListingsError, setShowListingsError] = useState(false);
   const [listingsFetched, setListingsFetched] = useState(false); 
 
-  // (Appointments)
-  const [userAppointments, setUserAppointments] = useState([]);
-  const [showAppointmentsError, setShowAppointmentsError] = useState(false);
-  const [appointmentsFetched, setAppointmentsFetched] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [listingToEdit, setListingToEdit] = useState(null);
 
-  // (Managed Users)
+  const [bookedSpaces, setBookedSpaces] = useState([]);
+  const [showBookedSpacesError, setShowBookedSpacesError] = useState(false);
+  const [bookedSpacesFetched, setBookedSpacesFetched] = useState(false);
+
   const [adminUsers, setAdminUsers] = useState([]);
   const [showAdminUsersError, setShowAdminUsersError] = useState(false);
   const [adminUsersFetched, setAdminUsersFetched] = useState(false);
@@ -131,6 +132,7 @@ export default function Profile() {
       dispatch(signOutUserFailure(error.message));
     }
   };
+
   const handleShowListings = async () => {
     if (listingsFetched) {
       setUserListings([]);
@@ -159,20 +161,20 @@ export default function Profile() {
     }
   };
 
-  const handleShowAppointments = async () => {
-    if (appointmentsFetched) {
-      setUserAppointments([]);
-      setAppointmentsFetched(false);
+  const handleShowBookedSpaces = async () => {
+    if (bookedSpacesFetched) {
+      setBookedSpaces([]);
+      setBookedSpacesFetched(false);
       return;
     }
     try {
-      setShowAppointmentsError(false);
-      const { data } = await axios.get(`/api/user/appointments/${currentUser._id}`);
-      if (data.success === false) return setShowAppointmentsError(true);
-      setUserAppointments(data);
-      setAppointmentsFetched(true);
+      setShowBookedSpacesError(false);
+      const { data } = await axios.get(`/api/user/spaces/${currentUser._id}`);
+      if (data.success === false) return setShowBookedSpacesError(true);
+      setBookedSpaces(data);
+      setBookedSpacesFetched(true);
     } catch (error) {
-      setShowAppointmentsError(true);
+      setShowBookedSpacesError(true);
     }
   };
 
@@ -192,6 +194,9 @@ export default function Profile() {
       setShowAdminUsersError(true);
     }
   };
+  const handleUpdateListingSuccess = (updatedListing) => {
+    setUserListings((prev) => prev.map((l) => l._id === updatedListing._id ? updatedListing : l));
+  };
 
   if (!currentUser) return null;
 
@@ -199,14 +204,12 @@ export default function Profile() {
     <div className='min-h-screen pt-28 pb-10 px-4 max-w-6xl mx-auto'>
       <div className='bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-[400px]'>
         
-        {/* ================= LEFT PANEL (Profile Info) ================= */}
         <div className='w-full md:w-5/12 p-8 sm:p-10 flex flex-col'>
           <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>
             {currentUser.role === 'admin' ? 'Account Details' : 'Profile Setup'}
           </h1>
           
           {currentUser.role === 'admin' ? (
-            /* --- ADMIN ONLY  --- */
             <div className='flex flex-col gap-5 flex-grow mt-4'>
               <div className='flex flex-col items-center mb-6'>
                 <img
@@ -236,7 +239,6 @@ export default function Profile() {
               </div>
             </div>
           ) : (
-            
             <form onSubmit={handleSubmit} className='flex flex-col gap-5 flex-grow mt-4'>
               <div className='flex flex-col items-center mb-4'>
                 <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
@@ -262,6 +264,7 @@ export default function Profile() {
               </div>
             </form>
           )}
+
           <div className={`flex items-center mt-6 pt-4 border-t border-slate-100 ${currentUser.role === 'admin' ? 'justify-end' : 'justify-between'}`}>
             {currentUser.role !== 'admin' && (
               <SmartModal 
@@ -278,7 +281,6 @@ export default function Profile() {
 
         <div className='hidden md:block w-px bg-slate-100 my-10'></div>
 
-        
         <div className='w-full md:w-7/12 p-8 sm:p-10 bg-slate-50/50 flex flex-col'>
           
           {currentUser.role === 'admin' ? (
@@ -337,61 +339,59 @@ export default function Profile() {
               </div>
             </>
           ) : currentUser.role === 'client' ? (
-           
             <>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
                 <div>
-                  <h2 className='text-2xl font-bold text-slate-900'>My Appointments</h2>
-                  <p className='text-sm text-slate-500'>Check your booked workspaces</p>
+                  <h2 className='text-2xl font-bold text-slate-900'>My Booked Spaces</h2>
+                  <p className='text-sm text-slate-500'>Check your reserved workspaces</p>
                 </div>
                 
                 <div className='flex items-center gap-3'>
                   <SmartButton 
-                    actionFunction={handleShowAppointments}
+                    actionFunction={handleShowBookedSpaces}
                     colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
-                    text={appointmentsFetched ? "Hide Appointments" : "Check Appointments"}
+                    text={bookedSpacesFetched ? "Hide Bookings" : "Check Bookings"}
                     showAlert={false}
                   /> 
                 </div>
               </div>
 
               <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
-                {showAppointmentsError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching appointments!</p>}
+                {showBookedSpacesError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching booked spaces!</p>}
 
-                {appointmentsFetched && userAppointments.length === 0 && !showAppointmentsError && (
+                {bookedSpacesFetched && bookedSpaces.length === 0 && !showBookedSpacesError && (
                   <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
-                    <img src="/images/empty-calendar.svg" alt="No appointments" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
-                    <p className='text-lg font-semibold text-slate-700'>No appointments yet</p>
-                    <p className='text-sm text-slate-500 mb-4'>You haven't booked any spaces.</p>
+                    <img src="/images/empty-calendar.svg" alt="No booked spaces" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
+                    <p className='text-lg font-semibold text-slate-700'>No spaces booked yet</p>
+                    <p className='text-sm text-slate-500 mb-4'>You haven't reserved any workspaces.</p>
                     <Link to='/search' className='text-slate-900 font-semibold hover:underline text-sm'>
                       Explore Workspaces
                     </Link>
                   </div>
                 )}
 
-                {userAppointments && userAppointments.length > 0 && (
+                {bookedSpaces && bookedSpaces.length > 0 && (
                   <div className='flex flex-col gap-4'>
-                    {userAppointments.map((appointment) => (
-                      <div key={appointment._id} className='bg-white border border-slate-100 rounded-2xl p-4 flex flex-col gap-2 hover:shadow-md transition-shadow'>
+                    {bookedSpaces.map((space) => (
+                      <div key={space._id} className='bg-white border border-slate-100 rounded-2xl p-4 flex flex-col gap-2 hover:shadow-md transition-shadow'>
                         <div className='flex justify-between items-start'>
-                           <h3 className='font-semibold text-slate-800'>{appointment.listingName || 'Workspace Booking'}</h3>
-                           <span className='text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded-full'>{appointment.status || 'Confirmed'}</span>
+                           <h3 className='font-semibold text-slate-800'>{space.listingName || 'Workspace Booking'}</h3>
+                           <span className='text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded-full'>{space.status || 'Confirmed'}</span>
                         </div>
-                        <p className='text-sm text-slate-500'>Date: {new Date(appointment.date).toLocaleDateString()}</p>
+                        <p className='text-sm text-slate-500'>Date: {new Date(space.date).toLocaleDateString()}</p>
                       </div>
                     ))}
                   </div>
                 )}
                 
-                {!appointmentsFetched && (
+                {!bookedSpacesFetched && (
                   <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
-                     <p className='text-sm text-slate-500'>Click "Check Appointments" to view your schedule.</p>
+                     <p className='text-sm text-slate-500'>Click "Check Bookings" to view your reserved spaces.</p>
                   </div>
                 )}
               </div>
             </>
           ) : (
-            
             <>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
                 <div>
@@ -428,7 +428,15 @@ export default function Profile() {
                           <p className='text-slate-800 font-semibold truncate group-hover:text-green-700 transition-colors'>{listing.name}</p>
                         </Link>
                         <div className='flex flex-col md:flex-row gap-2 md:gap-4 px-2'>
-                          <Link to={`/updatelisting/${listing._id}`}><button className='text-slate-400 hover:text-slate-900 font-medium text-sm transition-colors'>Edit</button></Link>
+                          <button 
+                              onClick={() => {
+                                setListingToEdit(listing);
+                                setIsUpdateModalOpen(true);
+                              }} 
+                              className='text-slate-400 hover:text-slate-900 font-medium text-sm transition-colors'
+                            >
+                              Edit
+                            </button>
                           <button onClick={() => handleListingDelete(listing._id)} className='text-red-400 hover:text-red-600 font-medium text-sm transition-colors'>Delete</button>
                         </div>
                       </div>
@@ -449,6 +457,8 @@ export default function Profile() {
       </div>
       
       <CreateListingModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <UpdateListingModal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)} listing={listingToEdit}  onUpdateSuccess={handleUpdateListingSuccess}
+      />
     </div>
   );
 }
