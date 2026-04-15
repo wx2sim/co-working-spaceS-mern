@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboards/Dashboard';
 import Map from './pages/Map';
 import Schedule from './pages/Schedule';
 import AdminUsers from './pages/AdminUsers';
+import Settings from './pages/Settings';
 
 // Error Pages
 import NotFound from './pages/Other Pages/NotFound';
@@ -38,6 +39,7 @@ function AnimatedRoutes() {
         <Route path='/map' element={<Map />} />
         <Route element={<PrivateRoutes />} >
           <Route path='/profile' element={<Profile />} />
+          <Route path='/settings' element={<Settings />} />
           <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/admin/users' element={<AdminUsers />} />
           <Route path='/schedule' element={<Schedule />} />

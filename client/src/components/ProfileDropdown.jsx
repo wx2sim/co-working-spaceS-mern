@@ -44,7 +44,7 @@ export default function ProfileDropdown({ currentUser }) {
     },
     {
       key: '2',
-      label: 'Settings',
+      label: <Link to="/settings">Settings</Link>,
       icon: <SettingOutlined />,
     },
     { type: 'divider' },
