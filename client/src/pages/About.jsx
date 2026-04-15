@@ -1,17 +1,76 @@
-import React from 'react'
-import AnimatedPage from '../components/AnimatedPage'
+import React from 'react';
+import AnimatedPage from '../components/AnimatedPage';
+import { Link } from 'react-router-dom';
 
 export default function About() {
   return (
     <AnimatedPage>
-    <div className='py-20 px-4 max-w-6xl mx-auto'>
-      <h1 className='text-3xl font-bold mb-4 text-slate-800'>About Co-Spaces</h1>
-      <p className='mb-4 text-slate-700'>Co-Spaces is a leading Co-Working-Spaces agency that specializes in helping clients find and rent spaces in the most desirable neighborhoods. Our team of experienced agents is dedicated to providing exceptional service and making the finding and renting process as smooth as possible.</p>
-      <p className='mb-4 text-slate-700'>
-      Our mission is to help our clients achieve their Profissional and confortability goals by providing the most suitable and elegant suggestions, personalized service, and a deep understanding of the local market. Whether you are looking to rent a space, ,make connections or benifit from our side services , we are here to help you every step of the way.
-      </p>
-      <p className='mb-4 text-slate-700'>Our team of agents has a wealth of experience and knowledge in the remote working industry, and we are committed to providing the highest level of service to our clients. We believe that comfort or stablity  should be an present and provided for those who need, and we are dedicated to making that a reality for each and every one of our clients.</p>
-    </div>
+      <div className='min-h-screen pt-28 pb-20 px-4 max-w-6xl mx-auto'>
+        <div className='text-center max-w-3xl mx-auto mb-16'>
+          <h1 className='text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight'>
+            Elevating Your <span className='text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500'>Workspace</span> Experience.
+          </h1>
+          <p className='text-lg text-slate-500 leading-relaxed font-light'>
+            CoSpace is a leading co-working spaces agency that specializes in helping professionals and teams find their perfect creative and productive environments in the most desirable neighborhoods.
+          </p>
+        </div>
+        <div className='grid md:grid-cols-2 gap-10 mb-20 items-center'>
+          <div className='rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50 relative group h-[400px]'>
+            <img 
+              src='https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop' 
+              alt='Modern Co-working Space' 
+              className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
+            />
+            <div className='absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-700'></div>
+          </div>
+          <div className='flex flex-col gap-8'>
+            <div>
+              <h2 className='text-2xl font-bold text-slate-900 mb-3 flex items-center gap-2'>
+                <span className='w-8 h-[2px] bg-slate-900 inline-block'></span> Our Mission
+              </h2>
+              <p className='text-slate-600 leading-relaxed'>
+                Our mission is to help our clients achieve their professional and comfort goals by providing the most suitable and elegant suggestions, personalized service, and a deep understanding of the local market. 
+              </p>
+            </div>
+            
+            <div>
+              <h2 className='text-2xl font-bold text-slate-900 mb-3 flex items-center gap-2'>
+                <span className='w-8 h-[2px] bg-slate-900 inline-block'></span> Why Choose Us?
+              </h2>
+              <p className='text-slate-600 leading-relaxed'>
+                Whether you are looking to rent a space, make valuable connections, or benefit from our premium side services, our experienced team is here to guide you every step of the way. We believe that stability and comfort should be present for those who need it to innovate.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className='bg-slate-900 rounded-3xl p-10 sm:p-16 text-white grid grid-cols-1 md:grid-cols-3 gap-10 text-center mb-16 shadow-xl'>
+          <div className='flex flex-col items-center justify-center'>
+            <span className='text-4xl md:text-5xl font-extrabold mb-2'>50+</span>
+            <span className='text-slate-400 font-medium uppercase tracking-wider text-sm'>Premium Spaces</span>
+          </div>
+          <div className='flex flex-col items-center justify-center md:border-x border-slate-700'>
+            <span className='text-4xl md:text-5xl font-extrabold mb-2'>1000+</span>
+            <span className='text-slate-400 font-medium uppercase tracking-wider text-sm'>Happy Clients</span>
+          </div>
+          <div className='flex flex-col items-center justify-center'>
+            <span className='text-4xl md:text-5xl font-extrabold mb-2'>24/7</span>
+            <span className='text-slate-400 font-medium uppercase tracking-wider text-sm'>Dedicated Support</span>
+          </div>
+        </div>
+        <div className='text-center bg-slate-50 border border-slate-100 rounded-3xl p-10'>
+          <h3 className='text-2xl font-bold text-slate-900 mb-4'>Ready to find your next workspace?</h3>
+          <p className='text-slate-500 mb-8 max-w-2xl mx-auto'>
+            Join thousands of freelancers, startups, and enterprises who have already found their perfect working environment with CoSpace.
+          </p>
+          <Link 
+            to='/search' 
+            className='inline-block bg-slate-900 text-white px-8 py-4 rounded-full font-semibold hover:bg-slate-800 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-200'
+          >
+            Explore Workspaces Now
+          </Link>
+        </div>
+
+      </div>
     </AnimatedPage>
-  )
+  );
 }
