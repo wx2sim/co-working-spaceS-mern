@@ -22,8 +22,10 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const { data } = await axios.get(`/api/admin/users/${currentUser._id}`);
-        setAllUsers(Array.isArray(data) ? data : []);
+        const { data } = await axios.get(`/api/admin/users/${currentUser._id}`, {
+          params: { limit: 1000 } // SuperAdmin might want a larger list or I should add pagination here too, but for now let's just fix the fetch.
+        });
+        setAllUsers(data.users || []);
       } catch (err) { console.log('Could not fetch users'); }
       finally { setLoadingUsers(false); }
     };

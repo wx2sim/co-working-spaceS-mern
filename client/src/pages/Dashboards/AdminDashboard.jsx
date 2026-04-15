@@ -12,6 +12,7 @@ import {
 export default function AdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
   const [users, setUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [upgradeRequests, setUpgradeRequests] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(true);
@@ -19,8 +20,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await axios.get(`/api/admin/users/${currentUser._id}`);
-        setUsers(Array.isArray(data) ? data : []);
+        const { data } = await axios.get(`/api/admin/users/${currentUser._id}`, {
+          params: { limit: 5, sort: 'activityScore', order: 'desc' }
+        });
+        setUsers(data.users || []);
+        setTotalUsers(data.totalUsers || 0);
       } catch (err) {
         console.log('Could not fetch users');
       } finally {
@@ -92,9 +96,9 @@ export default function AdminDashboard() {
               <div className='w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center'>
                 <FaUsers className='text-white text-sm' />
               </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{users.length}</span>
+              <span className='text-2xl font-extrabold text-slate-900'>{totalUsers}</span>
             </div>
-            <p className='text-xs text-slate-400 font-medium'>Team Members</p>
+            <p className='text-xs text-slate-400 font-medium'>Platform Users</p>
           </div>
           <div className='bg-white border border-slate-100 rounded-2xl p-5'>
             <div className='flex items-center justify-between mb-3'>
@@ -110,7 +114,7 @@ export default function AdminDashboard() {
               <div className='w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center'>
                 <FaClipboardList className='text-white text-sm' />
               </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{users.filter(u => u.role === 'user').length}</span>
+              <span className='text-2xl font-extrabold text-slate-900'>{totalUsers > 0 ? users.filter(u => u.role === 'user').length : 0}</span>
             </div>
             <p className='text-xs text-slate-400 font-medium'>Active Sellers</p>
           </div>
@@ -186,8 +190,8 @@ export default function AdminDashboard() {
                 <h2 className='text-lg font-bold text-slate-900'>Team Members</h2>
                 <p className='text-xs text-slate-400'>Users assigned to your management</p>
               </div>
-              <Link to='/profile' className='text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors'>
-                Manage →
+              <Link to='/admin/users' className='text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors'>
+                Manage All Users →
               </Link>
             </div>
 
@@ -219,13 +223,16 @@ export default function AdminDashboard() {
                         <p className='text-[11px] text-slate-400 truncate'>{user.email}</p>
                       </div>
                     </div>
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex-shrink-0 ${
-                      user.role === 'user' ? 'bg-emerald-50 text-emerald-600' :
-                      user.role === 'client' ? 'bg-slate-100 text-slate-500' :
-                      'bg-indigo-50 text-indigo-600'
-                    }`}>
-                      {user.role === 'user' ? 'Seller' : user.role}
-                    </span>
+                    <div className='flex flex-col items-end gap-1 flex-shrink-0'>
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                        user.role === 'user' ? 'bg-emerald-50 text-emerald-600' :
+                        user.role === 'client' ? 'bg-slate-100 text-slate-500' :
+                        'bg-indigo-50 text-indigo-600'
+                      }`}>
+                        {user.role === 'user' ? 'Seller' : user.role}
+                      </span>
+                      <p className='text-[9px] text-slate-400 font-bold'>Score: {user.activityScore || 0}</p>
+                    </div>
                   </div>
                 ))}
               </div>

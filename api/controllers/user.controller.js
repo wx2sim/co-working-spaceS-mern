@@ -26,7 +26,7 @@ export const updateUser = async (req, res, next) => {
           password: req.body.password,
           avatar: req.body.avatar,
         },
-      }, { new: true }
+      }, { returnDocument: 'after' }
     );
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
