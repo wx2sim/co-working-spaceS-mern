@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp'; 
+import SignUp from './pages/SignUp';
 import About from './pages/About';
 import Header from './components/Header';
 import PrivateRoutes from './components/PrivateRoutes';
@@ -15,6 +15,7 @@ import Map from './pages/Map';
 import Schedule from './pages/Schedule';
 import AdminUsers from './pages/AdminUsers';
 import Settings from './pages/Settings';
+import ThemeProvider from './components/ThemeProvider';
 
 // Error Pages
 import NotFound from './pages/Other Pages/NotFound';
@@ -43,7 +44,7 @@ function AnimatedRoutes() {
           <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/admin/users' element={<AdminUsers />} />
           <Route path='/schedule' element={<Schedule />} />
-        </Route>      
+        </Route>
 
         {/* Error Routes */}
         <Route path='/error/401' element={<Unauthorized />} />
@@ -71,9 +72,11 @@ function DynamicErrorPage() {
 
 export default function App() {
   return (
-    <BrowserRouter>  
-      <Header />
-      <AnimatedRoutes />
+    <BrowserRouter>
+      <ThemeProvider>
+        <Header />
+        <AnimatedRoutes />
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

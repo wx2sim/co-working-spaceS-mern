@@ -1,0 +1,39 @@
+@layer base {
+  :root {
+    --bg-app: #f8fafc;
+    --bg-header: rgba(255, 255, 255, 0.8);
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --bg-btn: #0f172a;
+    --bg-btn-hover: #1e293b;
+    
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --text-inverse: #ffffff;
+    
+    --border-soft: #f1f5f9;
+    --border-hard: #e2e8f0;
+    
+    --accent-primary: #4f46e5;
+    --accent-hover: #4338ca;
+  }
+
+  .dark {
+    --bg-app: #0f172a;
+    --bg-header: rgba(15, 23, 42, 0.8);
+    --bg-card: #1e293b;
+    --bg-input: #1e293b;
+    --bg-btn: #ffffff;
+    --bg-btn-hover: #f1f5f9;
+    
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-inverse: #0f172a;
+    
+    --border-soft: #334155;
+    --border-hard: #475569;
+    
+    --accent-primary: #6366f1;
+    --accent-hover: #818cf8;
+  }
+}

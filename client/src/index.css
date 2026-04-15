@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './styles/theme.css';
+
 body {
   background-color: rgb(500, 300, 400);
   overflow-x: hidden;

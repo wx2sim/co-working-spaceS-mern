@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import userReducer from './user/userSlice.js';
+import themeReducer from './theme/themeSlice.js';
 import {persistReducer, persistStore, } from 'redux-persist';
 
 const storage = {
@@ -8,7 +9,7 @@ const storage = {
   removeItem: (key) => Promise.resolve(localStorage.removeItem(key)),
 };
 
-const rootReducer = combineReducers({user: userReducer,});
+const rootReducer = combineReducers({user: userReducer, theme: themeReducer});
 const persistConfig = {
   key: 'root',
   storage,

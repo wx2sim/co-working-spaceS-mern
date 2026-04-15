@@ -1,13 +1,16 @@
-import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaBars, FaTimes, FaSun, FaMoon } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { toggleTheme } from '../redux/theme/themeSlice';
 import { Drawer } from 'antd';
 import ProfileDropdown from './ProfileDropdown';
 import SmartButton from '../components/SmartButton';
 
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
+  const { theme } = useSelector((state) => state.theme);
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -133,10 +136,17 @@ function Header() {
             </ul>
 
             {(!currentUser || currentUser.role === 'client') && (
-              <button className='md:hidden text-slate-600 hover:text-slate-900 transition-colors' onClick={() => setIsSearchExpanded(true)}>
+              <button className='md:hidden text-slate-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white transition-colors' onClick={() => setIsSearchExpanded(true)}>
                 <FaSearch size={20} />
               </button>
             )}
+
+            <button 
+              onClick={() => dispatch(toggleTheme())} 
+              className='w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:shadow-md transition-all'
+            >
+              {theme === 'light' ? <FaMoon size={16} /> : <FaSun size={16} />}
+            </button>
 
             <ProfileDropdown currentUser={currentUser} />
           </div>

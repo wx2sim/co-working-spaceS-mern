@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setTheme } from '../redux/theme/themeSlice';
 import AnimatedPage from '../components/AnimatedPage';
 import { FaBell, FaShieldAlt, FaPalette, FaGlobe, FaCheck } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 export default function Settings() {
   const { currentUser } = useSelector((state) => state.user);
+  const { theme } = useSelector((state) => state.theme);
+  const dispatch = useDispatch();
   
   const [activeTab, setActiveTab] = useState('notifications');
   
@@ -149,10 +152,10 @@ export default function Settings() {
                   <h2 className='text-xl font-bold text-slate-900 mb-6'>Appearance Settings</h2>
                   <div className='grid grid-cols-2 gap-4'>
                     <button 
-                      onClick={() => handleSelectChange('theme', 'light')}
-                      className={`relative border-2 rounded-2xl p-4 flex flex-col items-center gap-3 transition-colors ${settings.theme === 'light' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}
+                      onClick={() => { dispatch(setTheme('light')); toast.success('Theme updated'); }}
+                      className={`relative border-2 rounded-2xl p-4 flex flex-col items-center gap-3 transition-colors ${theme === 'light' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}
                     >
-                      {settings.theme === 'light' && <div className='absolute top-3 right-3 bg-indigo-600 rounded-full p-1'><FaCheck className='text-white text-[10px]' /></div>}
+                      {theme === 'light' && <div className='absolute top-3 right-3 bg-indigo-600 rounded-full p-1'><FaCheck className='text-white text-[10px]' /></div>}
                       <div className='w-24 h-16 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col'>
                          <div className='h-4 border-b border-slate-100 bg-slate-50'></div>
                          <div className='flex-1 flex gap-2 p-2'>
@@ -164,10 +167,10 @@ export default function Settings() {
                     </button>
 
                     <button 
-                      onClick={() => handleSelectChange('theme', 'dark')}
-                      className={`relative border-2 rounded-2xl p-4 flex flex-col items-center gap-3 transition-colors ${settings.theme === 'dark' ? 'border-indigo-600 bg-slate-800' : 'border-slate-200 hover:border-slate-300'}`}
+                      onClick={() => { dispatch(setTheme('dark')); toast.success('Theme updated'); }}
+                      className={`relative border-2 rounded-2xl p-4 flex flex-col items-center gap-3 transition-colors ${theme === 'dark' ? 'border-indigo-600 bg-slate-800' : 'border-slate-200 hover:border-slate-300'}`}
                     >
-                      {settings.theme === 'dark' && <div className='absolute top-3 right-3 bg-indigo-600 rounded-full p-1'><FaCheck className='text-white text-[10px]' /></div>}
+                      {theme === 'dark' && <div className='absolute top-3 right-3 bg-indigo-600 rounded-full p-1'><FaCheck className='text-white text-[10px]' /></div>}
                       <div className='w-24 h-16 bg-slate-800 border border-slate-700 rounded-lg shadow-sm flex flex-col'>
                          <div className='h-4 border-b border-slate-700 bg-slate-900'></div>
                          <div className='flex-1 flex gap-2 p-2'>
