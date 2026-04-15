@@ -11,6 +11,9 @@ import { AnimatePresence } from 'framer-motion';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
 import Dashboard from './pages/Dashboards/Dashboard';
+import Map from './pages/Map';
+import Schedule from './pages/Schedule';
+import AdminUsers from './pages/AdminUsers';
 
 // Error Pages
 import NotFound from './pages/Other Pages/NotFound';
@@ -32,9 +35,12 @@ function AnimatedRoutes() {
         <Route path='/about' element={<About />} />
         <Route path='/listing/:listingId' element={<Listing />} />
         <Route path='/search' element={<Search />} />
+        <Route path='/map' element={<Map />} />
         <Route element={<PrivateRoutes />} >
           <Route path='/profile' element={<Profile />} />
           <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/admin/users' element={<AdminUsers />} />
+          <Route path='/schedule' element={<Schedule />} />
         </Route>      
 
         {/* Error Routes */}
