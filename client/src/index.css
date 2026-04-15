@@ -1,11 +1,10 @@
+@import './styles/theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import './styles/theme.css';
-
 body {
-  background-color: rgb(500, 300, 400);
+  background-color: var(--bg-app);
   overflow-x: hidden;
 }
 
