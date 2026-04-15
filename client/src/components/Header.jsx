@@ -51,7 +51,7 @@ function Header() {
       return (
         <>
           <NavLink to='/admin/users' text='Users' onClick={handleLinkClick} />
-          <NavLink to='/profile' text='Dashboard' onClick={handleLinkClick} />
+          <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />
         </>
       );
     }
@@ -64,7 +64,7 @@ function Header() {
           <NavLink to='/schedule' text='Schedule' onClick={handleLinkClick} />
           <li>
             <SmartButton 
-              actionFunction={() => { navigate('/profile'); handleLinkClick(); }}
+              actionFunction={() => { navigate('/dashboard'); handleLinkClick(); }}
               colorClass="!bg-slate-900 !text-white hover:!bg-slate-800 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all w-full md:w-auto"
               text="Dashboard"
               showAlert={false}
@@ -79,7 +79,7 @@ function Header() {
         <NavLink to='/' text='Home' onClick={handleLinkClick} />
         <NavLink to='/about' text='About' onClick={handleLinkClick} />
         <NavLink to='/map' text='Map' onClick={handleLinkClick} />
-        {currentUser && <NavLink to='/profile' text='My Bookings' onClick={handleLinkClick} />}
+        {currentUser && <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />}
       </>
     );
   };

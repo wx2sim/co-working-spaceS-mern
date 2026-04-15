@@ -13,8 +13,6 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import SmartButton from '../components/SmartButton.jsx';
 import SmartModal from '../components/SmartModal.jsx';
-import CreateListingModal from '../components/CreateListingModal.jsx';
-import UpdateListingModal from '../components/UpdateListingModal.jsx';
 import { Modal } from 'antd';
 import { FaArrowUp, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 
@@ -28,14 +26,6 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [userListings, setUserListings] = useState([]);
-  const [showListingsError, setShowListingsError] = useState(false);
-  const [listingsFetched, setListingsFetched] = useState(false); 
-
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [listingToEdit, setListingToEdit] = useState(null);
-
   const [bookedSpaces, setBookedSpaces] = useState([]);
   const [showBookedSpacesError, setShowBookedSpacesError] = useState(false);
   const [bookedSpacesFetched, setBookedSpacesFetched] = useState(false);
@@ -158,34 +148,6 @@ export default function Profile() {
     }
   };
 
-  const handleShowListings = async () => {
-    if (listingsFetched) {
-      setUserListings([]);
-      setListingsFetched(false);
-      return;
-    }
-    try {
-      setShowListingsError(false);
-      const { data } = await axios.get(`/api/user/listings/${currentUser._id}`);
-      if (data.success === false) return setShowListingsError(true);
-      setUserListings(data);
-      setListingsFetched(true);
-    } catch (error) {
-      setShowListingsError(true);
-    }
-  };
-
-  const handleListingDelete = async (listingId) => {
-    try {
-      const { data } = await axios.delete(`/api/listing/delete/${listingId}`);
-      if (data.success === false) return toast.error(data.message);
-      setUserListings((prev) => prev.filter((listing) => listing._id !== listingId));
-      toast.success('Listing deleted!');
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
   const handleShowBookedSpaces = async () => {
     if (bookedSpacesFetched) {
       setBookedSpaces([]);
@@ -218,9 +180,6 @@ export default function Profile() {
     } catch (error) {
       setShowAdminUsersError(true);
     }
-  };
-  const handleUpdateListingSuccess = (updatedListing) => {
-    setUserListings((prev) => prev.map((l) => l._id === updatedListing._id ? updatedListing : l));
   };
 
   // Upgrade request handlers
@@ -633,73 +592,20 @@ export default function Profile() {
               </Modal>
             </>
           ) : (
-            <>
-              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
-                <div>
-                  <h2 className='text-2xl font-bold text-slate-900'>My Workspace Listings</h2>
-                  <p className='text-sm text-slate-500'>Manage your shared spaces</p>
-                </div>
-                
-                <div className='flex items-center gap-3'>
-                  <button onClick={() => setIsCreateModalOpen(true)} className='bg-slate-900 text-white hover:bg-slate-800 px-5 py-2 rounded-full shadow-sm text-sm font-medium transition-all flex items-center gap-1'>
-                    <span className='text-lg leading-none mb-[2px]'>+</span> Create New
-                  </button>
-                  <SmartButton actionFunction={handleShowListings} colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all" text={listingsFetched ? "Hide Listings" : "Show Listings"} showAlert={false}/> 
-                </div>
-              </div>
-
-              <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
-                {showListingsError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching listings!</p>}
-
-                {listingsFetched && userListings.length === 0 && !showListingsError && (
-                  <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
-                    <img src="/images/empty-state.svg" alt="No listings" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
-                    <p className='text-lg font-semibold text-slate-700'>No listings found</p>
-                    <p className='text-sm text-slate-500 mb-4'>You haven't created any workspaces yet.</p>
-                    <button onClick={() => setIsCreateModalOpen(true)} className='text-green-600 font-semibold hover:underline text-sm'>Click here to create one</button>
-                  </div>
-                )}
-
-                {userListings && userListings.length > 0 && (
-                  <div className='flex flex-col gap-4'>
-                    {userListings.map((listing) => (
-                      <div key={listing._id} className='bg-white border border-slate-100 rounded-2xl p-3 flex justify-between items-center gap-4 hover:shadow-md transition-shadow group'>
-                        <Link to={`/listing/${listing._id}`} className='flex items-center gap-4 flex-1 truncate'>
-                          <img src={listing.imageUrls[0]} alt='listing cover' className='h-16 w-24 object-cover rounded-lg bg-slate-100' />
-                          <p className='text-slate-800 font-semibold truncate group-hover:text-green-700 transition-colors'>{listing.name}</p>
-                        </Link>
-                        <div className='flex flex-col md:flex-row gap-2 md:gap-4 px-2'>
-                          <button 
-                              onClick={() => {
-                                setListingToEdit(listing);
-                                setIsUpdateModalOpen(true);
-                              }} 
-                              className='text-slate-400 hover:text-slate-900 font-medium text-sm transition-colors'
-                            >
-                              Edit
-                            </button>
-                          <button onClick={() => handleListingDelete(listing._id)} className='text-red-400 hover:text-red-600 font-medium text-sm transition-colors'>Delete</button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {!listingsFetched && (
-                  <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
-                     <p className='text-sm text-slate-500'>Click "Show Listings" to view your properties.</p>
-                  </div>
-                )}
-              </div>
-            </>
+            <div className='flex flex-col items-center justify-center text-center h-full opacity-70'>
+              <img src="https://cdn-icons-png.flaticon.com/512/9908/9908191.png" alt="Dashboard" className="w-24 h-24 mb-6 opacity-40 grayscale" onError={(e) => e.target.style.display='none'} />
+              <h2 className='text-3xl font-bold text-slate-800 mb-2'>Workspace Management Moved</h2>
+              <p className='text-sm text-slate-500 mb-8 max-w-sm mx-auto'>
+                All your listings, creation tools, and workspace management are now centralized in your dedicated Seller Dashboard.
+              </p>
+              <Link to='/dashboard' className='bg-indigo-600 text-white px-8 py-3.5 rounded-xl hover:bg-indigo-700 transition-colors font-semibold shadow-md inline-flex items-center gap-2 tracking-wide'>
+                Go to Dashboard
+              </Link>
+            </div>
           )}
 
         </div>
       </div>
-      
-      <CreateListingModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
-      <UpdateListingModal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)} listing={listingToEdit}  onUpdateSuccess={handleUpdateListingSuccess}
-      />
     </div>
   );
 }

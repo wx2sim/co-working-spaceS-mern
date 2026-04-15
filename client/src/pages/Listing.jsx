@@ -139,8 +139,8 @@ export default function Listing() {
                 {/* Type Badge */}
                 <div className='absolute top-3 left-3 z-10'>
                   <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg ${listing.type === 'rent'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-emerald-600 text-white'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-emerald-600 text-white'
                     }`}>
                     {listing.type === 'rent' ? 'For Rent' : 'For Sale'}
                   </span>

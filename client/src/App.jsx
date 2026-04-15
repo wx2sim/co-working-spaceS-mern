@@ -10,6 +10,7 @@ import PrivateRoutes from './components/PrivateRoutes';
 import { AnimatePresence } from 'framer-motion';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
+import Dashboard from './pages/Dashboards/Dashboard';
 
 // Error Pages
 import NotFound from './pages/Other Pages/NotFound';
@@ -33,6 +34,7 @@ function AnimatedRoutes() {
         <Route path='/search' element={<Search />} />
         <Route element={<PrivateRoutes />} >
           <Route path='/profile' element={<Profile />} />
+          <Route path='/dashboard' element={<Dashboard />} />
         </Route>      
 
         {/* Error Routes */}
