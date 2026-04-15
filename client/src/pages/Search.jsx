@@ -133,16 +133,16 @@ export default function Search() {
   return (
     <AnimatedPage>
       <div className='flex flex-col md:flex-row min-h-screen pt-20 bg-slate-50'>
-        
+
         {/* Filters Sidebar */}
         <div className='w-full md:w-[340px] bg-white border-b md:border-b-0 md:border-r border-slate-100 p-6 sm:p-8 flex-shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 h-auto md:min-h-screen'>
           <div className='flex items-center gap-2 mb-8'>
             <FaFilter className='text-indigo-600' />
             <h2 className='text-xl font-extrabold text-slate-900'>Filter Search</h2>
           </div>
-          
+
           <form onSubmit={handleSubmit} className='flex flex-col gap-6'>
-            
+
             {/* Keyword Search */}
             <div className='flex flex-col gap-2'>
               <label className='text-sm font-semibold text-slate-700'>Search Keyword</label>
@@ -219,7 +219,7 @@ export default function Search() {
             </button>
           </form>
         </div>
-        
+
         {/* Main Content Area */}
         <div className='flex-1 p-6 md:p-10 flex flex-col'>
           <div className='mb-8'>
@@ -244,18 +244,18 @@ export default function Search() {
                 <p className='text-slate-500 max-w-sm'>
                   We couldn't find any listings matching your exact filters. Try adjusting your search criteria or explore nearby areas.
                 </p>
-                <button onClick={() => { setSidebardata({searchTerm:'', type:'all', parking:false, furnished:false, offer:false, sort:'created_at', order:'desc'}); handleSubmit(new Event('submit')); }} className='mt-6 text-indigo-600 font-semibold hover:underline'>
+                <button onClick={() => { setSidebardata({ searchTerm: '', type: 'all', parking: false, furnished: false, offer: false, sort: 'created_at', order: 'desc' }); handleSubmit(new Event('submit')); }} className='mt-6 text-indigo-600 font-semibold hover:underline'>
                   Clear all filters
                 </button>
               </div>
             ) : (
               <>
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-10'>
                   {listings.map((listing) => (
                     <ListingItem key={listing._id} listing={listing} />
                   ))}
                 </div>
-                
+
                 {showMore && (
                   <div className='flex justify-center mt-auto pb-10'>
                     <button

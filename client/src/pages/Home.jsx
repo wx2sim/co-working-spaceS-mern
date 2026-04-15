@@ -7,6 +7,7 @@ import SwiperCore from 'swiper';
 import 'swiper/css/bundle';
 import { FaSearch, FaMapMarkerAlt, FaStar, FaArrowRight, FaCity, FaWifi, FaCoffee } from 'react-icons/fa';
 import AnimatedPage from '../components/AnimatedPage';
+import ListingItem from '../components/ListingItem';
 
 export default function Home() {
   SwiperCore.use([Navigation, Autoplay, EffectFade]);
@@ -150,9 +151,9 @@ export default function Home() {
                   See all <FaArrowRight />
                 </Link>
               </div>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
                 {offerListings.map((listing) => (
-                  <ListingCard key={listing._id} listing={listing} />
+                  <ListingItem key={listing._id} listing={listing} />
                 ))}
               </div>
             </div>
@@ -170,9 +171,9 @@ export default function Home() {
                   See all <FaArrowRight />
                 </Link>
               </div>
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
                 {rentListings.map((listing) => (
-                  <ListingCard key={listing._id} listing={listing} />
+                  <ListingItem key={listing._id} listing={listing} />
                 ))}
               </div>
             </div>
@@ -191,50 +192,5 @@ export default function Home() {
 
       </div>
     </AnimatedPage>
-  );
-}
-
-// Reusable elegant Card Component
-function ListingCard({ listing }) {
-  return (
-    <Link to={`/listing/${listing._id}`} className='bg-white border border-slate-100 rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300 flex flex-col'>
-      <div className='relative h-[220px] w-full overflow-hidden'>
-        <img
-          src={listing.imageUrls[0]}
-          alt='listing cover'
-          className='h-full w-full object-cover group-hover:scale-110 transition-transform duration-700'
-        />
-        <div className='absolute top-3 left-3 flex flex-col gap-2'>
-          <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm uppercase tracking-wider backdrop-blur-md ${listing.type === 'rent' ? 'bg-indigo-600/90 text-white' : 'bg-emerald-600/90 text-white'}`}>
-            {listing.type}
-          </span>
-          {listing.offer && (
-            <span className='px-3 py-1 bg-rose-500/90 backdrop-blur-md text-white text-xs font-bold rounded-full shadow-sm mx-auto self-start'>
-              Discount
-            </span>
-          )}
-        </div>
-      </div>
-      <div className='p-5 flex flex-col flex-1'>
-        <h3 className='text-lg font-bold text-slate-900 mb-1 truncate'>{listing.name}</h3>
-        <div className='flex items-center gap-1.5 text-slate-500 mb-4'>
-          <FaMapMarkerAlt className='text-xs text-indigo-400' />
-          <p className='text-xs truncate font-medium'>{listing.address}</p>
-        </div>
-        <p className='text-sm text-slate-500 line-clamp-2 leading-relaxed mb-4 flex-1'>
-          {listing.description}
-        </p>
-        <div className='pt-4 border-t border-slate-100 flex items-center justify-between mt-auto'>
-          <p className='text-xl font-extrabold text-slate-900'>
-            ${listing.offer ? listing.discountPrice.toLocaleString('en-US') : listing.regularPrice.toLocaleString('en-US')}
-            {listing.type === 'rent' && <span className='text-xs text-slate-500 font-medium'> /mo</span>}
-          </p>
-          <div className='flex items-center gap-1 text-amber-400'>
-            <FaStar className='text-sm' />
-            <span className='text-sm font-bold text-slate-700'>4.9</span>
-          </div>
-        </div>
-      </div>
-    </Link>
   );
 }
