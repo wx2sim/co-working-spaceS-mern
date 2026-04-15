@@ -4,9 +4,7 @@ import { Outlet, Navigate } from 'react-router-dom'
 
 function PrivateRoutes() {
     const {currentUser} = useSelector((state) => state.user)
-  return currentUser ? <Outlet/> : <Navigate to={'/signin'}/>
-
-
+  return currentUser ? <Outlet/> : <Navigate to={'/error/401'}/>
 }
 
 export default PrivateRoutes

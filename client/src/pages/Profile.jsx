@@ -15,6 +15,8 @@ import SmartButton from '../components/SmartButton.jsx';
 import SmartModal from '../components/SmartModal.jsx';
 import CreateListingModal from '../components/CreateListingModal.jsx';
 import UpdateListingModal from '../components/UpdateListingModal.jsx';
+import { Modal } from 'antd';
+import { FaArrowUp, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -42,6 +44,14 @@ export default function Profile() {
   const [showAdminUsersError, setShowAdminUsersError] = useState(false);
   const [adminUsersFetched, setAdminUsersFetched] = useState(false);
 
+  // Upgrade request state
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [upgradeStatus, setUpgradeStatus] = useState('none'); // none, pending, approved, denied
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [upgradeForm, setUpgradeForm] = useState({ fullName: '', businessName: '', speciality: '', phoneNumber: '' });
+  const [upgradeRequests, setUpgradeRequests] = useState([]);
+  const [upgradeRequestsFetched, setUpgradeRequestsFetched] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -50,6 +60,21 @@ export default function Profile() {
       handleFileUpload(file);
     }
   }, [file]);
+
+  // Check upgrade status on mount for clients
+  useEffect(() => {
+    if (currentUser?.role === 'client') {
+      const checkUpgradeStatus = async () => {
+        try {
+          const { data } = await axios.get('/api/upgrade/my-status');
+          setUpgradeStatus(data.status);
+        } catch (err) {
+          console.log('Could not check upgrade status');
+        }
+      };
+      checkUpgradeStatus();
+    }
+  }, [currentUser]);
 
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
@@ -198,6 +223,69 @@ export default function Profile() {
     setUserListings((prev) => prev.map((l) => l._id === updatedListing._id ? updatedListing : l));
   };
 
+  // Upgrade request handlers
+  const handleUpgradeFormChange = (e) => {
+    setUpgradeForm({ ...upgradeForm, [e.target.id]: e.target.value });
+  };
+
+  const handleUpgradeSubmit = async () => {
+    if (!upgradeForm.fullName || !upgradeForm.businessName || !upgradeForm.speciality || !upgradeForm.phoneNumber) {
+      return toast.error('Please fill in all fields.');
+    }
+    try {
+      setUpgradeLoading(true);
+      const payload = {
+        ...upgradeForm,
+        phoneNumber: '+213' + upgradeForm.phoneNumber.replace(/^\+?213/, ''),
+      };
+      await axios.post('/api/upgrade/request', payload);
+      setUpgradeStatus('pending');
+      setIsUpgradeModalOpen(false);
+      toast.success('Upgrade request sent successfully!');
+      setUpgradeForm({ fullName: '', businessName: '', speciality: '', phoneNumber: '' });
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to send request.';
+      toast.error(msg);
+    } finally {
+      setUpgradeLoading(false);
+    }
+  };
+
+  const handleShowUpgradeRequests = async () => {
+    if (upgradeRequestsFetched) {
+      setUpgradeRequests([]);
+      setUpgradeRequestsFetched(false);
+      return;
+    }
+    try {
+      const { data } = await axios.get('/api/upgrade/pending');
+      setUpgradeRequests(data);
+      setUpgradeRequestsFetched(true);
+    } catch (err) {
+      toast.error('Failed to fetch upgrade requests.');
+    }
+  };
+
+  const handleApproveRequest = async (requestId) => {
+    try {
+      await axios.post(`/api/upgrade/approve/${requestId}`);
+      setUpgradeRequests((prev) => prev.filter((r) => r._id !== requestId));
+      toast.success('Request approved! User upgraded to seller.');
+    } catch (err) {
+      toast.error('Failed to approve request.');
+    }
+  };
+
+  const handleDenyRequest = async (requestId) => {
+    try {
+      await axios.post(`/api/upgrade/deny/${requestId}`);
+      setUpgradeRequests((prev) => prev.filter((r) => r._id !== requestId));
+      toast.success('Request denied.');
+    } catch (err) {
+      toast.error('Failed to deny request.');
+    }
+  };
+
   if (!currentUser) return null;
 
   return (
@@ -285,6 +373,7 @@ export default function Profile() {
           
           {currentUser.role === 'admin' ? (
             <>
+              {/* Tab Headers for Admin */}
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
                 <div>
                   <h2 className='text-2xl font-bold text-slate-900'>My Team</h2>
@@ -292,6 +381,12 @@ export default function Profile() {
                 </div>
                 
                 <div className='flex items-center gap-3'>
+                  <SmartButton 
+                    actionFunction={handleShowUpgradeRequests}
+                    colorClass="!bg-gradient-to-r !from-indigo-600 !to-violet-600 !text-white hover:!from-indigo-700 hover:!to-violet-700 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
+                    text={upgradeRequestsFetched ? 'Hide Requests' : 'Upgrade Requests'}
+                    showAlert={false}
+                  />
                   <SmartButton 
                     actionFunction={handleShowAdminUsers}
                     colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
@@ -302,6 +397,66 @@ export default function Profile() {
               </div>
 
               <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
+                {/* Upgrade Requests Section */}
+                {upgradeRequestsFetched && (
+                  <div className='mb-6'>
+                    <h3 className='text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-2'>
+                      <FaArrowUp className='text-indigo-600 text-xs' />
+                      Pending Upgrade Requests
+                    </h3>
+                    {upgradeRequests.length === 0 ? (
+                      <div className='bg-slate-50 border border-slate-100 rounded-2xl p-6 text-center'>
+                        <p className='text-sm text-slate-500'>No pending upgrade requests.</p>
+                      </div>
+                    ) : (
+                      <div className='flex flex-col gap-3'>
+                        {upgradeRequests.map((req) => (
+                          <div key={req._id} className='bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-md transition-shadow'>
+                            <div className='flex items-start justify-between gap-3'>
+                              <div className='flex items-center gap-3'>
+                                <img src={req.userId?.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} alt='user' className='w-10 h-10 rounded-full object-cover border border-slate-200' />
+                                <div>
+                                  <p className='font-semibold text-slate-800 text-sm'>{req.fullName}</p>
+                                  <p className='text-xs text-slate-500'>{req.userId?.email}</p>
+                                </div>
+                              </div>
+                              <span className='text-[10px] font-bold px-2 py-1 bg-amber-100 text-amber-700 rounded-full uppercase tracking-wider'>Pending</span>
+                            </div>
+                            <div className='mt-3 grid grid-cols-2 gap-2 text-xs'>
+                              <div className='bg-slate-50 rounded-lg px-3 py-2'>
+                                <span className='text-slate-400'>Business</span>
+                                <p className='font-semibold text-slate-700'>{req.businessName}</p>
+                              </div>
+                              <div className='bg-slate-50 rounded-lg px-3 py-2'>
+                                <span className='text-slate-400'>Speciality</span>
+                                <p className='font-semibold text-slate-700'>{req.speciality}</p>
+                              </div>
+                              <div className='bg-slate-50 rounded-lg px-3 py-2 col-span-2'>
+                                <span className='text-slate-400'>Phone</span>
+                                <p className='font-semibold text-slate-700'>{req.phoneNumber}</p>
+                              </div>
+                            </div>
+                            <div className='flex gap-2 mt-3'>
+                              <button
+                                onClick={() => handleApproveRequest(req._id)}
+                                className='flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-emerald-700 transition-colors'
+                              >
+                                <FaCheck className='text-[10px]' /> Approve
+                              </button>
+                              <button
+                                onClick={() => handleDenyRequest(req._id)}
+                                className='flex-1 flex items-center justify-center gap-1.5 bg-white text-red-600 border border-red-200 text-xs font-medium py-2 rounded-lg hover:bg-red-50 transition-colors'
+                              >
+                                <FaTimes className='text-[10px]' /> Deny
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {showAdminUsersError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching users!</p>}
 
                 {adminUsersFetched && adminUsers.length === 0 && !showAdminUsersError && (
@@ -331,7 +486,7 @@ export default function Profile() {
                   </div>
                 )}
                 
-                {!adminUsersFetched && (
+                {!adminUsersFetched && !upgradeRequestsFetched && (
                   <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
                      <p className='text-sm text-slate-500'>Click "Show Users" to view your team members.</p>
                   </div>
@@ -390,6 +545,92 @@ export default function Profile() {
                   </div>
                 )}
               </div>
+
+              {/* Upgrade to Seller Section */}
+              <div className='mt-6 pt-5 border-t border-slate-100'>
+                {upgradeStatus === 'none' || upgradeStatus === 'denied' ? (
+                  <button
+                    onClick={() => setIsUpgradeModalOpen(true)}
+                    className='w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium py-3 rounded-xl hover:from-indigo-700 hover:to-violet-700 transition-all duration-300 text-sm shadow-sm'
+                  >
+                    <FaArrowUp className='text-xs' />
+                    {upgradeStatus === 'denied' ? 'Re-apply to Become a Seller' : 'Upgrade to Seller'}
+                  </button>
+                ) : upgradeStatus === 'pending' ? (
+                  <div className='w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 font-medium py-3 rounded-xl text-sm cursor-default'>
+                    <FaClock className='text-xs' />
+                    Upgrade Request Pending
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Upgrade Request Modal */}
+              <Modal
+                title={<span className='text-lg font-bold text-slate-900'>Upgrade to Seller</span>}
+                open={isUpgradeModalOpen}
+                onCancel={() => setIsUpgradeModalOpen(false)}
+                footer={null}
+                centered
+                destroyOnClose
+              >
+                <p className='text-sm text-slate-500 mb-5'>Fill in your business details to request a seller account.</p>
+                <div className='flex flex-col gap-3'>
+                  <div className='flex flex-col gap-1'>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>Full Name</label>
+                    <input
+                      type='text'
+                      id='fullName'
+                      placeholder='Your full name'
+                      value={upgradeForm.fullName}
+                      onChange={handleUpgradeFormChange}
+                      className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
+                    />
+                  </div>
+                  <div className='flex flex-col gap-1'>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>Business Name</label>
+                    <input
+                      type='text'
+                      id='businessName'
+                      placeholder='Your company or business name'
+                      value={upgradeForm.businessName}
+                      onChange={handleUpgradeFormChange}
+                      className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
+                    />
+                  </div>
+                  <div className='flex flex-col gap-1'>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>Speciality</label>
+                    <input
+                      type='text'
+                      id='speciality'
+                      placeholder='e.g. Co-working, Event Space, etc.'
+                      value={upgradeForm.speciality}
+                      onChange={handleUpgradeFormChange}
+                      className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
+                    />
+                  </div>
+                  <div className='flex flex-col gap-1'>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>Phone Number</label>
+                    <div className='flex items-center gap-2'>
+                      <span className='bg-slate-100 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-600 font-medium whitespace-nowrap'>+213</span>
+                      <input
+                        type='tel'
+                        id='phoneNumber'
+                        placeholder='5XX XXX XXX'
+                        value={upgradeForm.phoneNumber}
+                        onChange={handleUpgradeFormChange}
+                        className='flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleUpgradeSubmit}
+                    disabled={upgradeLoading}
+                    className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all duration-300 disabled:opacity-70 text-sm mt-2'
+                  >
+                    {upgradeLoading ? 'Submitting...' : 'Submit Request'}
+                  </button>
+                </div>
+              </Modal>
             </>
           ) : (
             <>
