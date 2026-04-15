@@ -13,7 +13,8 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
     description: '',
     address: '',
     type: 'rent',
-    bedrooms: 1,
+    rooms: 1,
+    confirencerooms: 1,
     bathrooms: 1,
     regularPrice: 50,
     discountPrice: 0,
@@ -27,7 +28,6 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // using old data 
   useEffect(() => {
     if (listing && isOpen) {
       setFormData({
@@ -36,7 +36,8 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
         description: listing.description || '',
         address: listing.address || '',
         type: listing.type || 'rent',
-        bedrooms: listing.bedrooms || 1,
+        rooms: listing.rooms || 1,
+        confirencerooms: listing.confirencerooms || 1,
         bathrooms: listing.bathrooms || 1,
         regularPrice: listing.regularPrice || 50,
         discountPrice: listing.discountPrice || 0,
@@ -197,11 +198,15 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
 
               <div className='flex flex-wrap gap-4 mt-2'>
                 <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
-                  <input type='number' id='bedrooms' min='1' max='10' required onChange={handleChange} value={formData.bedrooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                  <span className='text-sm text-slate-700 font-medium'>Beds</span>
+                  <input type='number' id='rooms' min='1' max='50' required onChange={handleChange} value={formData.rooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                  <span className='text-sm text-slate-700 font-medium'>Rooms</span>
                 </div>
                 <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
-                  <input type='number' id='bathrooms' min='1' max='10' required onChange={handleChange} value={formData.bathrooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                  <input type='number' id='confirencerooms' min='0' max='20' required onChange={handleChange} value={formData.confirencerooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                  <span className='text-sm text-slate-700 font-medium'>Conf. Rooms</span>
+                </div>
+                <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
+                  <input type='number' id='bathrooms' min='1' max='20' required onChange={handleChange} value={formData.bathrooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
                   <span className='text-sm text-slate-700 font-medium'>Baths</span>
                 </div>
                 <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>

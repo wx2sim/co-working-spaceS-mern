@@ -27,7 +27,11 @@ const listingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    bedrooms: {
+    confirencerooms: {
+      type: Number,
+      required: true,
+    },
+    rooms: {
       type: Number,
       required: true,
     },
