@@ -13,6 +13,12 @@ export const createAdmin = async (req, res, next) => {
       return next(errorHandler(403, 'Only superadmin can create admins.'));
     }
 
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return next(errorHandler(400, 'User with this email or username already exists.'));
+    }
+
     const hashedPassword = bcryptjs.hashSync(password, 10);
     const newAdmin = new User({
       username,

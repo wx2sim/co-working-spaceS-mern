@@ -10,16 +10,22 @@ import {
 import CreateListingModal from '../../components/CreateListingModal';
 import UpdateListingModal from '../../components/UpdateListingModal';
 import toast from 'react-hot-toast';
+import StatCard from '../../components/StatCard';
+import AnalyticsChart from '../../components/AnalyticsChart';
+import { FaWallet, FaClipboardCheck, FaBuilding, FaClock } from 'react-icons/fa';
 
 export default function UserDashboard() {
   const { currentUser } = useSelector((state) => state.user);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ total: 0, forRent: 0, forSale: 0, withOffer: 0 });
+  const [activeTab, setActiveTab] = useState('listings');
 
   const [bookings, setBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('listings');
+
+  // New Analytics State
+  const [ownerStats, setOwnerStats] = useState(null);
+  const [days, setDays] = useState(30);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -31,12 +37,6 @@ export default function UserDashboard() {
         const { data } = await axios.get(`/api/user/listings/${currentUser._id}`);
         if (Array.isArray(data)) {
           setListings(data);
-          setStats({
-            total: data.length,
-            forRent: data.filter(l => l.type === 'rent').length,
-            forSale: data.filter(l => l.type === 'sale').length,
-            withOffer: data.filter(l => l.offer).length,
-          });
         }
       } catch (err) {
         console.log('Could not fetch listings');
@@ -56,9 +56,17 @@ export default function UserDashboard() {
       }
     };
 
+    const fetchOwnerStats = async () => {
+        try {
+            const { data } = await axios.get('/api/stats/owner', { params: { days } });
+            setOwnerStats(data);
+        } catch (err) { console.log('Error fetching owner stats'); }
+    }
+
     fetchListings();
     fetchBookings();
-  }, [currentUser._id]);
+    fetchOwnerStats();
+  }, [currentUser._id, days]);
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -73,12 +81,6 @@ export default function UserDashboard() {
       if (data.success === false) return toast.error(data.message);
 
       setListings((prev) => prev.filter((listing) => listing._id !== listingId));
-
-      // Update stats
-      setStats(prev => ({
-        ...prev,
-        total: prev.total - 1
-      }));
 
       toast.success('Listing deleted!');
     } catch (error) {
@@ -133,43 +135,57 @@ export default function UserDashboard() {
           </button>
         </div>
 
-        {/* Stats Row */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-8'>
-          <div className='bg-white border border-slate-100 rounded-2xl p-5'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center'>
-                <FaListUl className='text-white text-sm' />
-              </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{stats.total}</span>
-            </div>
-            <p className='text-xs text-slate-400 font-medium'>Total Listings</p>
+        {/* New Analytics Section */}
+        <div className='mb-12'>
+          <div className='flex items-center justify-between mb-6'>
+            <h2 className='text-xl font-bold text-slate-900 flex items-center gap-2'>
+              <FaChartLine className='text-indigo-600' /> Financial Analytics
+            </h2>
+            <select 
+               value={days} 
+               onChange={(e) => setDays(e.target.value)}
+               className='text-xs font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer'
+            >
+              <option value={7}>Last 7 Days</option>
+              <option value={30}>Last 30 Days</option>
+              <option value={90}>Last 90 Days</option>
+            </select>
           </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-5'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center'>
-                <FaCalendarAlt className='text-white text-sm' />
-              </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{stats.forRent}</span>
-            </div>
-            <p className='text-xs text-slate-400 font-medium'>For Rent</p>
+
+          <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
+             <StatCard 
+                title="Total Revenue" 
+                value={`${ownerStats?.totalIncome?.toLocaleString() || 0} DA`} 
+                icon={FaWallet} 
+                colorClass="bg-indigo-600"
+             />
+             <StatCard 
+                title="Active Listings" 
+                value={ownerStats?.inventoryStats?.reduce((acc, curr) => acc + curr.count, 0) || listings.length} 
+                icon={FaBuilding} 
+                colorClass="bg-slate-900" 
+             />
+             <StatCard 
+                title="Approved Bookings" 
+                value={ownerStats?.bookingStatusCounts?.find(s => s._id === 'approved')?.count || 0} 
+                icon={FaClipboardCheck} 
+                colorClass="bg-emerald-600" 
+             />
+             <StatCard 
+                title="Pending Requests" 
+                value={ownerStats?.bookingStatusCounts?.find(s => s._id === 'pending')?.count || 0} 
+                icon={FaClock} 
+                colorClass="bg-amber-500" 
+             />
           </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-5'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center'>
-                <FaChartLine className='text-white text-sm' />
-              </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{stats.forSale}</span>
-            </div>
-            <p className='text-xs text-slate-400 font-medium'>For Sale</p>
-          </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-5'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center'>
-                <FaEye className='text-white text-sm' />
-              </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{stats.withOffer}</span>
-            </div>
-            <p className='text-xs text-slate-400 font-medium'>With Offers</p>
+
+          <div className='grid grid-cols-1 lg:grid-cols-1 gap-6 h-[400px]'>
+             <AnalyticsChart 
+                data={ownerStats?.revenueStats || []} 
+                title="Income Trend" 
+                dataKey="income" 
+                color="#4f46e5"
+             />
           </div>
         </div>
 

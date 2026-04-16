@@ -10,6 +10,9 @@ import {
 } from 'react-icons/fa';
 import TaskModal from '../../components/TaskModal';
 import AddReviewModal from '../../components/AddReviewModal';
+import StatCard from '../../components/StatCard';
+import AnalyticsChart from '../../components/AnalyticsChart';
+import { FaWallet, FaChartLine, FaClipboardCheck, FaBuilding } from 'react-icons/fa';
 
 export default function AdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -27,6 +30,11 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState([]);
   const [reviewToEdit, setReviewToEdit] = useState(null);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  
+  // Analytics State
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [days, setDays] = useState(30);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -74,11 +82,21 @@ export default function AdminDashboard() {
       finally { setLoadingReviews(false); }
     };
 
+    const fetchStats = async () => {
+      try {
+        setLoadingStats(true);
+        const { data } = await axios.get('/api/stats/platform', { params: { days } });
+        setStats(data);
+      } catch (err) { console.log('Could not fetch stats'); }
+      finally { setLoadingStats(false); }
+    };
+
     fetchUsers();
     fetchRequests();
     fetchTasks();
     fetchReviews();
-  }, [currentUser._id, teamTab]);
+    fetchStats();
+  }, [currentUser._id, teamTab, days]);
 
   const handleApprove = async (id) => {
     try {
@@ -202,35 +220,63 @@ export default function AdminDashboard() {
           reviewToEdit={reviewToEdit}
         />
 
-        {/* Stats */}
-        <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mb-8'>
-          <div className='bg-white border border-slate-100 rounded-2xl p-5'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center'>
-                <FaUsers className='text-white text-sm' />
-              </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{totalUsers}</span>
-            </div>
-            <p className='text-xs text-slate-400 font-medium'>Platform Users</p>
+        {/* Analytics Section */}
+        <div className='mb-12'>
+          <div className='flex items-center justify-between mb-6'>
+            <h2 className='text-xl font-bold text-slate-900 flex items-center gap-2'>
+              <FaChartLine className='text-indigo-600' /> Financial Analytics
+            </h2>
+            <select 
+               value={days} 
+               onChange={(e) => setDays(e.target.value)}
+               className='text-xs font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer'
+            >
+              <option value={7}>Last 7 Days</option>
+              <option value={30}>Last 30 Days</option>
+              <option value={90}>Last 90 Days</option>
+            </select>
           </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-5'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center'>
-                <FaArrowUp className='text-white text-sm' />
-              </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{upgradeRequests.length}</span>
-            </div>
-            <p className='text-xs text-slate-400 font-medium'>Pending Upgrades</p>
+
+          <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
+             <StatCard 
+                title="Global Revenue" 
+                value={`${stats?.totalIncome?.toLocaleString() || 0} DA`} 
+                icon={FaWallet} 
+                colorClass="bg-indigo-600"
+             />
+             <StatCard 
+                title="Platform Listings" 
+                value={stats?.inventoryStats?.reduce((acc, curr) => acc + curr.count, 0) || 0} 
+                icon={FaBuilding} 
+                colorClass="bg-slate-900" 
+             />
+             <StatCard 
+                title="Approved Bookings" 
+                value={stats?.bookingStatusCounts?.find(s => s._id === 'approved')?.count || 0} 
+                icon={FaClipboardCheck} 
+                colorClass="bg-emerald-600" 
+             />
+             <StatCard 
+                title="Pending Requests" 
+                value={stats?.bookingStatusCounts?.find(s => s._id === 'pending')?.count || 0} 
+                icon={FaClock} 
+                colorClass="bg-amber-500" 
+             />
           </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-5 col-span-2 md:col-span-1'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center'>
-                <FaClipboardList className='text-white text-sm' />
-              </div>
-              <span className='text-2xl font-extrabold text-slate-900'>{totalUsers > 0 ? users.filter(u => u.role === 'user').length : 0}</span>
-            </div>
-            <p className='text-xs text-slate-400 font-medium'>Active Sellers</p>
+
+          <div className='grid grid-cols-1 lg:grid-cols-1 gap-6 h-[400px]'>
+             <AnalyticsChart 
+                data={stats?.revenueStats || []} 
+                title="Income Trend" 
+                dataKey="income" 
+                color="#4f46e5"
+             />
           </div>
+        </div>
+
+        {/* System Management Summary */}
+        <div className='mb-6'>
+           <h2 className='text-sm font-bold text-slate-400 uppercase tracking-widest mb-4'>System Management</h2>
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-5 gap-6'>

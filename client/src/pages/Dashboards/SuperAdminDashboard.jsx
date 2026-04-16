@@ -10,6 +10,9 @@ import {
 } from 'react-icons/fa';
 import TaskModal from '../../components/TaskModal';
 import AddReviewModal from '../../components/AddReviewModal';
+import StatCard from '../../components/StatCard';
+import AnalyticsChart from '../../components/AnalyticsChart';
+import { FaWallet, FaChartLine, FaClipboardCheck, FaBuilding, FaGlobe } from 'react-icons/fa';
 
 export default function SuperAdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -32,6 +35,12 @@ export default function SuperAdminDashboard() {
   const [reviews, setReviews] = useState([]);
   const [reviewToEdit, setReviewToEdit] = useState(null);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  
+  // Analytics State
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [days, setDays] = useState(30);
+  const [selectedSeller, setSelectedSeller] = useState('all');
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -76,12 +85,25 @@ export default function SuperAdminDashboard() {
       finally { setLoadingReviews(false); }
     };
 
+    const fetchStats = async () => {
+      try {
+        setLoadingStats(true);
+        const endpoint = selectedSeller === 'all' ? '/api/stats/platform' : '/api/stats/owner';
+        const { data } = await axios.get(endpoint, { 
+          params: { days, targetId: selectedSeller === 'all' ? undefined : selectedSeller } 
+        });
+        setStats(data);
+      } catch (err) { console.log('Could not fetch stats'); }
+      finally { setLoadingStats(false); }
+    };
+
     fetchAll();
     fetchListings();
     fetchRequests();
     fetchTasks();
     fetchReviews();
-  }, [currentUser._id]);
+    fetchStats();
+  }, [currentUser._id, days, selectedSeller]);
 
   const handleApprove = async (id) => {
     try {
@@ -234,53 +256,86 @@ export default function SuperAdminDashboard() {
           reviewToEdit={reviewToEdit}
         />
 
-        {/* Stats Row */}
-        <div className='grid grid-cols-2 md:grid-cols-5 gap-3 mb-8'>
-          <div className='bg-white border border-slate-100 rounded-2xl p-4'>
-            <div className='flex items-center justify-between mb-2'>
-              <div className='w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center'>
-                <FaUsers className='text-white text-xs' />
-              </div>
-              <span className='text-xl font-extrabold text-slate-900'>{allUsers.length}</span>
+        <div className='mb-12'>
+          <div className='flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4'>
+            <h2 className='text-xl font-bold text-slate-900 flex items-center gap-2'>
+              <FaGlobe className='text-indigo-600' /> {selectedSeller === 'all' ? 'Platform Analytics' : 'Seller Analytics'}
+            </h2>
+            <div className='flex items-center gap-3'>
+              <select 
+                value={selectedSeller}
+                onChange={(e) => setSelectedSeller(e.target.value)}
+                className='text-[10px] font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer tracking-wider uppercase'
+              >
+                <option value="all">Global (All Sellers)</option>
+                {allUsers.filter(u => u.role === 'user').map(seller => (
+                  <option key={seller._id} value={seller._id}>{seller.username}</option>
+                ))}
+              </select>
+              <select 
+                value={days} 
+                onChange={(e) => setDays(e.target.value)}
+                className='text-[10px] font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer tracking-wider uppercase'
+              >
+                <option value={7}>7 Days</option>
+                <option value={30}>30 Days</option>
+                <option value={90}>90 Days</option>
+              </select>
             </div>
-            <p className='text-[11px] text-slate-400 font-medium'>All Users</p>
           </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-4'>
-            <div className='flex items-center justify-between mb-2'>
-              <div className='w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center'>
-                <FaUserShield className='text-white text-xs' />
-              </div>
-              <span className='text-xl font-extrabold text-slate-900'>{roleCount('admin')}</span>
-            </div>
-            <p className='text-[11px] text-slate-400 font-medium'>Admins</p>
+
+          <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
+             <StatCard 
+                title={selectedSeller === 'all' ? "Global Revenue" : "Seller Revenue"}
+                value={`${stats?.totalIncome?.toLocaleString() || 0} DA`} 
+                icon={FaWallet} 
+                colorClass="bg-indigo-600"
+             />
+             <StatCard 
+                title="Total Listings" 
+                value={selectedSeller === 'all' ? allListings.length : (stats?.inventoryStats?.reduce((acc, curr) => acc + curr.count, 0) || 0)} 
+                icon={FaBuilding} 
+                colorClass="bg-slate-900" 
+             />
+             <StatCard 
+                title={selectedSeller === 'all' ? "Active Sellers" : "Approved Bookings"} 
+                value={selectedSeller === 'all' ? roleCount('user') : (stats?.bookingStatusCounts?.find(s => s._id === 'approved')?.count || 0)} 
+                icon={selectedSeller === 'all' ? FaUserShield : FaClipboardCheck} 
+                colorClass={selectedSeller === 'all' ? "bg-amber-500" : "bg-emerald-600"} 
+             />
+             <StatCard 
+                title={selectedSeller === 'all' ? "Total Users" : "Pending Requests"} 
+                value={selectedSeller === 'all' ? allUsers.length : (stats?.bookingStatusCounts?.find(s => s._id === 'pending')?.count || 0)} 
+                icon={selectedSeller === 'all' ? FaUsers : FaClock} 
+                colorClass={selectedSeller === 'all' ? "bg-emerald-600" : "bg-amber-500"} 
+             />
           </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-4'>
-            <div className='flex items-center justify-between mb-2'>
-              <div className='w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center'>
-                <FaClipboardList className='text-white text-xs' />
-              </div>
-              <span className='text-xl font-extrabold text-slate-900'>{roleCount('user')}</span>
-            </div>
-            <p className='text-[11px] text-slate-400 font-medium'>Sellers</p>
+
+          <div className={`grid grid-cols-1 ${selectedSeller === 'all' ? 'lg:grid-cols-2' : 'lg:grid-cols-1'} gap-6`}>
+             <div className='h-[350px]'>
+               <AnalyticsChart 
+                  data={stats?.revenueStats || []} 
+                  title={selectedSeller === 'all' ? "Platform Income Growth" : "Seller Income Growth"} 
+                  dataKey="income" 
+                  color="#4f46e5"
+               />
+             </div>
+             {selectedSeller === 'all' && (
+               <div className='h-[350px]'>
+                 <AnalyticsChart 
+                    data={stats?.userGrowth || []} 
+                    type="bar" 
+                    title="New User Registration" 
+                    dataKey="count" 
+                    color="#10b981"
+                 />
+               </div>
+             )}
           </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-4'>
-            <div className='flex items-center justify-between mb-2'>
-              <div className='w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center'>
-                <FaDoorOpen className='text-white text-xs' />
-              </div>
-              <span className='text-xl font-extrabold text-slate-900'>{allListings.length}</span>
-            </div>
-            <p className='text-[11px] text-slate-400 font-medium'>Listings</p>
-          </div>
-          <div className='bg-white border border-slate-100 rounded-2xl p-4 col-span-2 md:col-span-1'>
-            <div className='flex items-center justify-between mb-2'>
-              <div className='w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center'>
-                <FaArrowUp className='text-white text-xs' />
-              </div>
-              <span className='text-xl font-extrabold text-slate-900'>{upgradeRequests.length}</span>
-            </div>
-            <p className='text-[11px] text-slate-400 font-medium'>Pending Upgrades</p>
-          </div>
+        </div>
+
+        <div className='mb-6'>
+           <h2 className='text-sm font-bold text-slate-400 uppercase tracking-widest mb-4'>System Assets & Management</h2>
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
@@ -381,7 +436,7 @@ export default function SuperAdminDashboard() {
               <form onSubmit={handleCreateAdmin} className='p-5 flex flex-col gap-3 relative'>
                 <input 
                   type='text' 
-                  placeholder='Username' 
+                  placeholder='Admin Name' 
                   required
                   value={newAdmin.username}
                   onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}

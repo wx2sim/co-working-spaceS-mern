@@ -10,6 +10,7 @@ import bookingRouter from './routes/booking.route.js';
 import taskRouter from './routes/task.route.js';
 import reviewRouter from './routes/review.route.js';
 import ratingRouter from './routes/rating.route.js';
+import statsRouter from './routes/stats.route.js';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
@@ -50,6 +51,7 @@ app.use('/api/booking', bookingRouter);
 app.use('/api/task', taskRouter);
 app.use('/api/review', reviewRouter);
 app.use('/api/rating', ratingRouter);
+app.use('/api/stats', statsRouter);
 
 app.use((err, req, res, next) => {
  const statusCode = err.statusCode || 500;
