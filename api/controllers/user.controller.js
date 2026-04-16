@@ -13,6 +13,12 @@ export const  user = (req, res) => {
 export const updateUser = async (req, res, next) => {
     if (req.user.id !== req.params.id)
     return next(errorHandler(401, 'You can only update your account!'));
+    
+    // Protect superadmin from being modified
+    if (req.user.role === 'superadmin') {
+      return next(errorHandler(403, 'The superadmin account cannot be modified!'));
+    }
+
     try {
     if (req.body.password) {
       req.body.password = bcryptjs.hashSync(req.body.password, 10);
@@ -38,6 +44,12 @@ export const updateUser = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   if (req.user.id !== req.params.id)
     return next(errorHandler(401, 'You can only delete your own account!'));
+
+  // Protect superadmin from being deleted
+  if (req.user.role === 'superadmin') {
+    return next(errorHandler(403, 'The superadmin account cannot be deleted!'));
+  }
+
   try {
     await User.findByIdAndDelete(req.params.id);
     res.clearCookie('access_token');

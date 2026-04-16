@@ -17,6 +17,11 @@ export const getUsers = async (req, res, next) => {
       ],
     };
 
+    // Hide superadmin from other dashboards
+    if (req.user.role !== 'superadmin') {
+      query.role = { $ne: 'superadmin' };
+    }
+
     const users = await User.find(query)
       .sort({ [sort]: order })
       .limit(limit)
