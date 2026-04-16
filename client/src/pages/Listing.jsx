@@ -68,9 +68,9 @@ export default function Listing() {
     try {
       setBookingLoading(true);
       const selectedFeatures = [];
-      if (bookingFeatures.catering) selectedFeatures.push("Catering (+$50)");
-      if (bookingFeatures.projector) selectedFeatures.push("Projector (+$20)");
-      if (bookingFeatures.extraChairs) selectedFeatures.push("Extra Chairs (+$10)");
+      if (bookingFeatures.catering) selectedFeatures.push("Catering (+50 DA)");
+      if (bookingFeatures.projector) selectedFeatures.push("Projector (+20 DA)");
+      if (bookingFeatures.extraChairs) selectedFeatures.push("Extra Chairs (+10 DA)");
 
       const payload = {
         listingId: listing._id,
@@ -213,7 +213,7 @@ export default function Listing() {
                   <div className='absolute top-3 right-3 z-10'>
                     <span className='text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-500 text-white uppercase tracking-wider shadow-lg flex items-center gap-1'>
                       <FaTag className='text-[9px]' />
-                      ${(+listing.regularPrice - +listing.discountPrice).toLocaleString('en-US')} OFF
+                      {(+listing.regularPrice - +listing.discountPrice).toLocaleString('en-US')} DA OFF
                     </span>
                   </div>
                 )}
@@ -232,16 +232,16 @@ export default function Listing() {
                   </h1>
                   <div className='flex items-baseline gap-2 mb-2'>
                     <span className='text-2xl font-extrabold text-slate-900'>
-                      ${listing.offer
+                      {listing.offer
                         ? listing.discountPrice.toLocaleString('en-US')
-                        : listing.regularPrice.toLocaleString('en-US')}
+                        : listing.regularPrice.toLocaleString('en-US')} DA
                     </span>
                     {listing.type === 'rent' && (
                       <span className='text-xs text-slate-400 font-medium'>/ month</span>
                     )}
                     {listing.offer && (
                       <span className='text-xs text-slate-400 line-through font-medium'>
-                        ${listing.regularPrice.toLocaleString('en-US')}
+                        {listing.regularPrice.toLocaleString('en-US')} DA
                       </span>
                     )}
                   </div>
@@ -386,22 +386,22 @@ export default function Listing() {
                    <div className="mb-4">
                      <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Optional Features</h4>
                      <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                       <span className="text-sm font-semibold text-slate-700">Catering Service (+$50)</span>
+                       <span className="text-sm font-semibold text-slate-700">Catering Service (+50 DA)</span>
                        <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.catering} onChange={(e) => setBookingFeatures({...bookingFeatures, catering: e.target.checked})} />
                      </label>
                      <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                       <span className="text-sm font-semibold text-slate-700">Projector Setup (+$20)</span>
+                       <span className="text-sm font-semibold text-slate-700">Projector Setup (+20 DA)</span>
                        <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.projector} onChange={(e) => setBookingFeatures({...bookingFeatures, projector: e.target.checked})} />
                      </label>
                      <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                       <span className="text-sm font-semibold text-slate-700">Extra Chairs (+$10)</span>
+                       <span className="text-sm font-semibold text-slate-700">Extra Chairs (+10 DA)</span>
                        <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.extraChairs} onChange={(e) => setBookingFeatures({...bookingFeatures, extraChairs: e.target.checked})} />
                      </label>
                    </div>
                    
                    <div className="flex justify-between items-center py-5 border-t border-slate-100 mb-4 bg-slate-50 -mx-6 px-6 shadow-inner">
                      <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Final Total</span>
-                     <span className="text-3xl font-extrabold text-slate-900">${calculateFinalPrice()}</span>
+                     <span className="text-3xl font-extrabold text-slate-900">{calculateFinalPrice()} DA</span>
                    </div>
                    
                    <div className="flex flex-col gap-3">

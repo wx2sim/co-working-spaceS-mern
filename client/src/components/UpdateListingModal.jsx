@@ -219,7 +219,7 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
                   <input type='number' id='regularPrice' min='50' max='10000000' required onChange={handleChange} value={formData.regularPrice} className='w-24 p-2 border border-slate-300 rounded-lg outline-none' />
                   <div className='flex flex-col'>
                     <span className='text-sm text-slate-700 font-medium'>Regular price</span>
-                    {formData.type === 'rent' && <span className='text-xs text-slate-500'>($ / month)</span>}
+                    {formData.type === 'rent' && <span className='text-xs text-slate-500'>(DA / month)</span>}
                   </div>
                 </div>
                 {formData.offer && (
@@ -227,7 +227,7 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
                     <input type='number' id='discountPrice' min='0' max='10000000' required onChange={handleChange} value={formData.discountPrice} className='w-24 p-2 border border-slate-300 rounded-lg outline-none' />
                     <div className='flex flex-col'>
                       <span className='text-sm text-slate-700 font-medium'>Discounted price</span>
-                      {formData.type === 'rent' && <span className='text-xs text-slate-500'>($ / month)</span>}
+                      {formData.type === 'rent' && <span className='text-xs text-slate-500'>(DA / month)</span>}
                     </div>
                   </div>
                 )}

@@ -566,7 +566,7 @@ export default function Profile() {
                           </div>
                           <div className="text-right">
                             <p className='text-sm text-slate-400'>Total Price</p>
-                            <p className='text-lg font-extrabold text-slate-900'>${space.finalPrice}</p>
+                            <p className='text-lg font-extrabold text-slate-900'>{space.finalPrice} DA</p>
                           </div>
                         </div>
 

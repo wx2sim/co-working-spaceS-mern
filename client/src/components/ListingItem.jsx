@@ -46,7 +46,8 @@ export default function ListingItem({ listing }) {
           <div className='pt-4 border-t border-neutral-500/10 dark:border-white/5 flex items-center justify-between mt-auto'>
             <div className='flex flex-col'>
               <p className='text-xl font-bold text-gray-600 dark:text-gray-300 tracking-tighter leading-none'>
-                ${listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')}
+                {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')}
+                <span className='ml-1 text-sm'>DA</span>
                 {listing.type === 'rent' && <span className='text-[10px] font-medium opacity-40 ml-0.5'>/mo</span>}
               </p>
             </div>

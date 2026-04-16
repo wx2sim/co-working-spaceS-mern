@@ -145,7 +145,7 @@ export default function ClientDashboard() {
                           <p className='text-[11px] text-slate-400 truncate'>{listing.address}</p>
                         </div>
                         <p className='text-sm font-bold text-slate-900 mt-2'>
-                          ${listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')}
+                          {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')} DA
                           {listing.type === 'rent' && <span className='text-[10px] text-slate-400 font-normal'> /mo</span>}
                         </p>
                       </div>

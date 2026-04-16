@@ -236,7 +236,7 @@ export default function UserDashboard() {
                     {/* Pricing / Type */}
                     <div className='hidden md:block text-right flex-shrink-0'>
                       <p className='text-sm font-bold text-slate-900'>
-                        ${listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')}
+                        {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')} DA
                       </p>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${listing.type === 'rent' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'
                         }`}>
@@ -302,7 +302,7 @@ export default function UserDashboard() {
                     <div className='md:w-1/3 flex flex-col justify-center'>
                       <Link to={`/listing/${booking.listing?._id}`} className='text-sm font-bold text-indigo-600 hover:underline truncate'>{booking.listing?.name}</Link>
                       <div className='mt-1 text-xs text-slate-500'>
-                        <p className="font-semibold text-slate-800">Total: ${booking.finalPrice}</p>
+                        <p className="font-semibold text-slate-800">Total: {booking.finalPrice} DA</p>
                         {booking.features?.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {booking.features.map((f, i) => <span key={i} className="bg-slate-100 text-slate-600 text-[9px] px-2 py-0.5 rounded-full">{f}</span>)}
