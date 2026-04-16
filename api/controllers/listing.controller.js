@@ -89,7 +89,9 @@ export const getListings = async (req, res, next) => {
 
     let category = req.query.category;
     if (category === undefined || category === 'all') {
-      category = { $in: ['property', 'service'] };
+      category = { $in: [null, 'property', 'service'] };
+    } else if (category === 'property') {
+      category = { $in: [null, 'property'] };
     }
 
     const searchTerm = req.query.searchTerm || '';
@@ -102,8 +104,19 @@ export const getListings = async (req, res, next) => {
       furnished,
       parking,
       type,
-      category,
     };
+
+    if (category === 'property') {
+      searchQuery.$or = [
+        { category: 'property' },
+        { category: { $exists: false } }
+      ];
+    } else if (category === 'service') {
+      searchQuery.category = 'service';
+    } else {
+      // 'all' or undefined
+      // no category filter needed or category in [property, service, undefined]
+    }
 
     if (req.query.rooms) {
       searchQuery.rooms = { $gte: parseInt(req.query.rooms) };

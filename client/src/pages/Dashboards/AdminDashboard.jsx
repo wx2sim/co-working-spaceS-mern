@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import AnimatedPage from '../../components/AnimatedPage';
 import {
   FaUsers, FaArrowUp, FaCheck, FaTimes, FaUserShield,
-  FaClipboardList, FaChevronRight, FaEnvelope, FaClock
+  FaClipboardList, FaChevronRight, FaEnvelope, FaClock, FaStar, FaEdit, FaTrash
 } from 'react-icons/fa';
 import TaskModal from '../../components/TaskModal';
 import AddReviewModal from '../../components/AddReviewModal';
@@ -24,6 +24,9 @@ export default function AdminDashboard() {
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewToEdit, setReviewToEdit] = useState(null);
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -63,9 +66,18 @@ export default function AdminDashboard() {
       finally { setLoadingTasks(false); }
     };
 
+    const fetchReviews = async () => {
+      try {
+        const { data } = await axios.get('/api/review/get');
+        setReviews(data);
+      } catch (err) { console.log('Could not fetch reviews'); }
+      finally { setLoadingReviews(false); }
+    };
+
     fetchUsers();
     fetchRequests();
     fetchTasks();
+    fetchReviews();
   }, [currentUser._id, teamTab]);
 
   const handleApprove = async (id) => {
@@ -110,6 +122,28 @@ export default function AdminDashboard() {
   const handleEditTask = (task) => {
     setTaskToEdit(task);
     setIsTaskModalOpen(true);
+  };
+
+  const handleReviewAdded = (review) => {
+    if (reviewToEdit) {
+      setReviews(reviews.map(r => r._id === review._id ? review : r));
+    } else {
+      setReviews([review, ...reviews]);
+    }
+  };
+
+  const handleDeleteReview = async (id) => {
+    if (!window.confirm('Delete this testimonial?')) return;
+    try {
+      await axios.delete(`/api/review/delete/${id}`);
+      setReviews(reviews.filter(r => r._id !== id));
+      toast.success('Review deleted');
+    } catch (err) { toast.error('Failed to delete'); }
+  };
+
+  const handleEditReview = (review) => {
+    setReviewToEdit(review);
+    setIsReviewModalOpen(true);
   };
 
   return (
@@ -160,8 +194,12 @@ export default function AdminDashboard() {
 
         <AddReviewModal 
           isOpen={isReviewModalOpen}
-          onClose={() => setIsReviewModalOpen(false)}
-          onReviewAdded={() => {}}
+          onClose={() => {
+            setIsReviewModalOpen(false);
+            setReviewToEdit(null);
+          }}
+          onReviewAdded={handleReviewAdded}
+          reviewToEdit={reviewToEdit}
         />
 
         {/* Stats */}
@@ -358,6 +396,62 @@ export default function AdminDashboard() {
                       >
                           <FaTimes className='text-[10px]' />
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Manage Reviews Section */}
+          <div className='lg:col-span-3 bg-white border border-slate-100 rounded-2xl overflow-hidden'>
+            <div className='px-6 py-5 border-b border-slate-100'>
+              <div className='flex items-center gap-2'>
+                <FaStar className='text-emerald-600 text-sm' />
+                <h2 className='text-lg font-bold text-slate-900'>Manage Testimonials</h2>
+              </div>
+              <p className='text-xs text-slate-400 mt-0.5'>Edit or remove community reviews</p>
+            </div>
+
+            {loadingReviews ? (
+              <div className='flex items-center justify-center py-12'>
+                <div className='w-7 h-7 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin'></div>
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className='py-12 text-center px-6'>
+                <p className='text-sm text-slate-400'>No reviews found.</p>
+              </div>
+            ) : (
+              <div className='divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar'>
+                {reviews.map((review) => (
+                  <div key={review._id} className='px-5 py-4 flex items-center justify-between group hover:bg-slate-50 transition-colors'>
+                    <div className='flex items-center gap-3 min-w-0 flex-1'>
+                      <img src={review.authorAvatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} alt='' className='w-8 h-8 rounded-full object-cover border border-slate-100' />
+                      <div className='min-w-0'>
+                        <p className='text-sm font-semibold text-slate-800 truncate'>{review.authorName}</p>
+                        <p className='text-[10px] text-slate-400 truncate'>{review.profession}</p>
+                      </div>
+                    </div>
+                    <div className='flex items-center gap-3'>
+                      <div className='flex text-amber-500 gap-0.5 mr-2 hidden sm:flex'>
+                        {[...Array(review.rating)].map((_, i) => <FaStar key={i} size={8} />)}
+                      </div>
+                      <div className='flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity'>
+                        <button 
+                            onClick={() => handleEditReview(review)}
+                            className='p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-900 hover:text-white transition-all'
+                            title='Edit Review'
+                        >
+                            <FaEdit className='text-[10px]' />
+                        </button>
+                        <button 
+                            onClick={() => handleDeleteReview(review._id)}
+                            className='p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all'
+                            title='Delete Review'
+                        >
+                            <FaTrash className='text-[10px]' />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

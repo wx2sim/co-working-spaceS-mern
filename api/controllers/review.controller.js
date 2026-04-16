@@ -34,3 +34,19 @@ export const deleteReview = async (req, res, next) => {
         next(error);
     }
 };
+
+export const updateReview = async (req, res, next) => {
+    try {
+        if (!['admin', 'superadmin'].includes(req.user.role)) {
+            return next(errorHandler(403, 'Only admins can update reviews'));
+        }
+        const updatedReview = await Review.findByIdAndUpdate(
+            req.params.id,
+            { $set: req.body },
+            { new: true }
+        );
+        res.status(200).json(updatedReview);
+    } catch (error) {
+        next(error);
+    }
+};

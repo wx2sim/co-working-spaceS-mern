@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export default function AddReviewModal({ isOpen, onClose, onReviewAdded }) {
+export default function AddReviewModal({ isOpen, onClose, onReviewAdded, reviewToEdit }) {
   const [formData, setFormData] = useState({
     authorName: '',
     authorAvatar: '',
@@ -12,13 +12,16 @@ export default function AddReviewModal({ isOpen, onClose, onReviewAdded }) {
   });
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { data } = await axios.post('/api/review/create', formData);
-      toast.success('Review added successfully!');
-      onReviewAdded(data);
+  useEffect(() => {
+    if (reviewToEdit) {
+      setFormData({
+        authorName: reviewToEdit.authorName || '',
+        authorAvatar: reviewToEdit.authorAvatar || '',
+        rating: reviewToEdit.rating || 5,
+        content: reviewToEdit.content || '',
+        profession: reviewToEdit.profession || ''
+      });
+    } else {
       setFormData({
         authorName: '',
         authorAvatar: '',
@@ -26,9 +29,25 @@ export default function AddReviewModal({ isOpen, onClose, onReviewAdded }) {
         content: '',
         profession: ''
       });
+    }
+  }, [reviewToEdit, isOpen]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (reviewToEdit) {
+        const { data } = await axios.put(`/api/review/update/${reviewToEdit._id}`, formData);
+        toast.success('Review updated successfully!');
+        onReviewAdded(data);
+      } else {
+        const { data } = await axios.post('/api/review/create', formData);
+        toast.success('Review added successfully!');
+        onReviewAdded(data);
+      }
       onClose();
     } catch (error) {
-      toast.error('Failed to add review');
+      toast.error(reviewToEdit ? 'Failed to update review' : 'Failed to add review');
     } finally {
       setLoading(false);
     }
@@ -38,8 +57,8 @@ export default function AddReviewModal({ isOpen, onClose, onReviewAdded }) {
 
   return (
     <div className='fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
-      <div className='bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl'>
-        <h2 className='text-2xl font-bold mb-6 text-slate-800'>Add User Testimonial</h2>
+      <div className='bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar'>
+        <h2 className='text-2xl font-bold mb-6 text-slate-800'>{reviewToEdit ? 'Edit Testimonial' : 'Add User Testimonial'}</h2>
         <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
           <div className='grid grid-cols-2 gap-4'>
             <div>
@@ -113,7 +132,7 @@ export default function AddReviewModal({ isOpen, onClose, onReviewAdded }) {
               disabled={loading}
               className='flex-1 py-3.5 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/30'
             >
-              {loading ? 'Posting...' : 'Post Review'}
+              {loading ? (reviewToEdit ? 'Updating...' : 'Posting...') : (reviewToEdit ? 'Update Review' : 'Post Review')}
             </button>
           </div>
         </form>

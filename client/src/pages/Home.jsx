@@ -12,60 +12,40 @@ import ListingItem from '../components/ListingItem';
 export default function Home() {
   SwiperCore.use([Navigation, Autoplay, EffectFade]);
   const [offerListings, setOfferListings] = useState([]);
+  const [latestListings, setLatestListings] = useState([]);
   const [rentListings, setRentListings] = useState([]);
+  const [saleListings, setSaleListings] = useState([]);
+  const [serviceListings, setServiceListings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [providers, setProviders] = useState([]);
-  const [serviceListings, setServiceListings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchOfferListings = async () => {
+    const fetchAllData = async () => {
       try {
-        const res = await axios.get('/api/listing/get?offer=true&limit=4');
-        setOfferListings(res.data);
-        fetchRentListings();
+        const [offers, latest, rent, sale, services, reviewsRes, providersRes] = await Promise.allSettled([
+          axios.get('/api/listing/get?offer=true&limit=4'),
+          axios.get('/api/listing/get?category=property&limit=4'),
+          axios.get('/api/listing/get?type=rent&category=property&limit=4'),
+          axios.get('/api/listing/get?type=sale&category=property&limit=4'),
+          axios.get('/api/listing/get?category=service&limit=4'),
+          axios.get('/api/review/get'),
+          axios.get('/api/user/top-providers')
+        ]);
+
+        if (offers.status === 'fulfilled') setOfferListings(offers.value.data);
+        if (latest.status === 'fulfilled') setLatestListings(latest.value.data);
+        if (rent.status === 'fulfilled') setRentListings(rent.value.data);
+        if (sale.status === 'fulfilled') setSaleListings(sale.value.data);
+        if (services.status === 'fulfilled') setServiceListings(services.value.data);
+        if (reviewsRes.status === 'fulfilled') setReviews(reviewsRes.value.data);
+        if (providersRes.status === 'fulfilled') setProviders(providersRes.value.data);
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching homepage data:", error);
       }
     };
-    const fetchRentListings = async () => {
-      try {
-        const res = await axios.get('/api/listing/get?type=rent&category=property&limit=4');
-        setRentListings(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    const fetchServiceListings = async () => {
-      try {
-        const res = await axios.get('/api/listing/get?category=service&limit=4');
-        setServiceListings(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    const fetchReviews = async () => {
-      try {
-        const res = await axios.get('/api/review/get');
-        setReviews(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    const fetchProviders = async () => {
-      try {
-        const res = await axios.get('/api/user/top-providers');
-        setProviders(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchOfferListings();
-    fetchRentListings();
-    fetchServiceListings();
-    fetchReviews();
-    fetchProviders();
+    fetchAllData();
   }, []);
 
   const handleSearchSubmit = (e) => {
@@ -170,41 +150,67 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Featured Offers */}
-          {offerListings && offerListings.length > 0 && (
+          {/* Latest Workspaces */}
+          {latestListings && latestListings.length > 0 && (
             <div className='mb-24'>
               <div className='flex items-end justify-between mb-8'>
                 <div>
-                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Special Offers</h2>
-                  <p className='text-slate-500'>Limited time deals on premium spaces.</p>
+                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Latest Added</h2>
+                  <p className='text-slate-500'>Explore newly listed environments.</p>
                 </div>
-                <Link to='/search?offer=true' className='text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-2 transition-colors'>
+                <Link to='/search?category=property' className='text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-2 transition-colors'>
                   See all <FaArrowRight />
                 </Link>
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
-                {offerListings.map((listing) => (
-                  <ListingItem key={listing._id} listing={listing} />
+                {latestListings.map((listing, index) => (
+                  <div key={listing._id} className={index >= 2 ? 'hidden lg:block' : 'block'}>
+                    <ListingItem listing={listing} />
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Top Rated Rent */}
+          {/* Places for Rent */}
           {rentListings && rentListings.length > 0 && (
             <div className='mb-24'>
               <div className='flex items-end justify-between mb-8'>
                 <div>
-                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Top Rated for Rent</h2>
-                  <p className='text-slate-500'>The most loved workspaces by our community.</p>
+                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Premium Rentals</h2>
+                  <p className='text-slate-500'>Flexible rental options for your team.</p>
                 </div>
                 <Link to='/search?type=rent&category=property' className='text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-2 transition-colors'>
                   See all <FaArrowRight />
                 </Link>
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
-                {rentListings.map((listing) => (
-                  <ListingItem key={listing._id} listing={listing} />
+                {rentListings.map((listing, index) => (
+                  <div key={listing._id} className={index >= 2 ? 'hidden lg:block' : 'block'}>
+                    <ListingItem listing={listing} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Places for Sale */}
+          {saleListings && saleListings.length > 0 && (
+            <div className='mb-24'>
+              <div className='flex items-end justify-between mb-8'>
+                <div>
+                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Places for Sale</h2>
+                  <p className='text-slate-500'>Invest in your own workspace.</p>
+                </div>
+                <Link to='/search?type=sale&category=property' className='text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-2 transition-colors'>
+                  See all <FaArrowRight />
+                </Link>
+              </div>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
+                {saleListings.map((listing, index) => (
+                  <div key={listing._id} className={index >= 2 ? 'hidden lg:block' : 'block'}>
+                    <ListingItem listing={listing} />
+                  </div>
                 ))}
               </div>
             </div>
@@ -223,8 +229,48 @@ export default function Home() {
                 </Link>
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
-                {serviceListings.map((listing) => (
-                  <ListingItem key={listing._id} listing={listing} />
+                {serviceListings.map((listing, index) => (
+                  <div key={listing._id} className={index >= 2 ? 'hidden lg:block' : 'block'}>
+                    <ListingItem listing={listing} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Top Rated Rent Repeating for emphasis as requested */}
+          {rentListings && rentListings.length > 0 && (
+            <div className='mb-24 pt-12 border-t border-slate-100'>
+              <div className='flex items-end justify-between mb-8'>
+                <div>
+                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500 uppercase tracking-tighter'>Top Rented Spaces</h2>
+                  <p className='text-slate-500'>The most visited and highly rated work environments.</p>
+                </div>
+              </div>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
+                {rentListings.map((listing, index) => (
+                  <div key={listing._id} className={index >= 2 ? 'hidden lg:block' : 'block'}>
+                    <ListingItem listing={listing} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Best Special Offers Repeating for emphasis as requested */}
+          {offerListings && offerListings.length > 0 && (
+            <div className='mb-24'>
+              <div className='flex items-end justify-between mb-8'>
+                <div>
+                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500 uppercase tracking-tighter'>Best Special Offers</h2>
+                  <p className='text-slate-500'>Unique opportunities and exclusive discounts.</p>
+                </div>
+              </div>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
+                {offerListings.map((listing, index) => (
+                  <div key={listing._id} className={index >= 2 ? 'hidden lg:block' : 'block'}>
+                    <ListingItem listing={listing} />
+                  </div>
                 ))}
               </div>
             </div>

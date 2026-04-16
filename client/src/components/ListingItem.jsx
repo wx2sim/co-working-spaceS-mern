@@ -35,8 +35,9 @@ export default function ListingItem({ listing }) {
             {listing.name}
           </h3>
           
-          {listing.category !== 'service' && (
-            <div className='flex items-center gap-4 mb-4 text-neutral-400 dark:text-neutral-500'>
+          <div className='flex items-center gap-4 mb-4 text-neutral-400 dark:text-neutral-500 min-h-[20px]'>
+            {listing.category !== 'service' ? (
+              <>
                 <div className='flex items-center gap-1.5'>
                   <FaDoorOpen className='text-[10px]' />
                   <span className='text-[11px] font-medium tracking-tight'>{listing.rooms || 1} Rooms</span>
@@ -45,8 +46,13 @@ export default function ListingItem({ listing }) {
                   <FaBath className='text-[10px]' />
                   <span className='text-[11px] font-medium tracking-tight'>{listing.bathrooms || 1} Baths</span>
                 </div>
-            </div>
-          )}
+              </>
+            ) : (
+              <div className='flex items-center gap-1.5'>
+                <span className='text-[11px] font-medium tracking-tight uppercase opacity-60'>Expert Service Delivery</span>
+              </div>
+            )}
+          </div>
 
           <div className='pt-4 border-t border-neutral-500/10 dark:border-white/5 flex items-center justify-between mt-auto'>
             <div className='flex flex-col'>
