@@ -59,3 +59,16 @@ export const markAsRead = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUnreadCount = async (req, res, next) => {
+  try {
+    const unreadSenders = await Message.distinct('sender', {
+      receiver: req.user.id,
+      read: false
+    });
+    
+    res.status(200).json({ count: unreadSenders.length });
+  } catch (error) {
+    next(error);
+  }
+};

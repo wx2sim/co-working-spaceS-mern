@@ -6,6 +6,7 @@ import { toggleTheme } from '../redux/theme/themeSlice';
 import { Drawer } from 'antd';
 import ProfileDropdown from './ProfileDropdown';
 import SmartButton from '../components/SmartButton';
+import axios from 'axios';
 
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
@@ -14,9 +15,28 @@ function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (currentUser) {
+      const fetchUnread = async () => {
+        try {
+          const { data } = await axios.get('/api/message/unread-count');
+          setUnreadCount(data.count || 0);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      // Fetch immediately on mount or user change
+      fetchUnread();
+      // Poll every 30 seconds for new messages
+      const interval = setInterval(fetchUnread, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,14 +54,19 @@ function Header() {
     }
   }, [location.search]);
 
-  const NavLink = ({ to, text, onClick }) => (
-    <li>
+  const NavLink = ({ to, text, onClick, badge }) => (
+    <li className='relative'>
       <Link 
         to={to} 
         onClick={onClick}
         className='text-slate-600 text-base md:text-sm font-medium transition-colors duration-300 hover:text-slate-900 relative group whitespace-nowrap block'
       >
         {text}
+        {badge > 0 && (
+          <span className="absolute -top-1.5 -right-3 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+            {badge > 9 ? '9+' : badge}
+          </span>
+        )}
         <span className='absolute left-0 -bottom-1 w-0 h-[2px] bg-slate-900 transition-all duration-300 group-hover:w-full'></span>
       </Link>
     </li>
@@ -64,7 +89,7 @@ function Header() {
         <>
           <NavLink to='/' text='Home' onClick={handleLinkClick} />
           <NavLink to='/about' text='About' onClick={handleLinkClick} />
-          <NavLink to='/schedule' text='Schedule' onClick={handleLinkClick} />
+          <NavLink to='/schedule' text='Schedule' onClick={handleLinkClick} badge={unreadCount} />
           <li>
             <SmartButton 
               actionFunction={() => { navigate('/dashboard'); handleLinkClick(); }}
@@ -84,7 +109,7 @@ function Header() {
         <NavLink to='/map' text='Map' onClick={handleLinkClick} />
         {currentUser && (
           <>
-            <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} />
+            <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} />
             <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />
           </>
         )}
