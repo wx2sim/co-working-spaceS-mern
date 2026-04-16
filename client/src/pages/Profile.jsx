@@ -14,18 +14,18 @@ import toast from 'react-hot-toast';
 import SmartButton from '../components/SmartButton.jsx';
 import SmartModal from '../components/SmartModal.jsx';
 import { Modal } from 'antd';
-import { FaArrowUp, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
+import { FaEnvelope, FaArrowUp, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
-  
+
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
-  
+
   const [bookedSpaces, setBookedSpaces] = useState([]);
   const [showBookedSpacesError, setShowBookedSpacesError] = useState(false);
   const [bookedSpacesFetched, setBookedSpacesFetched] = useState(false);
@@ -41,6 +41,9 @@ export default function Profile() {
   const [upgradeForm, setUpgradeForm] = useState({ fullName: '', businessName: '', speciality: '', phoneNumber: '' });
   const [upgradeRequests, setUpgradeRequests] = useState([]);
   const [upgradeRequestsFetched, setUpgradeRequestsFetched] = useState(false);
+
+  const [contactMessage, setContactMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -71,8 +74,8 @@ export default function Profile() {
     const fileName = new Date().getTime() + file.name;
     const storageRef = ref(storage, fileName);
     const uploadTask = uploadBytesResumable(storageRef, file);
-    
-    uploadTask.on('state_changed', 
+
+    uploadTask.on('state_changed',
       (snapshot) => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setFilePerc(Math.round(progress));
@@ -244,17 +247,40 @@ export default function Profile() {
     }
   };
 
+  const handleContactAdmin = async (e) => {
+    e.preventDefault();
+    if (!contactMessage.trim()) return toast.error('Please enter a message');
+    setSendingMessage(true);
+    try {
+      const { data: adminData } = await axios.get('/api/admin/support-admin');
+      if (!adminData || !adminData._id) throw new Error('No admin found');
+
+      await axios.post('/api/message/send', {
+        receiverId: adminData._id,
+        content: contactMessage
+      });
+
+      toast.success('Message sent to SuperAdmin successfully!');
+      setContactMessage('');
+      navigate('/schedule'); // Redirect to inbox to see the thread
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send message to SuperAdmin');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
   if (!currentUser) return null;
 
   return (
     <div className='min-h-screen pt-28 pb-10 px-4 max-w-6xl mx-auto'>
       <div className='bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-[400px]'>
-        
+
         <div className='w-full md:w-5/12 p-8 sm:p-10 flex flex-col'>
           <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>
             {currentUser.role === 'admin' ? 'Account Details' : 'Profile Setup'}
           </h1>
-          
+
           {currentUser.role === 'admin' ? (
             <div className='flex flex-col gap-5 flex-grow mt-4'>
               <div className='flex flex-col items-center mb-6'>
@@ -267,12 +293,12 @@ export default function Profile() {
                   Administrator
                 </span>
               </div>
-              
+
               <div className='flex flex-col gap-1'>
                 <label className='text-xs font-medium text-slate-500 ml-1'>Username</label>
                 <input type='text' disabled value={currentUser.username} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 cursor-not-allowed' />
               </div>
-              
+
               <div className='flex flex-col gap-1'>
                 <label className='text-xs font-medium text-slate-500 ml-1'>Email</label>
                 <input type='email' disabled value={currentUser.email} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 cursor-not-allowed' />
@@ -283,6 +309,32 @@ export default function Profile() {
                   Your account details and password are strictly managed by the Super Admin.
                 </p>
               </div>
+
+              <div className='mt-2 pt-4 border-t border-slate-100'>
+                <h3 className='text-sm font-bold text-slate-900 mb-3 flex items-center gap-2'>
+                  <FaEnvelope className='text-indigo-600' />
+                  Contact SuperAdmin Support
+                </h3>
+                <form onSubmit={handleContactAdmin} className='flex flex-col gap-2'>
+                  <textarea
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 resize-none h-20'
+                    placeholder='Inquire about an issue or request support...'
+                    value={contactMessage}
+                    onChange={(e) => setContactMessage(e.target.value)}
+                  />
+                  <button
+                    type='submit'
+                    disabled={sendingMessage}
+                    className='w-full bg-slate-900 text-white font-medium py-2 rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-70 text-xs mt-1'
+                  >
+                    {sendingMessage ? 'Sending...' : 'Send Message to SuperAdmin'}
+                  </button>
+                </form>
+              </div>
+
+              <Link to='/schedule' className='mt-2 flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm'>
+                <FaEnvelope /> Direct Messages Inbox
+              </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className='flex flex-col gap-5 flex-grow mt-4'>
@@ -302,7 +354,7 @@ export default function Profile() {
               <input type='text' placeholder='Username' id='username' defaultValue={currentUser.username} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
               <input type='email' placeholder='Email' id='email' defaultValue={currentUser.email} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
               <input type='password' placeholder='New Password (Optional)' id='password' onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
-              
+
               <div className='pt-2 flex flex-col gap-3'>
                 <button disabled={loading} className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all disabled:opacity-70 text-sm'>
                   {loading ? 'Saving...' : 'Save Changes'}
@@ -313,22 +365,23 @@ export default function Profile() {
 
           <div className={`flex items-center mt-6 pt-4 border-t border-slate-100 ${currentUser.role === 'admin' ? 'justify-end' : 'justify-between'}`}>
             {currentUser.role !== 'admin' && (
-              <SmartModal 
+              <SmartModal
                 triggerText="Delete Account" triggerColorClass="!bg-transparent !text-red-500 hover:!bg-red-50 !font-semibold text-sm px-4 py-2 rounded-lg transition-colors"
                 modalTitle="Delete Account" modalContent="Are you absolutely sure? This action cannot be undone."
-                cancelColorClass="!bg-white text-slate-700 hover:!bg-slate-100" okText="Yes, Delete" okColorClass="bg-red-600 !text-white hover:!bg-red-700" onOkAction={handleDeleteUser} 
+                cancelColorClass="!bg-white text-slate-700 hover:!bg-slate-100" okText="Yes, Delete" okColorClass="bg-red-600 !text-white hover:!bg-red-700" onOkAction={handleDeleteUser}
               />
             )}
             <button onClick={handleSignOut} className='text-slate-500 hover:text-slate-800 font-semibold text-sm px-4 py-2 transition-colors'>
               Sign Out
             </button>
           </div>
+
         </div>
 
         <div className='hidden md:block w-px bg-slate-100 my-10'></div>
 
         <div className='w-full md:w-7/12 p-8 sm:p-10 bg-slate-50/50 flex flex-col'>
-          
+
           {currentUser.role === 'admin' ? (
             <>
               {/* Tab Headers for Admin */}
@@ -337,20 +390,20 @@ export default function Profile() {
                   <h2 className='text-2xl font-bold text-slate-900'>My Team</h2>
                   <p className='text-sm text-slate-500'>Manage your assigned users</p>
                 </div>
-                
+
                 <div className='flex items-center gap-3'>
-                  <SmartButton 
+                  <SmartButton
                     actionFunction={handleShowUpgradeRequests}
                     colorClass="!bg-gradient-to-r !from-indigo-600 !to-violet-600 !text-white hover:!from-indigo-700 hover:!to-violet-700 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
                     text={upgradeRequestsFetched ? 'Hide Requests' : 'Upgrade Requests'}
                     showAlert={false}
                   />
-                  <SmartButton 
+                  <SmartButton
                     actionFunction={handleShowAdminUsers}
                     colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
                     text={adminUsersFetched ? "Hide Users" : "Show Users"}
                     showAlert={false}
-                  /> 
+                  />
                 </div>
               </div>
 
@@ -443,10 +496,10 @@ export default function Profile() {
                     ))}
                   </div>
                 )}
-                
+
                 {!adminUsersFetched && !upgradeRequestsFetched && (
                   <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
-                     <p className='text-sm text-slate-500'>Click "Show Users" to view your team members.</p>
+                    <p className='text-sm text-slate-500'>Click "Show Users" to view your team members.</p>
                   </div>
                 )}
               </div>
@@ -458,14 +511,14 @@ export default function Profile() {
                   <h2 className='text-2xl font-bold text-slate-900'>My Booked Spaces</h2>
                   <p className='text-sm text-slate-500'>Check your reserved workspaces</p>
                 </div>
-                
+
                 <div className='flex items-center gap-3'>
-                  <SmartButton 
+                  <SmartButton
                     actionFunction={handleShowBookedSpaces}
                     colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
                     text={bookedSpacesFetched ? "Hide Bookings" : "Check Bookings"}
                     showAlert={false}
-                  /> 
+                  />
                 </div>
               </div>
 
@@ -474,7 +527,7 @@ export default function Profile() {
 
                 {bookedSpacesFetched && bookedSpaces.length === 0 && !showBookedSpacesError && (
                   <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
-                    <img src="/images/empty-calendar.svg" alt="No booked spaces" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display='none'} />
+                    <img src="/images/empty-calendar.svg" alt="No booked spaces" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display = 'none'} />
                     <p className='text-lg font-semibold text-slate-700'>No spaces booked yet</p>
                     <p className='text-sm text-slate-500 mb-4'>You haven't reserved any workspaces.</p>
                     <Link to='/search' className='text-slate-900 font-semibold hover:underline text-sm'>
@@ -489,31 +542,31 @@ export default function Profile() {
                       <div key={space._id} className='bg-white border border-slate-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-md transition-shadow relative overflow-hidden'>
                         {/* Status bar atop card */}
                         <div className={`absolute top-0 left-0 w-full h-1 ${space.status === 'approved' ? 'bg-emerald-500' : space.status === 'rejected' ? 'bg-red-500' : 'bg-amber-400'}`}></div>
-                        
+
                         <div className='flex justify-between items-start'>
-                           <div className="flex gap-4">
-                             <img src={space.listing?.imageUrls?.[0] || 'https://via.placeholder.com/150'} className="w-16 h-16 rounded-xl object-cover bg-slate-100" />
-                             <div>
-                               <Link to={`/listing/${space.listing?._id}`} className='font-bold text-slate-800 hover:text-indigo-600 truncate'>{space.listing?.name || 'Workspace'}</Link>
-                               <p className='text-xs text-slate-500 mb-1'>{space.listing?.address}</p>
-                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${space.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : space.status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
-                                 {space.status === 'pending' ? 'Waiting to be confirmed' : space.status}
-                               </span>
-                             </div>
-                           </div>
-                           <div className="text-right">
-                             <p className='text-sm text-slate-400'>Total Price</p>
-                             <p className='text-lg font-extrabold text-slate-900'>${space.finalPrice}</p>
-                           </div>
+                          <div className="flex gap-4">
+                            <img src={space.listing?.imageUrls?.[0] || 'https://via.placeholder.com/150'} className="w-16 h-16 rounded-xl object-cover bg-slate-100" />
+                            <div>
+                              <Link to={`/listing/${space.listing?._id}`} className='font-bold text-slate-800 hover:text-indigo-600 truncate'>{space.listing?.name || 'Workspace'}</Link>
+                              <p className='text-xs text-slate-500 mb-1'>{space.listing?.address}</p>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${space.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : space.status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
+                                {space.status === 'pending' ? 'Waiting to be confirmed' : space.status}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className='text-sm text-slate-400'>Total Price</p>
+                            <p className='text-lg font-extrabold text-slate-900'>${space.finalPrice}</p>
+                          </div>
                         </div>
-                        
+
                         {(space.features && space.features.length > 0) && (
                           <div className='pt-3 border-t border-slate-50'>
                             <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1.5">Activated Features</p>
                             <div className="flex flex-wrap gap-1.5">
-                               {space.features.map(f => (
-                                 <span key={f} className="text-xs bg-slate-50 text-slate-600 border border-slate-100 px-2.5 py-1 rounded-md">{f}</span>
-                               ))}
+                              {space.features.map(f => (
+                                <span key={f} className="text-xs bg-slate-50 text-slate-600 border border-slate-100 px-2.5 py-1 rounded-md">{f}</span>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -524,10 +577,10 @@ export default function Profile() {
                     ))}
                   </div>
                 )}
-                
+
                 {!bookedSpacesFetched && (
                   <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
-                     <p className='text-sm text-slate-500'>Click "Check Bookings" to view your reserved spaces.</p>
+                    <p className='text-sm text-slate-500'>Click "Check Bookings" to view your reserved spaces.</p>
                   </div>
                 )}
               </div>
@@ -620,7 +673,7 @@ export default function Profile() {
             </>
           ) : (
             <div className='flex flex-col items-center justify-center text-center h-full opacity-70'>
-              <img src="https://cdn-icons-png.flaticon.com/512/9908/9908191.png" alt="Dashboard" className="w-24 h-24 mb-6 opacity-40 grayscale" onError={(e) => e.target.style.display='none'} />
+              <img src="https://cdn-icons-png.flaticon.com/512/9908/9908191.png" alt="Dashboard" className="w-24 h-24 mb-6 opacity-40 grayscale" onError={(e) => e.target.style.display = 'none'} />
               <h2 className='text-3xl font-bold text-slate-800 mb-2'>Workspace Management Moved</h2>
               <p className='text-sm text-slate-500 mb-8 max-w-sm mx-auto'>
                 All your listings, creation tools, and workspace management are now centralized in your dedicated Seller Dashboard.

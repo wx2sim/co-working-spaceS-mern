@@ -1,4 +1,5 @@
 import Message from '../models/message.model.js';
+import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
 
 export const sendMessage = async (req, res, next) => {
@@ -24,9 +25,12 @@ export const sendMessage = async (req, res, next) => {
 
 export const getMessages = async (req, res, next) => {
   try {
-    // Get messages where the current user is either sender or receiver
+    // Get messages where the current user is either sender or receiver and hasn't deleted them
     const messages = await Message.find({
-      $or: [{ sender: req.user.id }, { receiver: req.user.id }]
+      $and: [
+        { $or: [{ sender: req.user.id }, { receiver: req.user.id }] },
+        { deletedBy: { $ne: req.user.id } }
+      ]
     })
     .populate('sender', 'username avatar email')
     .populate('receiver', 'username avatar email')
@@ -68,6 +72,46 @@ export const getUnreadCount = async (req, res, next) => {
     });
     
     res.status(200).json({ count: unreadSenders.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteConversation = async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+    const userId = req.user.id;
+
+    const currentUser = await User.findById(userId);
+    const contactUser = await User.findById(contactId);
+
+    if (!currentUser || !contactUser) {
+        return next(errorHandler(404, 'User not found'));
+    }
+
+    const isCurrentAdminType = ['admin', 'superadmin'].includes(currentUser.role);
+    const isContactAdminType = ['admin', 'superadmin'].includes(contactUser.role);
+
+    // "except admin -superadmin messages"
+    if (isCurrentAdminType && isContactAdminType) {
+      return next(errorHandler(403, 'Conversations between administrators cannot be deleted.'));
+    }
+
+    const messages = await Message.find({
+      $or: [
+        { sender: userId, receiver: contactId },
+        { sender: contactId, receiver: userId }
+      ]
+    });
+
+    for (let msg of messages) {
+       if (!msg.deletedBy.includes(userId)) {
+           msg.deletedBy.push(userId);
+           await msg.save();
+       }
+    }
+
+    res.status(200).json({ success: true, message: 'Conversation deleted from your view.' });
   } catch (error) {
     next(error);
   }

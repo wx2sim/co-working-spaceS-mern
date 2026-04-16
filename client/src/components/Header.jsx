@@ -16,7 +16,7 @@ function Header() {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,8 +56,8 @@ function Header() {
 
   const NavLink = ({ to, text, onClick, badge }) => (
     <li className='relative'>
-      <Link 
-        to={to} 
+      <Link
+        to={to}
         onClick={onClick}
         className='text-slate-600 text-base md:text-sm font-medium transition-colors duration-300 hover:text-slate-900 relative group whitespace-nowrap block'
       >
@@ -91,7 +91,7 @@ function Header() {
           <NavLink to='/about' text='About' onClick={handleLinkClick} />
           <NavLink to='/schedule' text='Schedule' onClick={handleLinkClick} badge={unreadCount} />
           <li>
-            <SmartButton 
+            <SmartButton
               actionFunction={() => { navigate('/dashboard'); handleLinkClick(); }}
               colorClass="!bg-slate-900 !text-white hover:!bg-slate-800 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all w-full md:w-auto"
               text="Dashboard"
@@ -120,7 +120,7 @@ function Header() {
   return (
     <header className='fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300'>
       <div className='flex justify-between items-center max-w-6xl mx-auto p-4'>
-        
+
         <div className='flex items-center gap-3 shrink-0'>
           {!isSearchExpanded && (
             <button className='md:hidden text-slate-600 hover:text-slate-900 transition-colors' onClick={() => setIsDrawerOpen(true)}>
@@ -171,8 +171,8 @@ function Header() {
               </button>
             )}
 
-            <button 
-              onClick={() => dispatch(toggleTheme())} 
+            <button
+              onClick={() => dispatch(toggleTheme())}
               className='w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:shadow-md transition-all'
             >
               {theme === 'light' ? <FaMoon size={16} /> : <FaSun size={16} />}
@@ -181,7 +181,7 @@ function Header() {
             <ProfileDropdown currentUser={currentUser} />
           </div>
         )}
-        
+
       </div>
 
       <Drawer
@@ -189,7 +189,7 @@ function Header() {
         placement="left"
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
-        width={260}
+        size={260}
       >
         <ul className="flex flex-col gap-6 mt-4">
           {renderLinks(true)}

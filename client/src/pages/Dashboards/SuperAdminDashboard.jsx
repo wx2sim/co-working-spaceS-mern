@@ -6,8 +6,9 @@ import toast from 'react-hot-toast';
 import AnimatedPage from '../../components/AnimatedPage';
 import {
   FaUsers, FaCrown, FaArrowUp, FaCheck, FaTimes, FaChevronRight,
-  FaClipboardList, FaUserShield, FaDoorOpen, FaEnvelope, FaSearch
+  FaClipboardList, FaUserShield, FaDoorOpen, FaEnvelope, FaSearch, FaClock
 } from 'react-icons/fa';
+import TaskModal from '../../components/TaskModal';
 
 export default function SuperAdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -19,6 +20,13 @@ export default function SuperAdminDashboard() {
   const [loadingRequests, setLoadingRequests] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+
+  const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '' });
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [taskToEdit, setTaskToEdit] = useState(null);
+  const [loadingTasks, setLoadingTasks] = useState(true);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -47,9 +55,18 @@ export default function SuperAdminDashboard() {
       finally { setLoadingRequests(false); }
     };
 
+    const fetchTasks = async () => {
+      try {
+        const { data } = await axios.get('/api/task/all');
+        setTasks(data);
+      } catch (err) { console.log('Could not fetch tasks'); }
+      finally { setLoadingTasks(false); }
+    };
+
     fetchAll();
     fetchListings();
     fetchRequests();
+    fetchTasks();
   }, [currentUser._id]);
 
   const handleApprove = async (id) => {
@@ -86,6 +103,45 @@ export default function SuperAdminDashboard() {
     return matchesSearch && matchesRole;
   });
 
+  const handleCreateAdmin = async (e) => {
+    e.preventDefault();
+    setCreatingAdmin(true);
+    try {
+      const { data } = await axios.post('/api/admin/create-admin', newAdmin);
+      toast.success('Admin created successfully!');
+      setAllUsers([data, ...allUsers]);
+      setNewAdmin({ username: '', email: '', password: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create admin');
+    } finally {
+      setCreatingAdmin(false);
+    }
+  };
+
+  const handleTaskCreated = (newTask) => {
+    if (taskToEdit) {
+      setTasks(tasks.map(t => t._id === newTask._id ? newTask : t));
+    } else {
+      setTasks([newTask, ...tasks]);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await axios.delete(`/api/task/delete/${taskId}`);
+      setTasks(tasks.filter(t => t._id !== taskId));
+      toast.success('Task deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete task');
+    }
+  };
+
+  const handleEditTask = (task) => {
+    setTaskToEdit(task);
+    setIsTaskModalOpen(true);
+  };
+
   return (
     <AnimatedPage>
       <div className='min-h-screen pt-24 pb-10 px-4 max-w-6xl mx-auto'>
@@ -100,13 +156,31 @@ export default function SuperAdminDashboard() {
             <h1 className='text-3xl font-extrabold text-slate-900'>System Overview</h1>
             <p className='text-slate-500 font-light mt-1'>Full control over the platform.</p>
           </div>
-          <Link
-            to='/profile'
-            className='text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1 self-start sm:self-auto'
-          >
-            Settings <FaChevronRight className='text-[10px]' />
-          </Link>
+          <div className='flex items-center gap-3 self-start sm:self-auto'>
+            <button 
+              onClick={() => setIsTaskModalOpen(true)}
+              className='text-xs font-bold bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition-all flex items-center gap-2 shadow-sm'
+            >
+              <FaClock size={12} /> Create Task
+            </button>
+            <Link
+              to='/profile'
+              className='text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1'
+            >
+              Settings <FaChevronRight className='text-[10px]' />
+            </Link>
+          </div>
         </div>
+
+        <TaskModal 
+            isOpen={isTaskModalOpen} 
+            onClose={() => {
+                setIsTaskModalOpen(false);
+                setTaskToEdit(null);
+            }} 
+            onTaskCreated={handleTaskCreated} 
+            taskToEdit={taskToEdit}
+        />
 
         {/* Stats Row */}
         <div className='grid grid-cols-2 md:grid-cols-5 gap-3 mb-8'>
@@ -244,6 +318,49 @@ export default function SuperAdminDashboard() {
           {/* Right Column */}
           <div className='flex flex-col gap-5'>
 
+            {/* Create Admin Form */}
+            <div className='bg-indigo-600 text-white border border-indigo-500 rounded-2xl overflow-hidden shadow-lg shadow-indigo-600/20'>
+              <div className='px-5 py-4 border-b border-indigo-500/50'>
+                <div className='flex items-center gap-2'>
+                  <FaUserShield className='text-indigo-200 text-xs' />
+                  <h3 className='text-sm font-bold'>Add New Admin</h3>
+                </div>
+              </div>
+              <form onSubmit={handleCreateAdmin} className='p-5 flex flex-col gap-3 relative'>
+                <input 
+                  type='text' 
+                  placeholder='Username' 
+                  required
+                  value={newAdmin.username}
+                  onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}
+                  className='bg-indigo-700/50 border border-indigo-500 text-white placeholder-indigo-300 text-xs rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-white transition-all w-full'
+                />
+                <input 
+                  type='email' 
+                  placeholder='Email Address' 
+                  required
+                  value={newAdmin.email}
+                  onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
+                  className='bg-indigo-700/50 border border-indigo-500 text-white placeholder-indigo-300 text-xs rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-white transition-all w-full'
+                />
+                <input 
+                  type='password' 
+                  placeholder='Password' 
+                  required
+                  value={newAdmin.password}
+                  onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
+                  className='bg-indigo-700/50 border border-indigo-500 text-white placeholder-indigo-300 text-xs rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-white transition-all w-full'
+                />
+                <button 
+                  type='submit' 
+                  disabled={creatingAdmin}
+                  className='bg-white text-indigo-700 font-bold text-xs py-2.5 rounded-lg hover:bg-slate-100 transition-colors mt-1 disabled:opacity-70 flex items-center justify-center'
+                >
+                  {creatingAdmin ? 'Creating...' : 'Register Admin Account'}
+                </button>
+              </form>
+            </div>
+
             {/* Pending Upgrades */}
             <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden'>
               <div className='px-5 py-4 border-b border-slate-100'>
@@ -318,6 +435,52 @@ export default function SuperAdminDashboard() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Manage Tasks Section */}
+          <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden'>
+            <div className='px-5 py-4 border-b border-slate-100'>
+              <div className='flex items-center gap-2'>
+                <FaClock className='text-indigo-600 text-xs' />
+                <h3 className='text-sm font-bold text-slate-900'>System Tasks</h3>
+              </div>
+            </div>
+            {loadingTasks ? (
+              <div className='flex items-center justify-center py-8'>
+                <div className='w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin'></div>
+              </div>
+            ) : tasks.length === 0 ? (
+              <div className='py-8 text-center px-4'>
+                <p className='text-xs text-slate-400'>No tasks created yet.</p>
+              </div>
+            ) : (
+              <div className='divide-y divide-slate-50 max-h-[300px] overflow-y-auto custom-scrollbar'>
+                {tasks.map((task) => (
+                  <div key={task._id} className='px-4 py-3 flex items-center justify-between group hover:bg-slate-50 transition-colors'>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-xs font-semibold text-slate-800 truncate'>{task.title}</p>
+                      <p className='text-[10px] text-slate-400'>{task.date} • {task.time}</p>
+                    </div>
+                    <div className='flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity'>
+                      <button 
+                          onClick={() => handleEditTask(task)}
+                          className='w-7 h-7 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all'
+                          title='Edit Task'
+                      >
+                          <FaCheck className='text-[10px]' /> 
+                      </button>
+                      <button 
+                          onClick={() => handleDeleteTask(task._id)}
+                          className='w-7 h-7 bg-red-50 text-red-600 rounded-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition-all'
+                          title='Delete Task'
+                      >
+                          <FaTimes className='text-[10px]' />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

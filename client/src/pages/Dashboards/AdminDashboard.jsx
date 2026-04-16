@@ -6,8 +6,9 @@ import toast from 'react-hot-toast';
 import AnimatedPage from '../../components/AnimatedPage';
 import {
   FaUsers, FaArrowUp, FaCheck, FaTimes, FaUserShield,
-  FaClipboardList, FaChevronRight, FaEnvelope
+  FaClipboardList, FaChevronRight, FaEnvelope, FaClock
 } from 'react-icons/fa';
+import TaskModal from '../../components/TaskModal';
 
 export default function AdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -16,15 +17,24 @@ export default function AdminDashboard() {
   const [upgradeRequests, setUpgradeRequests] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(true);
+  const [teamTab, setTeamTab] = useState('user');
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [taskToEdit, setTaskToEdit] = useState(null);
+  const [loadingTasks, setLoadingTasks] = useState(true);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const { data } = await axios.get(`/api/admin/users/${currentUser._id}`, {
-          params: { limit: 5, sort: 'activityScore', order: 'desc' }
+          params: { limit: 5, sort: 'activityScore', order: 'desc', roleFilter: teamTab }
         });
         setUsers(data.users || []);
-        setTotalUsers(data.totalUsers || 0);
+        // Only set totalUsers if we don't have it, or fetch it separately so it reflects total.
+        // But since we want to know total active sellers and clients, let's keep it simple.
+        if (teamTab === 'user') {
+           setTotalUsers(data.totalUsers || 0);
+        }
       } catch (err) {
         console.log('Could not fetch users');
       } finally {
@@ -43,9 +53,18 @@ export default function AdminDashboard() {
       }
     };
 
+    const fetchTasks = async () => {
+      try {
+        const { data } = await axios.get('/api/task/all');
+        setTasks(data);
+      } catch (err) { console.log('Could not fetch tasks'); }
+      finally { setLoadingTasks(false); }
+    };
+
     fetchUsers();
     fetchRequests();
-  }, [currentUser._id]);
+    fetchTasks();
+  }, [currentUser._id, teamTab]);
 
   const handleApprove = async (id) => {
     try {
@@ -67,6 +86,30 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleTaskCreated = (newTask) => {
+    if (taskToEdit) {
+      setTasks(tasks.map(t => t._id === newTask._id ? newTask : t));
+    } else {
+      setTasks([newTask, ...tasks]);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await axios.delete(`/api/task/delete/${taskId}`);
+      setTasks(tasks.filter(t => t._id !== taskId));
+      toast.success('Task deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete task');
+    }
+  };
+
+  const handleEditTask = (task) => {
+    setTaskToEdit(task);
+    setIsTaskModalOpen(true);
+  };
+
   return (
     <AnimatedPage>
       <div className='min-h-screen pt-24 pb-10 px-4 max-w-6xl mx-auto'>
@@ -81,13 +124,31 @@ export default function AdminDashboard() {
             <h1 className='text-3xl font-extrabold text-slate-900'>Admin Dashboard</h1>
             <p className='text-slate-500 font-light mt-1'>Manage users and upgrade requests.</p>
           </div>
-          <Link
-            to='/profile'
-            className='text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1 self-start sm:self-auto'
-          >
-            Account Settings <FaChevronRight className='text-[10px]' />
-          </Link>
+          <div className='flex items-center gap-3 self-start sm:self-auto'>
+            <button 
+              onClick={() => setIsTaskModalOpen(true)}
+              className='text-xs font-bold bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-sm'
+            >
+              <FaClock size={12} /> Create Task
+            </button>
+            <Link
+              to='/profile'
+              className='text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1'
+            >
+              Account Settings <FaChevronRight className='text-[10px]' />
+            </Link>
+          </div>
         </div>
+
+        <TaskModal 
+            isOpen={isTaskModalOpen} 
+            onClose={() => {
+                setIsTaskModalOpen(false);
+                setTaskToEdit(null);
+            }} 
+            onTaskCreated={handleTaskCreated} 
+            taskToEdit={taskToEdit}
+        />
 
         {/* Stats */}
         <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mb-8'>
@@ -188,7 +249,10 @@ export default function AdminDashboard() {
             <div className='px-6 py-5 border-b border-slate-100 flex items-center justify-between'>
               <div>
                 <h2 className='text-lg font-bold text-slate-900'>Team Members</h2>
-                <p className='text-xs text-slate-400'>Users assigned to your management</p>
+                <div className="flex gap-4 mt-2">
+                  <button onClick={() => setTeamTab('user')} className={`text-xs font-bold ${teamTab === 'user' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400'}`}>Sellers</button>
+                  <button onClick={() => setTeamTab('client')} className={`text-xs font-bold ${teamTab === 'client' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400'}`}>Clients</button>
+                </div>
               </div>
               <Link to='/admin/users' className='text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors'>
                 Manage All Users →
@@ -232,6 +296,54 @@ export default function AdminDashboard() {
                         {user.role === 'user' ? 'Seller' : user.role}
                       </span>
                       <p className='text-[9px] text-slate-400 font-bold'>Score: {user.activityScore || 0}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Manage Tasks Section */}
+          <div className='lg:col-span-2 bg-white border border-slate-100 rounded-2xl overflow-hidden'>
+            <div className='px-6 py-5 border-b border-slate-100'>
+              <div className='flex items-center gap-2'>
+                <FaClock className='text-indigo-600 text-sm' />
+                <h2 className='text-lg font-bold text-slate-900'>My Tasks</h2>
+              </div>
+              <p className='text-xs text-slate-400 mt-0.5'>Edit or remove system assignments</p>
+            </div>
+
+            {loadingTasks ? (
+              <div className='flex items-center justify-center py-12'>
+                <div className='w-7 h-7 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin'></div>
+              </div>
+            ) : tasks.length === 0 ? (
+              <div className='py-12 text-center px-6'>
+                <p className='text-sm text-slate-400'>No tasks made yet.</p>
+              </div>
+            ) : (
+              <div className='divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar'>
+                {tasks.map((task) => (
+                  <div key={task._id} className='px-5 py-4 flex items-center justify-between group hover:bg-slate-50 transition-colors'>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-sm font-semibold text-slate-800 truncate'>{task.title}</p>
+                      <p className='text-[11px] text-slate-400'>{task.date} • {task.time}</p>
+                    </div>
+                    <div className='flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity'>
+                      <button 
+                          onClick={() => handleEditTask(task)}
+                          className='p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-900 hover:text-white transition-all'
+                          title='Edit Task'
+                      >
+                          <FaCheck className='text-[10px]' />
+                      </button>
+                      <button 
+                          onClick={() => handleDeleteTask(task._id)}
+                          className='p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all'
+                          title='Delete Task'
+                      >
+                          <FaTimes className='text-[10px]' />
+                      </button>
                     </div>
                   </div>
                 ))}

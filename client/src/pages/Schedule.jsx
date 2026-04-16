@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import TaskModal from '../components/TaskModal';
 
 export default function Schedule() {
   const { currentUser } = useSelector((state) => state.user);
@@ -14,11 +15,9 @@ export default function Schedule() {
   const [activeContactId, setActiveContactId] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // Dummy data for upcoming events
-  const upcomingEvents = [
-    { id: 1, title: 'Workspace Maintenance Check', date: 'Oct 25, 2024', time: '08:00 AM - 09:00 AM', status: 'Pending' },
-    { id: 2, title: 'Freelancer Network Event', date: 'Oct 28, 2024', time: '05:00 PM - 09:00 PM', status: 'Confirmed' }
-  ];
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', date: '', time: '' });
 
   const fetchMessages = async () => {
     try {
@@ -31,8 +30,18 @@ export default function Schedule() {
     }
   };
 
+  const fetchTasks = async () => {
+    try {
+      const { data } = await axios.get('/api/task/all');
+      setUpcomingEvents(data);
+    } catch (error) {
+      console.log('Failed to fetch tasks');
+    }
+  };
+
   useEffect(() => {
     fetchMessages();
+    fetchTasks();
   }, []);
 
   // Scroll to bottom when thread changes or new message
@@ -108,6 +117,31 @@ export default function Schedule() {
          } catch(e) {}
        }
        fetchMessages();
+    }
+  };
+
+  const handleDeleteConversation = async () => {
+    if (!activeContactId) return;
+    try {
+      await axios.delete(`/api/message/conversation/${activeContactId}`);
+      toast.success('Conversation has been deleted from your inbox.');
+      setActiveContactId(null);
+      fetchMessages();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete conversation');
+    }
+  };
+
+  const handleTaskCreated = (task) => {
+    setUpcomingEvents([task, ...upcomingEvents]);
+  };
+
+  const handleMarkTaskDone = async (taskId) => {
+    try {
+      const { data } = await axios.put(`/api/task/update/${taskId}`, { status: 'Done' });
+      setUpcomingEvents(upcomingEvents.map(ev => ev._id === taskId ? data : ev));
+    } catch (error) {
+      toast.error('Failed to mark task as done');
     }
   };
 
@@ -199,6 +233,9 @@ export default function Schedule() {
                             )}
                           </div>
                         </div>
+                        <button onClick={handleDeleteConversation} className="text-[11px] font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors border border-transparent hover:border-red-100">
+                          Delete Conversation
+                        </button>
                       </div>
                       
                       {/* Chat History */}
@@ -261,23 +298,40 @@ export default function Schedule() {
           </div>
 
           {/* Upcoming Snapshot Overview */}
-          <div className='flex flex-col gap-6 lg:h-[600px]'>
-            <div className='bg-slate-900 rounded-3xl p-6 text-white shadow-lg overflow-hidden relative'>
-              <div className='absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-[0.03] rounded-full -mr-10 -mt-10'></div>
-              <h3 className='text-lg font-bold mb-6 flex items-center gap-2 relative z-10'>
-                <FaClock className='text-indigo-400' /> Upcoming Week
-              </h3>
-              
-              <div className='flex flex-col gap-4 relative z-10 custom-scrollbar overflow-y-auto max-h-[300px]'>
-                {upcomingEvents.map(event => (
-                  <div key={event.id} className='bg-slate-800/50 hover:bg-slate-800 transition-colors rounded-2xl p-4 border border-slate-700/50 backdrop-blur-md'>
+          {currentUser?.role !== 'client' && (
+            <div className='flex flex-col gap-6 lg:h-[600px]'>
+              <div className='bg-slate-900 rounded-3xl p-6 text-white shadow-lg overflow-hidden relative'>
+                <div className='absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-[0.03] rounded-full -mr-10 -mt-10'></div>
+                <div className='flex items-center justify-between mb-6 relative z-10'>
+                  <h3 className='text-lg font-bold flex items-center gap-2'>
+                    <FaClock className='text-indigo-400' /> Upcoming Week
+                  </h3>
+                  {['admin', 'superadmin'].includes(currentUser?.role) && (
+                    <button onClick={() => setIsTaskModalOpen(true)} className='text-[10px] bg-white text-indigo-900 font-bold px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors'>
+                      + Add Task
+                    </button>
+                  )}
+                </div>
+                
+                <div className='flex flex-col gap-4 relative z-10 custom-scrollbar overflow-y-auto max-h-[300px]'>
+                  {upcomingEvents.length === 0 ? (
+                     <p className='text-xs text-slate-400'>No tasks for this week.</p>
+                  ) : upcomingEvents.map(event => (
+                  <div key={event._id} className='bg-slate-800/50 hover:bg-slate-800 transition-colors rounded-2xl p-4 border border-slate-700/50 backdrop-blur-md'>
                     <div className='flex items-start justify-between mb-2'>
-                      <h4 className='font-semibold text-sm truncate pr-4'>{event.title}</h4>
-                      {event.status === 'Confirmed' ? (
-                        <FaCheckCircle className='text-emerald-400 shrink-0 mt-0.5' size={14} />
-                      ) : (
-                        <FaExclamationCircle className='text-amber-400 shrink-0 mt-0.5' size={14} />
-                      )}
+                      <h4 className={`font-semibold text-sm truncate pr-4 ${event.status === 'Done' ? 'line-through text-slate-400' : ''}`}>{event.title}</h4>
+                      <div className="flex items-center gap-2">
+                        {event.status === 'Done' ? (
+                          <FaCheckCircle className='text-emerald-400 shrink-0 mt-0.5' size={14} title="Done" />
+                        ) : (
+                          <FaExclamationCircle className='text-amber-400 shrink-0 mt-0.5' size={14} title="Pending" />
+                        )}
+                        {['admin', 'superadmin'].includes(currentUser?.role) && event.status !== 'Done' && (
+                           <button onClick={() => handleMarkTaskDone(event._id)} className='text-[9px] bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-white transition-colors px-2 py-0.5 rounded'>
+                             Done
+                           </button>
+                        )}
+                      </div>
                     </div>
                     <div className='text-xs text-slate-400 flex flex-col gap-1'>
                       <span className='flex items-center gap-1.5'><FaCalendarAlt size={10} /> {event.date}</span>
@@ -303,8 +357,15 @@ export default function Schedule() {
                </div>
             </div>
           </div>
+          )}
         </div>
       </div>
+
+      <TaskModal 
+        isOpen={isTaskModalOpen} 
+        onClose={() => setIsTaskModalOpen(false)} 
+        onTaskCreated={handleTaskCreated} 
+      />
     </AnimatedPage>
   );
 }

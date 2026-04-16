@@ -17,6 +17,7 @@ export default function AdminUsers() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [sort, setSort] = useState('activityScore');
   const [order, setOrder] = useState('desc');
+  const [activeTab, setActiveTab] = useState('client');
 
   // Debounce search term
   useEffect(() => {
@@ -40,7 +41,8 @@ export default function AdminUsers() {
           limit,
           sort,
           order,
-          searchTerm: debouncedSearchTerm
+          searchTerm: debouncedSearchTerm,
+          roleFilter: activeTab
         }
       });
       setUsers(data.users || []);
@@ -51,7 +53,7 @@ export default function AdminUsers() {
     } finally {
       setLoading(false);
     }
-  }, [currentUser._id, startIndex, limit, sort, order, debouncedSearchTerm]);
+  }, [currentUser._id, startIndex, limit, sort, order, debouncedSearchTerm, activeTab]);
 
   useEffect(() => {
     fetchUsers();
@@ -133,6 +135,22 @@ export default function AdminUsers() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-slate-200 mb-6 gap-6 px-4">
+          <button 
+             onClick={() => { setActiveTab('client'); setStartIndex(0); }} 
+             className={`pb-3 font-semibold text-sm transition-all relative ${activeTab === 'client' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>
+            Clients
+            {activeTab === 'client' && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-indigo-600"></span>}
+          </button>
+          <button 
+             onClick={() => { setActiveTab('user'); setStartIndex(0); }} 
+             className={`pb-3 font-semibold text-sm transition-all relative ${activeTab === 'user' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>
+            Sellers
+            {activeTab === 'user' && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-indigo-600"></span>}
+          </button>
         </div>
 
         {/* User Stats Summary */}

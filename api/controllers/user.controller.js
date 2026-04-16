@@ -4,22 +4,22 @@ import { errorHandler } from '../utils/error.js';
 import Listing from '../models/listing.model.js';
 
 
-export const  user = (req, res) => {
-    res.json( {
-        message: "api user route is working!!!!"
-    })
+export const user = (req, res) => {
+  res.json({
+    message: "api user route is working!!!!"
+  })
 }
 
 export const updateUser = async (req, res, next) => {
-    if (req.user.id !== req.params.id)
+  if (req.user.id !== req.params.id)
     return next(errorHandler(401, 'You can only update your account!'));
-    
-    // Protect superadmin from being modified
-    if (req.user.role === 'superadmin') {
-      return next(errorHandler(403, 'The superadmin account cannot be modified!'));
-    }
 
-    try {
+  // Protect superadmin from being modified
+  if (req.user.role === 'superadmin') {
+    return next(errorHandler(403, 'The superadmin account cannot be modified!'));
+  }
+
+  try {
     if (req.body.password) {
       req.body.password = bcryptjs.hashSync(req.body.password, 10);
     }
@@ -36,9 +36,9 @@ export const updateUser = async (req, res, next) => {
     );
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
-    } catch (error) {
+  } catch (error) {
     next(error);
-    }
+  }
 };
 
 export const deleteUser = async (req, res, next) => {
@@ -62,7 +62,6 @@ export const getUserListings = async (req, res, next) => {
   if (req.user.id === req.params.id) {
     try {
       const listings = await Listing.find({ userRef: req.params.id });
-      console.log("Listings found:", listings.length);
       res.status(200).json(listings);
     } catch (error) {
       next(error);
@@ -74,13 +73,13 @@ export const getUserListings = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
-    
+
     const user = await User.findById(req.params.id);
-  
+
     if (!user) return next(errorHandler(404, 'User not found!'));
-  
+
     const { password: pass, ...rest } = user._doc;
-  
+
     res.status(200).json(rest);
   } catch (error) {
     next(error);

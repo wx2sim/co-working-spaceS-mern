@@ -1,5 +1,33 @@
 import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
+import bcryptjs from 'bcryptjs';
+
+export const createAdmin = async (req, res, next) => {
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return next(errorHandler(400, 'Username, email, and password are required.'));
+    }
+
+    if (req.user.role !== 'superadmin') {
+      return next(errorHandler(403, 'Only superadmin can create admins.'));
+    }
+
+    const hashedPassword = bcryptjs.hashSync(password, 10);
+    const newAdmin = new User({
+      username,
+      email,
+      password: hashedPassword,
+      role: 'admin'
+    });
+
+    await newAdmin.save();
+    const { password: pass, ...rest } = newAdmin._doc;
+    res.status(201).json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getUsers = async (req, res, next) => {
   try {
@@ -18,8 +46,14 @@ export const getUsers = async (req, res, next) => {
     };
 
     // Hide superadmin from other dashboards
-    if (req.user.role !== 'superadmin') {
+    if (req.user.role === 'admin') {
+      query.role = { $nin: ['superadmin', 'admin'] };
+    } else if (req.user.role !== 'superadmin') {
       query.role = { $ne: 'superadmin' };
+    }
+
+    if (req.query.roleFilter) {
+      query.role = req.query.roleFilter;
     }
 
     const users = await User.find(query)
@@ -82,5 +116,15 @@ export const updateUserRole = async (req, res, next) => {
     res.status(200).json({ message: `User role successfully updated to ${role}.` });
   } catch (error) {
     next(error);
+  }
+};
+
+export const getSupportAdmin = async (req, res, next) => {
+  try {
+    const admin = await User.findOne({ role: 'superadmin' });
+    if (!admin) return next(errorHandler(404, 'No superadmin currently available.'));
+    res.status(200).json({ _id: admin._id, username: admin.username, avatar: admin.avatar });
+  } catch (err) {
+    next(err);
   }
 };
