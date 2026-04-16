@@ -10,6 +10,7 @@ export default function Search() {
   const [sidebardata, setSidebardata] = useState({
     searchTerm: '',
     type: 'all',
+    category: 'all',
     parking: false,
     furnished: false,
     offer: false,
@@ -27,6 +28,7 @@ export default function Search() {
     const typeFromUrl = urlParams.get('type');
     const parkingFromUrl = urlParams.get('parking');
     const furnishedFromUrl = urlParams.get('furnished');
+    const categoryFromUrl = urlParams.get('category');
     const offerFromUrl = urlParams.get('offer');
     const sortFromUrl = urlParams.get('sort');
     const orderFromUrl = urlParams.get('order');
@@ -36,6 +38,7 @@ export default function Search() {
       typeFromUrl ||
       parkingFromUrl ||
       furnishedFromUrl ||
+      categoryFromUrl ||
       offerFromUrl ||
       sortFromUrl ||
       orderFromUrl
@@ -43,6 +46,7 @@ export default function Search() {
       setSidebardata({
         searchTerm: searchTermFromUrl || '',
         type: typeFromUrl || 'all',
+        category: categoryFromUrl || 'all',
         parking: parkingFromUrl === 'true' ? true : false,
         furnished: furnishedFromUrl === 'true' ? true : false,
         offer: offerFromUrl === 'true' ? true : false,
@@ -78,6 +82,15 @@ export default function Search() {
       setSidebardata({ ...sidebardata, type: e.target.id });
     }
 
+    if (
+      e.target.id === 'all_cat' ||
+      e.target.id === 'property' ||
+      e.target.id === 'service'
+    ) {
+      const cat = e.target.id === 'all_cat' ? 'all' : e.target.id;
+      setSidebardata({ ...sidebardata, category: cat });
+    }
+
     if (e.target.id === 'searchTerm') {
       setSidebardata({ ...sidebardata, searchTerm: e.target.value });
     }
@@ -108,6 +121,7 @@ export default function Search() {
     const urlParams = new URLSearchParams();
     urlParams.set('searchTerm', sidebardata.searchTerm);
     urlParams.set('type', sidebardata.type);
+    urlParams.set('category', sidebardata.category);
     urlParams.set('parking', sidebardata.parking);
     urlParams.set('furnished', sidebardata.furnished);
     urlParams.set('offer', sidebardata.offer);
@@ -161,39 +175,61 @@ export default function Search() {
               </div>
             </div>
 
-            {/* Type Filter */}
+            {/* Category Filter */}
             <div className='flex flex-col gap-3 pt-4 border-t border-slate-100'>
-              <label className='text-sm font-semibold text-slate-700'>Listing Type</label>
+              <label className='text-sm font-semibold text-slate-700'>Listing Category</label>
               <div className='flex flex-wrap gap-3'>
-                {['all', 'rent', 'sale'].map((type) => (
-                  <label key={type} className={`cursor-pointer flex items-center justify-center px-4 py-2 rounded-lg border text-xs font-semibold transition-all ${sidebardata.type === type ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-                    <input type='checkbox' id={type} className='sr-only' onChange={handleChange} checked={sidebardata.type === type} />
-                    {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
+                {[
+                  { id: 'all_cat', label: 'All Categories', value: 'all' },
+                  { id: 'property', label: 'Workspaces', value: 'property' },
+                  { id: 'service', label: 'Services', value: 'service' }
+                ].map((cat) => (
+                  <label key={cat.id} className={`cursor-pointer flex items-center justify-center px-4 py-2 rounded-lg border text-xs font-semibold transition-all ${sidebardata.category === cat.value ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                    <input type='checkbox' id={cat.id} className='sr-only' onChange={handleChange} checked={sidebardata.category === cat.value} />
+                    {cat.label}
                   </label>
                 ))}
               </div>
             </div>
+
+            {/* Type Filter - Show only for properties */}
+            {sidebardata.category !== 'service' && (
+              <div className='flex flex-col gap-3 pt-4 border-t border-slate-100'>
+                <label className='text-sm font-semibold text-slate-700'>Property Type</label>
+                <div className='flex flex-wrap gap-3'>
+                  {['all', 'rent', 'sale'].map((type) => (
+                    <label key={type} className={`cursor-pointer flex items-center justify-center px-4 py-2 rounded-lg border text-xs font-semibold transition-all ${sidebardata.type === type ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                      <input type='checkbox' id={type} className='sr-only' onChange={handleChange} checked={sidebardata.type === type} />
+                      {type === 'all' ? 'Rent & Sale' : type.charAt(0).toUpperCase() + type.slice(1)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Features (Offer, Parking, Furnished) */}
             <div className='flex flex-col gap-3 pt-4 border-t border-slate-100'>
               <label className='text-sm font-semibold text-slate-700'>Features & Offers</label>
               <div className='flex flex-col gap-3'>
                 {[
-                  { id: 'offer', label: 'Special Offers Only' },
-                  { id: 'parking', label: 'Includes Parking' },
-                  { id: 'furnished', label: 'Fully Furnished' }
-                ].map((feature) => (
-                  <label key={feature.id} className='flex items-center gap-3 cursor-pointer group'>
-                    <div className='relative flex items-center justify-center'>
-                      <input type='checkbox' id={feature.id} className='peer sr-only' onChange={handleChange} checked={sidebardata[feature.id]} />
-                      <div className='w-5 h-5 border-2 border-slate-300 rounded-md bg-white peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-all'></div>
-                      <svg className='absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth='3'>
-                        <path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7'></path>
-                      </svg>
-                    </div>
-                    <span className='text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors'>{feature.label}</span>
-                  </label>
-                ))}
+                  { id: 'offer', label: 'Special Offers Only', alwaysShow: true },
+                  { id: 'parking', label: 'Includes Parking', propertyOnly: true },
+                  { id: 'furnished', label: 'Fully Furnished', propertyOnly: true }
+                ].map((feature) => {
+                  if (feature.propertyOnly && sidebardata.category === 'service') return null;
+                  return (
+                    <label key={feature.id} className='flex items-center gap-3 cursor-pointer group'>
+                      <div className='relative flex items-center justify-center'>
+                        <input type='checkbox' id={feature.id} className='peer sr-only' onChange={handleChange} checked={sidebardata[feature.id]} />
+                        <div className='w-5 h-5 border-2 border-slate-300 rounded-md bg-white peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-all'></div>
+                        <svg className='absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth='3'>
+                          <path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7'></path>
+                        </svg>
+                      </div>
+                      <span className='text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors'>{feature.label}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
 

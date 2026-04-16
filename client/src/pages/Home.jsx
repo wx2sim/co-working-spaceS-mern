@@ -15,6 +15,7 @@ export default function Home() {
   const [rentListings, setRentListings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [providers, setProviders] = useState([]);
+  const [serviceListings, setServiceListings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
@@ -30,8 +31,16 @@ export default function Home() {
     };
     const fetchRentListings = async () => {
       try {
-        const res = await axios.get('/api/listing/get?type=rent&limit=4');
+        const res = await axios.get('/api/listing/get?type=rent&category=property&limit=4');
         setRentListings(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const fetchServiceListings = async () => {
+      try {
+        const res = await axios.get('/api/listing/get?category=service&limit=4');
+        setServiceListings(res.data);
       } catch (error) {
         console.log(error);
       }
@@ -53,6 +62,8 @@ export default function Home() {
       }
     };
     fetchOfferListings();
+    fetchRentListings();
+    fetchServiceListings();
     fetchReviews();
     fetchProviders();
   }, []);
@@ -187,12 +198,32 @@ export default function Home() {
                   <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Top Rated for Rent</h2>
                   <p className='text-slate-500'>The most loved workspaces by our community.</p>
                 </div>
-                <Link to='/search?type=rent' className='text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-2 transition-colors'>
+                <Link to='/search?type=rent&category=property' className='text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-2 transition-colors'>
                   See all <FaArrowRight />
                 </Link>
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
                 {rentListings.map((listing) => (
+                  <ListingItem key={listing._id} listing={listing} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Professional Services */}
+          {serviceListings && serviceListings.length > 0 && (
+            <div className='mb-24'>
+              <div className='flex items-end justify-between mb-8'>
+                <div>
+                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Professional Services</h2>
+                  <p className='text-slate-500'>Expert help for your co-working journey.</p>
+                </div>
+                <Link to='/search?category=service' className='text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-2 transition-colors'>
+                  See all <FaArrowRight />
+                </Link>
+              </div>
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
+                {serviceListings.map((listing) => (
                   <ListingItem key={listing._id} listing={listing} />
                 ))}
               </div>

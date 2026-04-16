@@ -238,9 +238,11 @@ export default function UserDashboard() {
                       <p className='text-sm font-bold text-slate-900'>
                         {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')} DA
                       </p>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${listing.type === 'rent' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'
-                        }`}>
-                        {listing.type}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                        listing.category === 'service' ? 'bg-amber-50 text-amber-600' :
+                        listing.type === 'rent' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'
+                      }`}>
+                        {listing.category === 'service' ? 'Service' : listing.type}
                       </span>
                     </div>
 

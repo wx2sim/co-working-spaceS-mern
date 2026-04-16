@@ -195,11 +195,11 @@ export default function Listing() {
 
                 {/* Type Badge */}
                 <div className='absolute top-3 left-3 z-10 flex gap-2'>
-                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg ${listing.type === 'rent'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-emerald-600 text-white'
-                    }`}>
-                    {listing.type === 'rent' ? 'For Rent' : 'For Sale'}
+                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg ${
+                    listing.category === 'service' ? 'bg-amber-500 text-white' :
+                    listing.type === 'rent' ? 'bg-indigo-600 text-white' : 'bg-emerald-600 text-white'
+                  }`}>
+                    {listing.category === 'service' ? 'Service' : (listing.type === 'rent' ? 'For Rent' : 'For Sale')}
                   </span>
                   {isFullyBooked && (
                     <span className='text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg bg-red-600 text-white'>
@@ -236,8 +236,11 @@ export default function Listing() {
                         ? listing.discountPrice.toLocaleString('en-US')
                         : listing.regularPrice.toLocaleString('en-US')} DA
                     </span>
-                    {listing.type === 'rent' && (
+                    {listing.category === 'property' && listing.type === 'rent' && (
                       <span className='text-xs text-slate-400 font-medium'>/ month</span>
+                    )}
+                    {listing.category === 'service' && (
+                      <span className='text-xs text-slate-400 font-medium'>/ Total Service</span>
                     )}
                     {listing.offer && (
                       <span className='text-xs text-slate-400 line-through font-medium'>
@@ -268,60 +271,79 @@ export default function Listing() {
                 <div className='border-t border-slate-100'></div>
 
                 {/* Amenities — Compact Grid */}
-                <div className='my-3'>
-                  <h2 className='text-xs font-bold text-slate-900 uppercase tracking-wider mb-2'>
-                    Amenities
-                  </h2>
-                  <div className='grid grid-cols-3 gap-2'>
-                    <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
-                      <FaDoorOpen className='text-slate-500 text-xs flex-shrink-0' />
-                      <div className='min-w-0'>
-                        <p className='text-[10px] text-slate-400 leading-tight'>Rooms</p>
-                        <p className='text-xs font-bold text-slate-800'>{listing.rooms}</p>
+                {listing.category === 'property' && (
+                  <div className='my-3'>
+                    <h2 className='text-xs font-bold text-slate-900 uppercase tracking-wider mb-2'>
+                      Amenities
+                    </h2>
+                    <div className='grid grid-cols-3 gap-2'>
+                      <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
+                        <FaDoorOpen className='text-slate-500 text-xs flex-shrink-0' />
+                        <div className='min-w-0'>
+                          <p className='text-[10px] text-slate-400 leading-tight'>Rooms</p>
+                          <p className='text-xs font-bold text-slate-800'>{listing.rooms}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
-                      <FaUsers className='text-slate-500 text-xs flex-shrink-0' />
-                      <div className='min-w-0'>
-                        <p className='text-[10px] text-slate-400 leading-tight'>Conference</p>
-                        <p className='text-xs font-bold text-slate-800'>{listing.confirencerooms}</p>
+                      <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
+                        <FaUsers className='text-slate-500 text-xs flex-shrink-0' />
+                        <div className='min-w-0'>
+                          <p className='text-[10px] text-slate-400 leading-tight'>Conference</p>
+                          <p className='text-xs font-bold text-slate-800'>{listing.confirencerooms}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
-                      <FaBath className='text-slate-500 text-xs flex-shrink-0' />
-                      <div className='min-w-0'>
-                        <p className='text-[10px] text-slate-400 leading-tight'>Baths</p>
-                        <p className='text-xs font-bold text-slate-800'>{listing.bathrooms}</p>
+                      <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
+                        <FaBath className='text-slate-500 text-xs flex-shrink-0' />
+                        <div className='min-w-0'>
+                          <p className='text-[10px] text-slate-400 leading-tight'>Baths</p>
+                          <p className='text-xs font-bold text-slate-800'>{listing.bathrooms}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
-                      <FaParking className='text-slate-500 text-xs flex-shrink-0' />
-                      <div className='min-w-0'>
-                        <p className='text-[10px] text-slate-400 leading-tight'>Parking</p>
-                        <p className='text-xs font-bold text-slate-800 flex items-center gap-0.5'>
-                          {listing.parking ? (
-                            <><FaCheckCircle className='text-emerald-500 text-[10px]' /> Yes</>
-                          ) : (
-                            <><FaTimesCircle className='text-red-400 text-[10px]' /> No</>
-                          )}
-                        </p>
+                      <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
+                        <FaParking className='text-slate-500 text-xs flex-shrink-0' />
+                        <div className='min-w-0'>
+                          <p className='text-[10px] text-slate-400 leading-tight'>Parking</p>
+                          <p className='text-xs font-bold text-slate-800 flex items-center gap-0.5'>
+                            {listing.parking ? (
+                              <><FaCheckCircle className='text-emerald-500 text-[10px]' /> Yes</>
+                            ) : (
+                              <><FaTimesCircle className='text-red-400 text-[10px]' /> No</>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2 col-span-2'>
-                      <FaChair className='text-slate-500 text-xs flex-shrink-0' />
-                      <div className='min-w-0'>
-                        <p className='text-[10px] text-slate-400 leading-tight'>Furnishing</p>
-                        <p className='text-xs font-bold text-slate-800 flex items-center gap-0.5'>
-                          {listing.furnished ? (
-                            <><FaCheckCircle className='text-emerald-500 text-[10px]' /> Furnished</>
-                          ) : (
-                            <><FaTimesCircle className='text-red-400 text-[10px]' /> Unfurnished</>
-                          )}
-                        </p>
+                      <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2 col-span-2'>
+                        <FaChair className='text-slate-500 text-xs flex-shrink-0' />
+                        <div className='min-w-0'>
+                          <p className='text-[10px] text-slate-400 leading-tight'>Furnishing</p>
+                          <p className='text-xs font-bold text-slate-800 flex items-center gap-0.5'>
+                            {listing.furnished ? (
+                              <><FaCheckCircle className='text-emerald-500 text-[10px]' /> Furnished</>
+                            ) : (
+                              <><FaTimesCircle className='text-red-400 text-[10px]' /> Unfurnished</>
+                            )}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
+                {listing.category === 'service' && (
+                  <div className='my-3'>
+                    <h2 className='text-xs font-bold text-slate-900 uppercase tracking-wider mb-2'>
+                      Service Features
+                    </h2>
+                    <div className='grid grid-cols-1 gap-2'>
+                      <div className='flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3'>
+                        <FaCheckCircle className='text-indigo-500 text-sm' />
+                        <p className='text-sm font-semibold text-slate-700'>Professional Service Offered</p>
+                      </div>
+                      <div className='flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3'>
+                        <FaCheckCircle className='text-indigo-500 text-sm' />
+                        <p className='text-sm font-semibold text-slate-700'>Co-working Integrated Solution</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Spacer */}
                 <div className='flex-grow'></div>
@@ -339,10 +361,10 @@ export default function Listing() {
                   {(!currentUser || listing.userRef !== currentUser._id) && !contact && (
                     <button
                       onClick={handleBookSpaceClick}
-                      disabled={isFullyBooked}
-                      className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md'}`}
+                      disabled={listing.category === 'property' && isFullyBooked}
+                      className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${listing.category === 'property' && isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md'}`}
                     >
-                      {isFullyBooked ? 'Fully Booked' : 'Book Space'}
+                      {listing.category === 'property' && isFullyBooked ? 'Fully Booked' : (listing.category === 'service' ? 'Order Service' : 'Book Space')}
                     </button>
                   )}
 
@@ -372,32 +394,38 @@ export default function Listing() {
             </div>
             
             <div className="p-6">
-              {bookingSuccess ? (
-                <div className="flex flex-col items-center justify-center text-center py-6">
-                  <FaCheckCircle className="text-emerald-500 text-6xl mb-4 animate-bounce" />
-                  <h4 className="text-xl font-bold text-slate-900 mb-2">Booking Validated!</h4>
-                  <p className="text-sm text-slate-500 px-4">The space owner will contact you shortly to complete the remaining process.</p>
-                  <button onClick={() => setShowBookingModal(false)} className="mt-8 w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">
-                    Done
-                  </button>
-                </div>
-              ) : (
-                <>
-                   <div className="mb-4">
-                     <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Optional Features</h4>
-                     <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                       <span className="text-sm font-semibold text-slate-700">Catering Service (+50 DA)</span>
-                       <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.catering} onChange={(e) => setBookingFeatures({...bookingFeatures, catering: e.target.checked})} />
-                     </label>
-                     <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                       <span className="text-sm font-semibold text-slate-700">Projector Setup (+20 DA)</span>
-                       <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.projector} onChange={(e) => setBookingFeatures({...bookingFeatures, projector: e.target.checked})} />
-                     </label>
-                     <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                       <span className="text-sm font-semibold text-slate-700">Extra Chairs (+10 DA)</span>
-                       <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.extraChairs} onChange={(e) => setBookingFeatures({...bookingFeatures, extraChairs: e.target.checked})} />
-                     </label>
-                   </div>
+                  {bookingSuccess ? (
+                    <div className="flex flex-col items-center justify-center text-center py-6">
+                      <FaCheckCircle className="text-emerald-500 text-6xl mb-4 animate-bounce" />
+                      <h4 className="text-xl font-bold text-slate-900 mb-2">{listing.category === 'service' ? 'Order Placed!' : 'Booking Validated!'}</h4>
+                      <p className="text-sm text-slate-500 px-4">{listing.category === 'service' ? 'The service provider will contact you shortly to complete the process.' : 'The space owner will contact you shortly to complete the remaining process.'}</p>
+                      <button onClick={() => setShowBookingModal(false)} className="mt-8 w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">
+                        Done
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                       {listing.category === 'property' ? (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Optional Features</h4>
+                            <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                              <span className="text-sm font-semibold text-slate-700">Catering Service (+50 DA)</span>
+                              <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.catering} onChange={(e) => setBookingFeatures({...bookingFeatures, catering: e.target.checked})} />
+                            </label>
+                            <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                              <span className="text-sm font-semibold text-slate-700">Projector Setup (+20 DA)</span>
+                              <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.projector} onChange={(e) => setBookingFeatures({...bookingFeatures, projector: e.target.checked})} />
+                            </label>
+                            <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                              <span className="text-sm font-semibold text-slate-700">Extra Chairs (+10 DA)</span>
+                              <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.extraChairs} onChange={(e) => setBookingFeatures({...bookingFeatures, extraChairs: e.target.checked})} />
+                            </label>
+                          </div>
+                       ) : (
+                          <div className="mb-4 text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                             <p className="text-sm text-slate-500 italic">No additional options for this service.</p>
+                          </div>
+                       )}
                    
                    <div className="flex justify-between items-center py-5 border-t border-slate-100 mb-4 bg-slate-50 -mx-6 px-6 shadow-inner">
                      <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Final Total</span>
@@ -405,9 +433,9 @@ export default function Listing() {
                    </div>
                    
                    <div className="flex flex-col gap-3">
-                     <button disabled={bookingLoading} onClick={handleValidateBooking} className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
-                       {bookingLoading ? 'Processing...' : 'Validate Booking (Cash)'}
-                     </button>
+                      <button disabled={bookingLoading} onClick={handleValidateBooking} className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+                        {bookingLoading ? 'Processing...' : (listing.category === 'service' ? 'Confirm Order' : 'Validate Booking (Cash)')}
+                      </button>
                      <button disabled className="w-full flex items-center justify-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-400 font-bold py-3.5 rounded-xl cursor-not-allowed">
                        Pay with Stripe <span className="text-[10px] bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-widest text-indigo-500">Coming Soon</span>
                      </button>

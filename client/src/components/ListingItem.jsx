@@ -16,8 +16,11 @@ export default function ListingItem({ listing }) {
             className='h-full w-full object-cover group-hover:scale-105 transition-transform duration-700' 
           />
           <div className='absolute top-3 left-3 flex flex-col gap-1.5'>
-            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest backdrop-blur-md border border-white/10 ${listing.type === 'rent' ? 'bg-indigo-500/80 text-white' : 'bg-emerald-500/80 text-white'}`}>
-              {listing.type}
+            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest backdrop-blur-md border border-white/10 ${
+              listing.category === 'service' ? 'bg-amber-500/80 text-white' :
+              listing.type === 'rent' ? 'bg-indigo-500/80 text-white' : 'bg-emerald-500/80 text-white'
+            }`}>
+              {listing.category === 'service' ? 'Service' : listing.type}
             </span>
           </div>
         </div>
@@ -32,23 +35,25 @@ export default function ListingItem({ listing }) {
             {listing.name}
           </h3>
           
-          <div className='flex items-center gap-4 mb-4 text-neutral-400 dark:text-neutral-500'>
-              <div className='flex items-center gap-1.5'>
-                <FaDoorOpen className='text-[10px]' />
-                <span className='text-[11px] font-medium tracking-tight'>{listing.rooms || 1} Rooms</span>
-              </div>
-              <div className='flex items-center gap-1.5'>
-                <FaBath className='text-[10px]' />
-                <span className='text-[11px] font-medium tracking-tight'>{listing.bathrooms || 1} Baths</span>
-              </div>
-          </div>
+          {listing.category !== 'service' && (
+            <div className='flex items-center gap-4 mb-4 text-neutral-400 dark:text-neutral-500'>
+                <div className='flex items-center gap-1.5'>
+                  <FaDoorOpen className='text-[10px]' />
+                  <span className='text-[11px] font-medium tracking-tight'>{listing.rooms || 1} Rooms</span>
+                </div>
+                <div className='flex items-center gap-1.5'>
+                  <FaBath className='text-[10px]' />
+                  <span className='text-[11px] font-medium tracking-tight'>{listing.bathrooms || 1} Baths</span>
+                </div>
+            </div>
+          )}
 
           <div className='pt-4 border-t border-neutral-500/10 dark:border-white/5 flex items-center justify-between mt-auto'>
             <div className='flex flex-col'>
               <p className='text-xl font-bold text-gray-600 dark:text-gray-300 tracking-tighter leading-none'>
                 {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')}
                 <span className='ml-1 text-sm'>DA</span>
-                {listing.type === 'rent' && <span className='text-[10px] font-medium opacity-40 ml-0.5'>/mo</span>}
+                {listing.category === 'property' && listing.type === 'rent' && <span className='text-[10px] font-medium opacity-40 ml-0.5'>/mo</span>}
               </p>
             </div>
             <div className='flex items-center gap-1 text-amber-500/80'>

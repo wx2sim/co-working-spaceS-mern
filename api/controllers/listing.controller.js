@@ -87,6 +87,11 @@ export const getListings = async (req, res, next) => {
       type = { $in: ['sale', 'rent'] };
     }
 
+    let category = req.query.category;
+    if (category === undefined || category === 'all') {
+      category = { $in: ['property', 'service'] };
+    }
+
     const searchTerm = req.query.searchTerm || '';
     const sort = req.query.sort || 'createdAt';
     const order = req.query.order || 'desc';
@@ -97,6 +102,7 @@ export const getListings = async (req, res, next) => {
       furnished,
       parking,
       type,
+      category,
     };
 
     if (req.query.rooms) {

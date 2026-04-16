@@ -14,6 +14,7 @@ export default function CreateListingModal({ isOpen, onClose }) {
     name: '',
     description: '',
     address: '',
+    category: 'property', // 'property' or 'service'
     type: 'rent',
     rooms: 1,
     availableRooms: 1,
@@ -161,51 +162,88 @@ export default function CreateListingModal({ isOpen, onClose }) {
               <textarea placeholder='Description' id='description' required onChange={handleChange} value={formData.description} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm min-h-[100px]' />
               <input type='text' placeholder='Address' id='address' required onChange={handleChange} value={formData.address} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
               
-              <div className='flex gap-4 flex-wrap mt-2'>
-                <div className='flex gap-2 items-center'>
-                  <input type='checkbox' id='sale' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.type === 'sale'} />
-                  <label htmlFor='sale' className='text-sm text-slate-700'>Sell</label>
-                </div>
-                <div className='flex gap-2 items-center'>
-                  <input type='checkbox' id='rent' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.type === 'rent'} />
-                  <label htmlFor='rent' className='text-sm text-slate-700'>Rent</label>
-                </div>
-                <div className='flex gap-2 items-center'>
-                  <input type='checkbox' id='parking' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.parking} />
-                  <label htmlFor='parking' className='text-sm text-slate-700'>Parking spot</label>
-                </div>
-                <div className='flex gap-2 items-center'>
-                  <input type='checkbox' id='furnished' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.furnished} />
-                  <label htmlFor='furnished' className='text-sm text-slate-700'>Furnished</label>
-                </div>
-                <div className='flex gap-2 items-center'>
-                  <input type='checkbox' id='offer' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.offer} />
-                  <label htmlFor='offer' className='text-sm text-slate-700'>Offer</label>
+              <div className='flex flex-col gap-2 mt-2'>
+                <label className='text-xs font-bold text-slate-500 uppercase tracking-wider ml-1'>Listing Category</label>
+                <div className='flex gap-4 p-1 bg-slate-100 rounded-2xl w-fit'>
+                  <button 
+                    type='button' 
+                    onClick={() => setFormData({...formData, category: 'property'})}
+                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.category === 'property' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Property
+                  </button>
+                  <button 
+                    type='button' 
+                    onClick={() => setFormData({...formData, category: 'service'})}
+                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.category === 'service' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    Service
+                  </button>
                 </div>
               </div>
 
+              {formData.category === 'property' && (
+                <div className='flex gap-4 flex-wrap mt-2'>
+                  <div className='flex gap-2 items-center'>
+                    <input type='checkbox' id='sale' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.type === 'sale'} />
+                    <label htmlFor='sale' className='text-sm text-slate-700'>Sell</label>
+                  </div>
+                  <div className='flex gap-2 items-center'>
+                    <input type='checkbox' id='rent' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.type === 'rent'} />
+                    <label htmlFor='rent' className='text-sm text-slate-700'>Rent</label>
+                  </div>
+                  <div className='flex gap-2 items-center'>
+                    <input type='checkbox' id='parking' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.parking} />
+                    <label htmlFor='parking' className='text-sm text-slate-700'>Parking spot</label>
+                  </div>
+                  <div className='flex gap-2 items-center'>
+                    <input type='checkbox' id='furnished' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.furnished} />
+                    <label htmlFor='furnished' className='text-sm text-slate-700'>Furnished</label>
+                  </div>
+                  <div className='flex gap-2 items-center'>
+                    <input type='checkbox' id='offer' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.offer} />
+                    <label htmlFor='offer' className='text-sm text-slate-700'>Offer</label>
+                  </div>
+                </div>
+              )}
+
+              {formData.category === 'service' && (
+                <div className='flex gap-4 flex-wrap mt-2'>
+                  <div className='flex gap-2 items-center'>
+                    <input type='checkbox' id='offer' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.offer} />
+                    <label htmlFor='offer' className='text-sm text-slate-700'>Special Offer</label>
+                  </div>
+                </div>
+              )}
+
               <div className='flex flex-wrap gap-4 mt-2'>
-                <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
-                  <input type='number' id='rooms' min='1' max='50' required onChange={handleChange} value={formData.rooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                  <span className='text-sm text-slate-700 font-medium'>Rooms</span>
-                </div>
-                <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
-                  <input type='number' id='availableRooms' min='1' max='50' required onChange={handleChange} value={formData.availableRooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                  <span className='text-sm text-slate-700 font-medium'>Available</span>
-                </div>
-                <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
-                  <input type='number' id='confirencerooms' min='0' max='20' required onChange={handleChange} value={formData.confirencerooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                  <span className='text-sm text-slate-700 font-medium'>Conf. Rooms</span>
-                </div>
-                <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
-                  <input type='number' id='bathrooms' min='1' max='20' required onChange={handleChange} value={formData.bathrooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                  <span className='text-sm text-slate-700 font-medium'>Baths</span>
-                </div>
+                {formData.category === 'property' && (
+                  <>
+                    <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
+                      <input type='number' id='rooms' min='1' max='50' required onChange={handleChange} value={formData.rooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                      <span className='text-sm text-slate-700 font-medium'>Rooms</span>
+                    </div>
+                    <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
+                      <input type='number' id='availableRooms' min='1' max='50' required onChange={handleChange} value={formData.availableRooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                      <span className='text-sm text-slate-700 font-medium'>Available</span>
+                    </div>
+                    <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
+                      <input type='number' id='confirencerooms' min='0' max='20' required onChange={handleChange} value={formData.confirencerooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                      <span className='text-sm text-slate-700 font-medium'>Conf. Rooms</span>
+                    </div>
+                    <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
+                      <input type='number' id='bathrooms' min='1' max='20' required onChange={handleChange} value={formData.bathrooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                      <span className='text-sm text-slate-700 font-medium'>Baths</span>
+                    </div>
+                  </>
+                )}
+                
                 <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                   <input type='number' id='regularPrice' min='50' max='10000000' required onChange={handleChange} value={formData.regularPrice} className='w-24 p-2 border border-slate-300 rounded-lg outline-none' />
                   <div className='flex flex-col'>
-                    <span className='text-sm text-slate-700 font-medium'>Regular price</span>
-                    {formData.type === 'rent' && <span className='text-xs text-slate-500'>(DA / month)</span>}
+                    <span className='text-sm text-slate-700 font-medium'>{formData.category === 'property' ? 'Regular price' : 'Service Price'}</span>
+                    {formData.category === 'property' && formData.type === 'rent' && <span className='text-xs text-slate-500'>(DA / month)</span>}
+                    {formData.category === 'service' && <span className='text-xs text-slate-500'>(Total DA)</span>}
                   </div>
                 </div>
                 {formData.offer && (

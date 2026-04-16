@@ -23,29 +23,33 @@ const listingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    category: {
+      type: String,
+      default: 'property', // 'property' or 'service'
+    },
     bathrooms: {
       type: Number,
-      required: true,
+      required: false,
     },
     confirencerooms: {
       type: Number,
-      required: true,
+      required: false,
     },
     rooms: {
       type: Number,
-      required: true,
+      required: false,
     },
     availableRooms: {
       type: Number,
-      required: true,
+      required: false,
     },
     furnished: {
       type: Boolean,
-      required: true,
+      required: false,
     },
     parking: {
       type: Boolean,
-      required: true,
+      required: false,
     },
     type: {
       type: String,
