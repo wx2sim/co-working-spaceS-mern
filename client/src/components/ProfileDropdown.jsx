@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dropdown } from 'antd';
 import { SettingOutlined, UserOutlined, LogoutOutlined, LoginOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ import {
 export default function ProfileDropdown({ currentUser }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async ()=> {
       try {
@@ -26,8 +27,12 @@ export default function ProfileDropdown({ currentUser }) {
           return;
         }
         dispatch(signOutUserSuccess(data));
-         toast.success('User Signed out successfully!', { duration: 3000 });
+        toast.success('User Signed out successfully!', { duration: 3000 });
         
+        const currentPath = location.pathname;
+        if (currentPath !== '/' && currentPath !== '/about' && currentPath !== '/search') {
+          navigate('/signin');
+        }
       } catch (error) {
         const message = error.response?.data?.message || error.message;
           toast.error(message, { duration: 3000 });
