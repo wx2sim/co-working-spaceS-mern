@@ -64,7 +64,9 @@ export default function ListingItem({ listing }) {
             </div>
             <div className='flex items-center gap-1 text-amber-500/80'>
               <FaStar className='text-[10px]' />
-              <span className='text-[11px] font-bold'>4.9</span>
+              <span className='text-[11px] font-bold'>
+                {listing.ratingCount > 0 ? listing.averageRating : 'N/A'}
+              </span>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import SwiperCore from 'swiper';
 import { useSelector } from 'react-redux';
@@ -19,6 +20,7 @@ import {
   FaTag,
   FaArrowLeft,
   FaRegCopy,
+  FaStar,
 } from 'react-icons/fa';
 import Contact from '../components/Contact';
 import AnimatedPage from '../components/AnimatedPage';
@@ -43,6 +45,8 @@ export default function Listing() {
   });
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   const availableRooms = listing?.availableRooms !== undefined ? listing.availableRooms : listing?.rooms;
   const isFullyBooked = availableRooms <= 0;
@@ -111,8 +115,39 @@ export default function Listing() {
         navigate(`/error/${statusCode}?message=${encodeURIComponent(message)}`, { replace: true });
       }
     };
+
+    const fetchUserRating = async () => {
+      if (!currentUser) return;
+      try {
+        const { data } = await axios.get(`/api/rating/get/${params.listingId}`);
+        if (data) setUserRating(data.rating);
+      } catch (err) { console.log(err); }
+    };
+
     fetchListing();
-  }, [params.listingId]);
+    fetchUserRating();
+  }, [params.listingId, currentUser]);
+
+  const handleRatingSubmit = async (newRating) => {
+    if (!currentUser) {
+      navigate('/signup');
+      return;
+    }
+    try {
+      setRatingLoading(true);
+      const { data } = await axios.post('/api/rating/add', {
+        listingId: listing._id,
+        rating: newRating
+      });
+      setUserRating(newRating);
+      setListing(data); // update averageRating and ratingCount
+      toast.success('Thank you for rating!');
+    } catch (err) {
+      toast.error('Failed to save rating');
+    } finally {
+      setRatingLoading(false);
+    }
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -248,11 +283,53 @@ export default function Listing() {
                       </span>
                     )}
                   </div>
-                  <div className='flex items-center gap-1.5 text-slate-500 text-xs'>
-                    <FaMapMarkerAlt className='text-slate-400 flex-shrink-0 text-[11px]' />
-                    <span>{listing.address}</span>
+                  <div className='flex items-center gap-3 mb-2'>
+                    <div className='flex items-center gap-1.5 text-slate-500 text-xs'>
+                      <FaMapMarkerAlt className='text-slate-400 flex-shrink-0 text-[11px]' />
+                      <span>{listing.address}</span>
+                    </div>
+                    <div className='w-px h-3 bg-slate-200'></div>
+                    <div className='flex items-center gap-1 text-amber-500'>
+                      <FaStar className='text-[10px]' />
+                      <span className='text-xs font-bold'>
+                        {listing.ratingCount > 0 ? listing.averageRating : 'N/A'}
+                      </span>
+                      <span className='text-[10px] text-slate-400 font-medium ml-0.5'>
+                        ({listing.ratingCount || 0})
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                {/* Rating Input for Logged In Users */}
+                {currentUser && (
+                  <div className='mb-4 p-3.5 bg-slate-50 border border-slate-100 rounded-2xl'>
+                    <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2'>Rate your experience</p>
+                    <div className='flex items-center gap-2'>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => handleRatingSubmit(star)}
+                          disabled={ratingLoading}
+                          className='transition-all duration-200 hover:scale-110 disabled:opacity-50'
+                        >
+                          <FaStar 
+                            className={`text-lg ${star <= userRating ? 'text-amber-500' : 'text-slate-200'}`} 
+                          />
+                        </button>
+                      ))}
+                      {userRating > 0 && (
+                        <span className='text-[10px] font-bold text-emerald-600 ml-2'>You rated {userRating}/5</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {!currentUser && (
+                  <div className='mb-4 p-3.5 bg-slate-50 border border-slate-100 rounded-2xl'>
+                    <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1'>Experience this space?</p>
+                    <Link to='/signup' className='text-xs font-bold text-indigo-600 hover:underline'>Sign in to leave a rating</Link>
+                  </div>
+                )}
 
                 {/* Divider */}
                 <div className='border-t border-slate-100'></div>

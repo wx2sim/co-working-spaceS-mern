@@ -247,6 +247,7 @@ export default function Search() {
                 <option value='createdAt_asc'>Oldest First</option>
                 <option value='regularPrice_desc'>Price: High to Low</option>
                 <option value='regularPrice_asc'>Price: Low to High</option>
+                <option value='averageRating_desc'>Top Rated</option>
               </select>
             </div>
 

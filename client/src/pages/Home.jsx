@@ -25,11 +25,11 @@ export default function Home() {
     const fetchAllData = async () => {
       try {
         const [offers, latest, rent, sale, services, reviewsRes, providersRes] = await Promise.allSettled([
-          axios.get('/api/listing/get?offer=true&limit=4'),
-          axios.get('/api/listing/get?category=property&limit=4'),
-          axios.get('/api/listing/get?type=rent&category=property&limit=4'),
-          axios.get('/api/listing/get?type=sale&category=property&limit=4'),
-          axios.get('/api/listing/get?category=service&limit=4'),
+          axios.get('/api/listing/get?offer=true&limit=4&sort=discountPrice&order=asc'),
+          axios.get('/api/listing/get?category=property&limit=4&sort=createdAt&order=desc'),
+          axios.get('/api/listing/get?type=rent&category=property&limit=4&sort=averageRating&order=desc'),
+          axios.get('/api/listing/get?type=sale&category=property&limit=4&sort=averageRating&order=desc'),
+          axios.get('/api/listing/get?category=service&limit=4&sort=averageRating&order=desc'),
           axios.get('/api/review/get'),
           axios.get('/api/user/top-providers')
         ]);
