@@ -82,7 +82,12 @@ function Header() {
         <NavLink to='/' text='Home' onClick={handleLinkClick} />
         <NavLink to='/about' text='About' onClick={handleLinkClick} />
         <NavLink to='/map' text='Map' onClick={handleLinkClick} />
-        {currentUser && <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />}
+        {currentUser && (
+          <>
+            <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} />
+            <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />
+          </>
+        )}
       </>
     );
   };
