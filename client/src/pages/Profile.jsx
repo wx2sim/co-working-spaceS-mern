@@ -156,8 +156,7 @@ export default function Profile() {
     }
     try {
       setShowBookedSpacesError(false);
-      const { data } = await axios.get(`/api/user/spaces/${currentUser._id}`);
-      if (data.success === false) return setShowBookedSpacesError(true);
+      const { data } = await axios.get(`/api/booking/client`);
       setBookedSpaces(data);
       setBookedSpacesFetched(true);
     } catch (error) {
@@ -487,12 +486,40 @@ export default function Profile() {
                 {bookedSpaces && bookedSpaces.length > 0 && (
                   <div className='flex flex-col gap-4'>
                     {bookedSpaces.map((space) => (
-                      <div key={space._id} className='bg-white border border-slate-100 rounded-2xl p-4 flex flex-col gap-2 hover:shadow-md transition-shadow'>
+                      <div key={space._id} className='bg-white border border-slate-100 rounded-2xl p-5 flex flex-col gap-3 hover:shadow-md transition-shadow relative overflow-hidden'>
+                        {/* Status bar atop card */}
+                        <div className={`absolute top-0 left-0 w-full h-1 ${space.status === 'approved' ? 'bg-emerald-500' : space.status === 'rejected' ? 'bg-red-500' : 'bg-amber-400'}`}></div>
+                        
                         <div className='flex justify-between items-start'>
-                           <h3 className='font-semibold text-slate-800'>{space.listingName || 'Workspace Booking'}</h3>
-                           <span className='text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded-full'>{space.status || 'Confirmed'}</span>
+                           <div className="flex gap-4">
+                             <img src={space.listing?.imageUrls?.[0] || 'https://via.placeholder.com/150'} className="w-16 h-16 rounded-xl object-cover bg-slate-100" />
+                             <div>
+                               <Link to={`/listing/${space.listing?._id}`} className='font-bold text-slate-800 hover:text-indigo-600 truncate'>{space.listing?.name || 'Workspace'}</Link>
+                               <p className='text-xs text-slate-500 mb-1'>{space.listing?.address}</p>
+                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${space.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : space.status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
+                                 {space.status === 'pending' ? 'Waiting to be confirmed' : space.status}
+                               </span>
+                             </div>
+                           </div>
+                           <div className="text-right">
+                             <p className='text-sm text-slate-400'>Total Price</p>
+                             <p className='text-lg font-extrabold text-slate-900'>${space.finalPrice}</p>
+                           </div>
                         </div>
-                        <p className='text-sm text-slate-500'>Date: {new Date(space.date).toLocaleDateString()}</p>
+                        
+                        {(space.features && space.features.length > 0) && (
+                          <div className='pt-3 border-t border-slate-50'>
+                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1.5">Activated Features</p>
+                            <div className="flex flex-wrap gap-1.5">
+                               {space.features.map(f => (
+                                 <span key={f} className="text-xs bg-slate-50 text-slate-600 border border-slate-100 px-2.5 py-1 rounded-md">{f}</span>
+                               ))}
+                            </div>
+                          </div>
+                        )}
+                        <p className='text-[10px] text-slate-400 absolute bottom-3 right-4'>
+                          {new Date(space.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
                     ))}
                   </div>

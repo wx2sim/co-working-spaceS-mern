@@ -5,6 +5,10 @@
 
 body {
   background-color: var(--bg-app);
+  background-image: url('./assets/shape/grid-01.svg');
+  background-position: top center;
+  background-repeat: repeat;
+  background-attachment: fixed;
   overflow-x: hidden;
 }
 

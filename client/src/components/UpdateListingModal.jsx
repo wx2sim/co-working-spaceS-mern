@@ -14,6 +14,7 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
     address: '',
     type: 'rent',
     rooms: 1,
+    availableRooms: 1,
     confirencerooms: 1,
     bathrooms: 1,
     regularPrice: 50,
@@ -37,6 +38,7 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
         address: listing.address || '',
         type: listing.type || 'rent',
         rooms: listing.rooms || 1,
+        availableRooms: listing.availableRooms !== undefined ? listing.availableRooms : listing.rooms || 1,
         confirencerooms: listing.confirencerooms || 1,
         bathrooms: listing.bathrooms || 1,
         regularPrice: listing.regularPrice || 50,
@@ -200,6 +202,10 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
                 <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                   <input type='number' id='rooms' min='1' max='50' required onChange={handleChange} value={formData.rooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
                   <span className='text-sm text-slate-700 font-medium'>Rooms</span>
+                </div>
+                <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
+                  <input type='number' id='availableRooms' min='1' max='50' required onChange={handleChange} value={formData.availableRooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
+                  <span className='text-sm text-slate-700 font-medium'>Available</span>
                 </div>
                 <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                   <input type='number' id='confirencerooms' min='0' max='20' required onChange={handleChange} value={formData.confirencerooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />

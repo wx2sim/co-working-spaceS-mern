@@ -6,6 +6,7 @@ import listingRouter  from './routes/listing.route.js';
 import upgradeRouter from './routes/upgrade.route.js';
 import adminRouter from './routes/admin.route.js';
 import messageRouter from './routes/message.route.js';
+import bookingRouter from './routes/booking.route.js';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -27,6 +28,7 @@ app.use('/api/listing' , listingRouter);
 app.use('/api/upgrade', upgradeRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/message', messageRouter);
+app.use('/api/booking', bookingRouter);
 
 app.use((err, req, res, next) => {
  const statusCode = err.statusCode || 500;

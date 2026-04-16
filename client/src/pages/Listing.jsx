@@ -35,6 +35,63 @@ export default function Listing() {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingFeatures, setBookingFeatures] = useState({
+    catering: false,
+    projector: false,
+    extraChairs: false,
+  });
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+
+  const availableRooms = listing?.availableRooms !== undefined ? listing.availableRooms : listing?.rooms;
+  const isFullyBooked = availableRooms <= 0;
+  const basePrice = listing?.offer ? listing.discountPrice : listing?.regularPrice;
+
+  const calculateFinalPrice = () => {
+    let price = +basePrice || 0;
+    if (bookingFeatures.catering) price += 50;
+    if (bookingFeatures.projector) price += 20;
+    if (bookingFeatures.extraChairs) price += 10;
+    return price;
+  };
+
+  const handleBookSpaceClick = () => {
+    if (!currentUser) {
+      navigate('/signup');
+      return;
+    }
+    setShowBookingModal(true);
+  };
+
+  const handleValidateBooking = async () => {
+    try {
+      setBookingLoading(true);
+      const selectedFeatures = [];
+      if (bookingFeatures.catering) selectedFeatures.push("Catering (+$50)");
+      if (bookingFeatures.projector) selectedFeatures.push("Projector (+$20)");
+      if (bookingFeatures.extraChairs) selectedFeatures.push("Extra Chairs (+$10)");
+
+      const payload = {
+        listingId: listing._id,
+        features: selectedFeatures,
+        finalPrice: calculateFinalPrice(),
+        paymentMethod: 'cash'
+      };
+      
+      await axios.post('/api/booking/create', payload);
+      setBookingSuccess(true);
+      setBookingLoading(false);
+      
+      if (listing.availableRooms !== undefined) {
+         setListing({...listing, availableRooms: listing.availableRooms - 1});
+      }
+    } catch (error) {
+      console.log(error);
+      setBookingLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -137,13 +194,18 @@ export default function Listing() {
                 </div>
 
                 {/* Type Badge */}
-                <div className='absolute top-3 left-3 z-10'>
+                <div className='absolute top-3 left-3 z-10 flex gap-2'>
                   <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg ${listing.type === 'rent'
                     ? 'bg-indigo-600 text-white'
                     : 'bg-emerald-600 text-white'
                     }`}>
                     {listing.type === 'rent' ? 'For Rent' : 'For Sale'}
                   </span>
+                  {isFullyBooked && (
+                    <span className='text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg bg-red-600 text-white'>
+                      Fully Booked
+                    </span>
+                  )}
                 </div>
 
                 {/* Offer Badge */}
@@ -265,27 +327,27 @@ export default function Listing() {
                 <div className='flex-grow'></div>
 
                 {/* Contact CTA */}
-                <div className='pt-3 border-t border-slate-100'>
+                <div className='pt-3 border-t border-slate-100 flex flex-wrap gap-2 w-full'>
                   {currentUser && listing.userRef !== currentUser._id && !contact && (
                     <button
                       onClick={() => setContact(true)}
-                      className='w-full bg-slate-900 text-white font-medium py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm'
+                      className='flex-1 min-w-[140px] bg-white border-[1.5px] border-slate-900 text-slate-900 font-bold py-2.5 px-4 rounded-xl hover:bg-slate-50 transition-all duration-300 text-sm'
                     >
-                      Contact Owner
+                      Message Owner
+                    </button>
+                  )}
+                  {(!currentUser || listing.userRef !== currentUser._id) && !contact && (
+                    <button
+                      onClick={handleBookSpaceClick}
+                      disabled={isFullyBooked}
+                      className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md'}`}
+                    >
+                      {isFullyBooked ? 'Fully Booked' : 'Book Space'}
                     </button>
                   )}
 
-                  {!currentUser && (
-                    <Link
-                      to='/signin'
-                      className='block w-full bg-slate-900 text-white font-medium py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm text-center'
-                    >
-                      Sign in to Contact Owner
-                    </Link>
-                  )}
-
                   {contact && (
-                    <div className='bg-slate-50 border border-slate-100 rounded-xl p-4'>
+                    <div className='w-full bg-slate-50 border border-slate-100 rounded-xl p-4'>
                       <Contact listing={listing} />
                     </div>
                   )}
@@ -295,6 +357,67 @@ export default function Listing() {
           </>
         )}
       </div>
+
+      {showBookingModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-lg">Book Workspace</h3>
+                <p className="text-xs text-slate-500">Customize your reservation</p>
+              </div>
+              <button disabled={bookingSuccess} onClick={() => setShowBookingModal(false)} className="text-slate-400 hover:text-red-500 bg-slate-100 p-2 rounded-full transition-colors">
+                <FaTimesCircle size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {bookingSuccess ? (
+                <div className="flex flex-col items-center justify-center text-center py-6">
+                  <FaCheckCircle className="text-emerald-500 text-6xl mb-4 animate-bounce" />
+                  <h4 className="text-xl font-bold text-slate-900 mb-2">Booking Validated!</h4>
+                  <p className="text-sm text-slate-500 px-4">The space owner will contact you shortly to complete the remaining process.</p>
+                  <button onClick={() => setShowBookingModal(false)} className="mt-8 w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">
+                    Done
+                  </button>
+                </div>
+              ) : (
+                <>
+                   <div className="mb-4">
+                     <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Optional Features</h4>
+                     <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                       <span className="text-sm font-semibold text-slate-700">Catering Service (+$50)</span>
+                       <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.catering} onChange={(e) => setBookingFeatures({...bookingFeatures, catering: e.target.checked})} />
+                     </label>
+                     <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                       <span className="text-sm font-semibold text-slate-700">Projector Setup (+$20)</span>
+                       <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.projector} onChange={(e) => setBookingFeatures({...bookingFeatures, projector: e.target.checked})} />
+                     </label>
+                     <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                       <span className="text-sm font-semibold text-slate-700">Extra Chairs (+$10)</span>
+                       <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.extraChairs} onChange={(e) => setBookingFeatures({...bookingFeatures, extraChairs: e.target.checked})} />
+                     </label>
+                   </div>
+                   
+                   <div className="flex justify-between items-center py-5 border-t border-slate-100 mb-4 bg-slate-50 -mx-6 px-6 shadow-inner">
+                     <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Final Total</span>
+                     <span className="text-3xl font-extrabold text-slate-900">${calculateFinalPrice()}</span>
+                   </div>
+                   
+                   <div className="flex flex-col gap-3">
+                     <button disabled={bookingLoading} onClick={handleValidateBooking} className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+                       {bookingLoading ? 'Processing...' : 'Validate Booking (Cash)'}
+                     </button>
+                     <button disabled className="w-full flex items-center justify-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-400 font-bold py-3.5 rounded-xl cursor-not-allowed">
+                       Pay with Stripe <span className="text-[10px] bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-widest text-indigo-500">Coming Soon</span>
+                     </button>
+                   </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AnimatedPage>
   );
 }

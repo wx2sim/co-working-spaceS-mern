@@ -47,7 +47,7 @@ export default function Home() {
 
   return (
     <AnimatedPage>
-      <div className='min-h-screen bg-slate-50'>
+      <div className='min-h-screen bg-transparent'>
 
         {/* HERO SECTION */}
         <div className='relative h-[650px] md:h-[750px] flex items-center justify-center overflow-hidden'>
@@ -179,6 +179,74 @@ export default function Home() {
             </div>
           )}
 
+        </div>
+
+        {/* Community Reviews Section - Breaking the pattern */}
+        <div className='bg-slate-950 py-24 relative overflow-hidden'>
+          <div className='absolute inset-0 opacity-20'>
+            <div className='absolute top-0 -left-1/4 w-1/2 h-[500px] bg-indigo-600 rounded-full mix-blend-screen filter blur-[150px] animate-pulse-slow'></div>
+            <div className='absolute bottom-0 -right-1/4 w-1/2 h-[500px] bg-cyan-600 rounded-full mix-blend-screen filter blur-[150px] animate-pulse-slow' style={{animationDelay: '2s'}}></div>
+          </div>
+          
+          <div className='max-w-6xl mx-auto px-4 relative z-10'>
+            <div className='text-center mb-16'>
+              <h2 className='text-3xl md:text-5xl font-extrabold text-white mb-4'>Why our community loves us</h2>
+              <p className='text-slate-400 max-w-2xl mx-auto text-lg'>Hear from freelancers, startups, and enterprises who found their perfect workspace.</p>
+            </div>
+
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+              {/* Review 1 */}
+              <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors'>
+                <div className='flex gap-1 text-amber-400 mb-6'>
+                  <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+                </div>
+                <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic'>
+                  "The process of finding a private office for our growing startup was incredibly seamless. The direct messaging feature allowed me to negotiate directly with the owner."
+                </p>
+                <div className='flex items-center gap-4'>
+                  <img src='https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop' alt='Reviewer' className='w-12 h-12 rounded-full object-cover border border-slate-700' />
+                  <div>
+                    <h4 className='text-white font-bold text-sm'>Sarah Jenkins</h4>
+                    <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>Tech Founder</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Review 2 */}
+              <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors transform md:-translate-y-4 shadow-2xl'>
+                <div className='flex gap-1 text-amber-400 mb-6'>
+                  <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+                </div>
+                <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic'>
+                  "I book hot desks in different cities as a digital nomad. This platform always highlights the spaces with the fastest Wi-Fi and best coffee. Absolute lifesaver!"
+                </p>
+                <div className='flex items-center gap-4'>
+                  <img src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop' alt='Reviewer' className='w-12 h-12 rounded-full object-cover border border-slate-700' />
+                  <div>
+                    <h4 className='text-white font-bold text-sm'>Marcus Chen</h4>
+                    <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>Digital Nomad</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Review 3 */}
+              <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors'>
+                <div className='flex gap-1 text-amber-400 mb-6'>
+                  <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+                </div>
+                <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic'>
+                  "We rented a massive creative studio in downtown. The search filters made it so easy to find a place that matched our specific production requirements."
+                </p>
+                <div className='flex items-center gap-4'>
+                  <img src='https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop' alt='Reviewer' className='w-12 h-12 rounded-full object-cover border border-slate-700' />
+                  <div>
+                    <h4 className='text-white font-bold text-sm'>Emily Rodriguez</h4>
+                    <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>Creative Director</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* CTA Section */}
