@@ -68,6 +68,16 @@ export default function SuperAdminDashboard() {
     } catch (err) { toast.error('Failed.'); }
   };
 
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      await axios.put(`/api/admin/role/${userId}`, { role: newRole });
+      setAllUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
+      toast.success(`User role updated to ${newRole === 'user' ? 'seller' : newRole}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update role');
+    }
+  };
+
   const roleCount = (role) => allUsers.filter(u => u.role === role).length;
   const filteredUsers = allUsers.filter(u => {
     const matchesSearch = u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -205,14 +215,26 @@ export default function SuperAdminDashboard() {
                         <p className='text-[11px] text-slate-400 truncate'>{user.email}</p>
                       </div>
                     </div>
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0 ${
-                      user.role === 'superadmin' ? 'bg-amber-100 text-amber-700' :
-                      user.role === 'admin' ? 'bg-indigo-50 text-indigo-600' :
-                      user.role === 'user' ? 'bg-emerald-50 text-emerald-600' :
-                      'bg-slate-100 text-slate-500'
-                    }`}>
-                      {user.role === 'user' ? 'seller' : user.role}
-                    </span>
+                    {user.role === 'superadmin' ? (
+                      <span className='bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0'>
+                        superadmin
+                      </span>
+                    ) : (
+                      <select 
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                        className={`text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wider flex-shrink-0 cursor-pointer border border-transparent hover:border-slate-300 focus:ring-0 outline-none ${
+                          user.role === 'admin' ? 'bg-indigo-50 text-indigo-600' :
+                          user.role === 'user' ? 'bg-emerald-50 text-emerald-600' :
+                          'bg-slate-100 text-slate-500'
+                        }`}
+                        title="Change user role"
+                      >
+                        <option value="client" className="bg-white text-slate-700 font-bold uppercase">Client</option>
+                        <option value="user" className="bg-white text-slate-700 font-bold uppercase">Seller</option>
+                        <option value="admin" className="bg-white text-slate-700 font-bold uppercase">Admin</option>
+                      </select>
+                    )}
                   </div>
                 ))}
               </div>

@@ -58,3 +58,29 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateUserRole = async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    
+    if (!['client', 'user', 'admin'].includes(role)) {
+      return next(errorHandler(400, 'Invalid role specified.'));
+    }
+
+    const userToUpdate = await User.findById(req.params.userId);
+    if (!userToUpdate) {
+      return next(errorHandler(404, 'User not found!'));
+    }
+
+    if (userToUpdate.role === 'superadmin') {
+      return next(errorHandler(403, 'Superadmin role cannot be modified!'));
+    }
+
+    userToUpdate.role = role;
+    await userToUpdate.save();
+
+    res.status(200).json({ message: `User role successfully updated to ${role}.` });
+  } catch (error) {
+    next(error);
+  }
+};
