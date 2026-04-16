@@ -144,6 +144,7 @@ export default function Profile() {
       }
       dispatch(signOutUserSuccess(data));
       toast.success('Signed out successfully!', { duration: 3000 });
+      navigate('/signin');
     } catch (error) {
       const message = error.response?.data?.message || error.message;
       toast.error(message, { duration: 3000 });

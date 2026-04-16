@@ -28,11 +28,7 @@ export default function ProfileDropdown({ currentUser }) {
         }
         dispatch(signOutUserSuccess(data));
         toast.success('User Signed out successfully!', { duration: 3000 });
-        
-        const currentPath = location.pathname;
-        if (currentPath !== '/' && currentPath !== '/about' && currentPath !== '/search') {
-          navigate('/signin');
-        }
+        navigate('/signin');
       } catch (error) {
         const message = error.response?.data?.message || error.message;
           toast.error(message, { duration: 3000 });
