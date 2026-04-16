@@ -93,7 +93,8 @@ export default function Listing() {
          setListing({...listing, availableRooms: listing.availableRooms - 1});
       }
     } catch (error) {
-      console.log(error);
+      const message = error.response?.data?.message || 'Failed to process booking';
+      toast.error(message);
       setBookingLoading(false);
     }
   };

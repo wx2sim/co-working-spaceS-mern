@@ -5,15 +5,26 @@ import { errorHandler } from '../utils/error.js';
 export const createBooking = async (req, res, next) => {
   try {
     const { listingId, features, finalPrice, paymentMethod, bookingDate } = req.body;
-    
+
     if (!bookingDate) return next(errorHandler(400, 'Booking date is required'));
 
     const listing = await Listing.findById(listingId);
     if (!listing) return next(errorHandler(404, 'Listing not found'));
-    
+
+    // Check if the user already has a pending request for this listing
+    const existingPending = await Booking.findOne({
+      user: req.user.id,
+      listing: listingId,
+      status: 'pending'
+    });
+
+    if (existingPending) {
+      return next(errorHandler(400, "You can't book the same listing twice"));
+    }
+
     // Total capacity of the space
     const capacity = listing.availableRooms !== undefined ? listing.availableRooms : listing.rooms;
-    
+
     // Count how many ACTIVE (approved) bookings already exist for this date
     // We normalize the date to just YYYY-MM-DD to check the whole day
     const startOfDay = new Date(bookingDate);
@@ -62,20 +73,20 @@ export const getOwnerBookings = async (req, res, next) => {
 export const approveBooking = async (req, res, next) => {
   try {
     const booking = await Booking.findById(req.params.id);
-    
+
     if (!booking) return next(errorHandler(404, 'Booking not found'));
     if (booking.owner.toString() !== req.user.id) {
       return next(errorHandler(401, 'You can only approve your own property bookings'));
     }
     if (booking.status !== 'pending') {
-       return next(errorHandler(400, `Booking is already ${booking.status}`));
+      return next(errorHandler(400, `Booking is already ${booking.status}`));
     }
 
     // Decrement listing availability
     const listing = await Listing.findById(booking.listing);
     if (listing) {
       const capacity = listing.availableRooms !== undefined ? listing.availableRooms : listing.rooms;
-      
+
       const startOfDay = new Date(booking.bookingDate);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(booking.bookingDate);
@@ -104,13 +115,13 @@ export const approveBooking = async (req, res, next) => {
 export const rejectBooking = async (req, res, next) => {
   try {
     const booking = await Booking.findById(req.params.id);
-    
+
     if (!booking) return next(errorHandler(404, 'Booking not found'));
     if (booking.owner.toString() !== req.user.id) {
       return next(errorHandler(401, 'You can only reject your own property bookings'));
     }
     if (booking.status !== 'pending') {
-       return next(errorHandler(400, `Booking is already ${booking.status}`));
+      return next(errorHandler(400, `Booking is already ${booking.status}`));
     }
 
     booking.status = 'rejected';
