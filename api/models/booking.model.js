@@ -33,6 +33,10 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     enum: ['cash', 'stripe'],
     required: true,
+  },
+  bookingDate: {
+    type: Date,
+    required: true,
   }
 }, { timestamps: true });
 

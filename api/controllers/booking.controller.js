@@ -4,16 +4,31 @@ import { errorHandler } from '../utils/error.js';
 
 export const createBooking = async (req, res, next) => {
   try {
-    const { listingId, features, finalPrice, paymentMethod } = req.body;
+    const { listingId, features, finalPrice, paymentMethod, bookingDate } = req.body;
     
+    if (!bookingDate) return next(errorHandler(400, 'Booking date is required'));
+
     const listing = await Listing.findById(listingId);
     if (!listing) return next(errorHandler(404, 'Listing not found'));
     
-    // Fallback if availableRooms missing from old listings
-    const available = listing.availableRooms !== undefined ? listing.availableRooms : listing.rooms;
+    // Total capacity of the space
+    const capacity = listing.availableRooms !== undefined ? listing.availableRooms : listing.rooms;
     
-    if (available <= 0) {
-      return next(errorHandler(400, 'This space is fully booked'));
+    // Count how many ACTIVE (approved) bookings already exist for this date
+    // We normalize the date to just YYYY-MM-DD to check the whole day
+    const startOfDay = new Date(bookingDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(bookingDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const activeBookings = await Booking.countDocuments({
+      listing: listingId,
+      status: 'approved',
+      bookingDate: { $gte: startOfDay, $lte: endOfDay }
+    });
+
+    if (activeBookings >= capacity) {
+      return next(errorHandler(400, 'This space is already fully booked for the selected date.'));
     }
 
     const booking = await Booking.create({
@@ -23,6 +38,7 @@ export const createBooking = async (req, res, next) => {
       features,
       finalPrice,
       paymentMethod,
+      bookingDate: new Date(bookingDate)
     });
 
     res.status(201).json(booking);
@@ -58,12 +74,21 @@ export const approveBooking = async (req, res, next) => {
     // Decrement listing availability
     const listing = await Listing.findById(booking.listing);
     if (listing) {
-      const currentAvail = listing.availableRooms !== undefined ? listing.availableRooms : listing.rooms;
-      if (currentAvail > 0) {
-        listing.availableRooms = currentAvail - 1;
-        await listing.save();
-      } else {
-        return next(errorHandler(400, 'Cannot approve: Space is fully booked'));
+      const capacity = listing.availableRooms !== undefined ? listing.availableRooms : listing.rooms;
+      
+      const startOfDay = new Date(booking.bookingDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(booking.bookingDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const activeBookings = await Booking.countDocuments({
+        listing: booking.listing,
+        status: 'approved',
+        bookingDate: { $gte: startOfDay, $lte: endOfDay }
+      });
+
+      if (activeBookings >= capacity) {
+        return next(errorHandler(400, 'Cannot approve: Space is fully booked for this date'));
       }
     }
 

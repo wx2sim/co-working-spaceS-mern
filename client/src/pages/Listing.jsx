@@ -47,6 +47,7 @@ export default function Listing() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [ratingLoading, setRatingLoading] = useState(false);
+  const [bookingDate, setBookingDate] = useState(new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]);
 
   const availableRooms = listing?.availableRooms !== undefined ? listing.availableRooms : listing?.rooms;
   const isFullyBooked = availableRooms <= 0;
@@ -80,7 +81,8 @@ export default function Listing() {
         listingId: listing._id,
         features: selectedFeatures,
         finalPrice: calculateFinalPrice(),
-        paymentMethod: 'cash'
+        paymentMethod: 'cash',
+        bookingDate
       };
       
       await axios.post('/api/booking/create', payload);
@@ -482,6 +484,17 @@ export default function Listing() {
                     </div>
                   ) : (
                     <>
+                       <div className="mb-6">
+                         <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">Select Date</label>
+                         <input 
+                            type="date"
+                            min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]}
+                            value={bookingDate}
+                            onChange={(e) => setBookingDate(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all"
+                         />
+                       </div>
+
                        {listing.category === 'property' ? (
                           <div className="mb-4">
                             <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Optional Features</h4>
