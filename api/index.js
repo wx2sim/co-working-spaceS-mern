@@ -13,7 +13,7 @@ import ratingRouter from './routes/rating.route.js';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import { generalLimiter } from './utils/rateLimiters.js';
 import mongoSanitize from 'mongo-sanitize';
 
 dotenv.config();
@@ -28,20 +28,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 500, // Balanced limit for polling and general usage
-  message: 'Too many requests from this IP'
-});
-
-const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Max 10 attempts per hour for signin/up
-  message: 'Too many login attempts, please try again in an hour'
-});
-
-app.use('/api/auth', authLimiter);
-app.use('/api/', limiter);
+app.use('/api/', generalLimiter);
 
 app.use(cookieParser());
 
