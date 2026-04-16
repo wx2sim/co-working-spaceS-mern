@@ -18,6 +18,7 @@ export default function SuperAdminDashboard() {
   const [loadingListings, setLoadingListings] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -68,10 +69,12 @@ export default function SuperAdminDashboard() {
   };
 
   const roleCount = (role) => allUsers.filter(u => u.role === role).length;
-  const filteredUsers = allUsers.filter(u =>
-    u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = allUsers.filter(u => {
+    const matchesSearch = u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          u.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === 'all' || u.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <AnimatedPage>
@@ -151,17 +154,29 @@ export default function SuperAdminDashboard() {
             <div className='px-6 py-4 border-b border-slate-100'>
               <div className='flex items-center justify-between mb-3'>
                 <h2 className='text-lg font-bold text-slate-900'>All Users</h2>
-                <span className='text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full'>{allUsers.length} total</span>
+                <span className='text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full'>{filteredUsers.length} total</span>
               </div>
-              <div className='flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2'>
-                <FaSearch className='text-slate-400 text-xs' />
-                <input
-                  type='text'
-                  placeholder='Search users...'
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className='bg-transparent text-sm w-full focus:outline-none text-slate-700 placeholder-slate-400'
-                />
+              <div className='flex flex-col sm:flex-row gap-2'>
+                <div className='flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2'>
+                  <FaSearch className='text-slate-400 text-xs' />
+                  <input
+                    type='text'
+                    placeholder='Search users...'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className='bg-transparent text-sm w-full focus:outline-none text-slate-700 placeholder-slate-400'
+                  />
+                </div>
+                <select 
+                  className='bg-slate-50 border border-slate-200 text-sm font-medium text-slate-600 rounded-lg px-3 py-2 focus:outline-none hover:bg-slate-100 transition-colors cursor-pointer'
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Admins</option>
+                  <option value="user">Sellers</option>
+                  <option value="client">Clients</option>
+                </select>
               </div>
             </div>
 
