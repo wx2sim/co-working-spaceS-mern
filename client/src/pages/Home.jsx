@@ -13,6 +13,8 @@ export default function Home() {
   SwiperCore.use([Navigation, Autoplay, EffectFade]);
   const [offerListings, setOfferListings] = useState([]);
   const [rentListings, setRentListings] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [providers, setProviders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
@@ -34,7 +36,25 @@ export default function Home() {
         console.log(error);
       }
     };
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get('/api/review/get');
+        setReviews(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const fetchProviders = async () => {
+      try {
+        const res = await axios.get('/api/user/top-providers');
+        setProviders(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     fetchOfferListings();
+    fetchReviews();
+    fetchProviders();
   }, []);
 
   const handleSearchSubmit = (e) => {
@@ -179,6 +199,47 @@ export default function Home() {
             </div>
           )}
 
+          {/* Top Service Providers */}
+          {providers && providers.length > 0 && (
+            <div className='mb-24'>
+              <div className='flex items-end justify-between mb-8'>
+                <div>
+                  <h2 className='text-3xl font-extrabold text-slate-900 mb-2'>Top Workspace Providers</h2>
+                  <p className='text-slate-500'>Ranked by listings, community activity, and trust.</p>
+                </div>
+              </div>
+              <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6'>
+                {providers.map((provider) => (
+                  <div key={provider._id} className='bg-white border border-slate-100 rounded-3xl p-6 text-center hover:shadow-xl hover:shadow-indigo-500/10 transition-all group'>
+                    <div className='relative inline-block mb-4'>
+                      <img 
+                        src={provider.avatar} 
+                        alt={provider.username} 
+                        className='w-20 h-20 rounded-2xl object-cover border-4 border-slate-50 group-hover:border-indigo-100 transition-colors mx-auto shadow-md' 
+                      />
+                      <div className='absolute -bottom-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white shadow-sm'>
+                        TOP
+                      </div>
+                    </div>
+                    <h4 className='text-sm font-bold text-slate-800 mb-1 truncate'>{provider.username}</h4>
+                    <p className='text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-3'>Space Provider</p>
+                    
+                    <div className='flex items-center justify-center gap-3 pt-3 border-t border-slate-50'>
+                      <div className='text-center'>
+                        <p className='text-[10px] font-bold text-slate-700'>{provider.listingCount}</p>
+                        <p className='text-[8px] text-slate-400'>Listings</p>
+                      </div>
+                      <div className='w-px h-4 bg-slate-100'></div>
+                      <div className='text-center'>
+                        <p className='text-[10px] font-bold text-indigo-600'>{provider.activityScore}</p>
+                        <p className='text-[8px] text-slate-400'>Activity</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Community Reviews Section - Breaking the pattern */}
@@ -194,57 +255,67 @@ export default function Home() {
               <p className='text-slate-400 max-w-2xl mx-auto text-lg'>Hear from freelancers, startups, and enterprises who found their perfect workspace.</p>
             </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-              {/* Review 1 */}
-              <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors'>
-                <div className='flex gap-1 text-amber-400 mb-6'>
-                  <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-                </div>
-                <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic'>
-                  "The process of finding a private office for our growing startup was incredibly seamless. The direct messaging feature allowed me to negotiate directly with the owner."
-                </p>
-                <div className='flex items-center gap-4'>
-                  <img src='https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop' alt='Reviewer' className='w-12 h-12 rounded-full object-cover border border-slate-700' />
-                  <div>
-                    <h4 className='text-white font-bold text-sm'>Sarah Jenkins</h4>
-                    <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>Tech Founder</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Review 2 */}
-              <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors transform md:-translate-y-4 shadow-2xl'>
-                <div className='flex gap-1 text-amber-400 mb-6'>
-                  <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-                </div>
-                <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic'>
-                  "I book hot desks in different cities as a digital nomad. This platform always highlights the spaces with the fastest Wi-Fi and best coffee. Absolute lifesaver!"
-                </p>
-                <div className='flex items-center gap-4'>
-                  <img src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop' alt='Reviewer' className='w-12 h-12 rounded-full object-cover border border-slate-700' />
-                  <div>
-                    <h4 className='text-white font-bold text-sm'>Marcus Chen</h4>
-                    <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>Digital Nomad</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Review 3 */}
-              <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors'>
-                <div className='flex gap-1 text-amber-400 mb-6'>
-                  <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-                </div>
-                <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic'>
-                  "We rented a massive creative studio in downtown. The search filters made it so easy to find a place that matched our specific production requirements."
-                </p>
-                <div className='flex items-center gap-4'>
-                  <img src='https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop' alt='Reviewer' className='w-12 h-12 rounded-full object-cover border border-slate-700' />
-                  <div>
-                    <h4 className='text-white font-bold text-sm'>Emily Rodriguez</h4>
-                    <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>Creative Director</p>
-                  </div>
-                </div>
-              </div>
+            <div className='mt-8'>
+              <Swiper
+                modules={[Autoplay, Navigation]}
+                spaceBetween={30}
+                slidesPerView={1}
+                navigation
+                autoplay={{ delay: 4000, disableOnInteraction: false }}
+                loop={reviews.length > 3}
+                breakpoints={{
+                  640: { slidesPerView: 2 },
+                  1024: { slidesPerView: 3 }
+                }}
+                className='pb-12'
+              >
+                {reviews.length === 0 ? (
+                  // Fallback to placeholders if no reviews in DB
+                  [1, 2, 3].map((i) => (
+                    <SwiperSlide key={i}>
+                      <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 h-full'>
+                        <div className='flex gap-1 text-amber-400 mb-6'>
+                          <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+                        </div>
+                        <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic'>
+                          "Loading wonderful community stories..."
+                        </p>
+                        <div className='flex items-center gap-4'>
+                          <div className='w-12 h-12 rounded-full bg-slate-800' />
+                          <div>
+                            <h4 className='text-white font-bold text-sm'>Community Member</h4>
+                            <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>Member</p>
+                          </div>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))
+                ) : (
+                  reviews.map((review) => (
+                    <SwiperSlide key={review._id}>
+                      <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all h-full group'>
+                        <div className='flex gap-1 text-amber-400 mb-6'>
+                          {[...Array(review.rating)].map((_, i) => <FaStar key={i} />)}
+                        </div>
+                        <p className='text-slate-300 text-sm leading-relaxed mb-8 font-light italic group-hover:text-white transition-colors'>
+                          "{review.content}"
+                        </p>
+                        <div className='flex items-center gap-4'>
+                          <img 
+                            src={review.authorAvatar} 
+                            alt={review.authorName} 
+                            className='w-12 h-12 rounded-full object-cover border border-slate-700 shadow-lg' 
+                          />
+                          <div>
+                            <h4 className='text-white font-bold text-sm'>{review.authorName}</h4>
+                            <p className='text-slate-500 text-[10px] uppercase tracking-wider font-bold'>{review.profession}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))
+                )}
+              </Swiper>
             </div>
           </div>
         </div>

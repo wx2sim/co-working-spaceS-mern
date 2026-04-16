@@ -10,6 +10,16 @@ export const user = (req, res) => {
   })
 }
 
+export const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return next(errorHandler(404, 'User not found'));
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateUser = async (req, res, next) => {
   if (req.user.id !== req.params.id)
     return next(errorHandler(401, 'You can only update your account!'));
@@ -34,7 +44,7 @@ export const updateUser = async (req, res, next) => {
         },
       }, { returnDocument: 'after' }
     );
-    const { password, ...rest } = updatedUser._doc;
+    const { password, role, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
   } catch (error) {
     next(error);
@@ -78,7 +88,7 @@ export const getUser = async (req, res, next) => {
 
     if (!user) return next(errorHandler(404, 'User not found!'));
 
-    const { password: pass, ...rest } = user._doc;
+    const { password: pass, role, ...rest } = user._doc;
 
     res.status(200).json(rest);
   } catch (error) {
@@ -86,3 +96,38 @@ export const getUser = async (req, res, next) => {
   }
 };
 
+export const getTopProviders = async (req, res, next) => {
+  try {
+    const topSellers = await User.aggregate([
+      { $match: { role: 'user' } },
+      { $addFields: { idString: { $toString: "$_id" } } },
+      {
+        $lookup: {
+          from: 'listings',
+          localField: 'idString',
+          foreignField: 'userRef',
+          as: 'listings'
+        }
+      },
+      {
+        $project: {
+          username: 1,
+          avatar: 1,
+          activityScore: 1,
+          listingCount: { $size: '$listings' },
+        }
+      },
+      {
+        $addFields: {
+          rankScore: { $add: ['$activityScore', { $multiply: ['$listingCount', 5] }] }
+        }
+      },
+      { $sort: { rankScore: -1 } },
+      { $limit: 6 }
+    ]);
+
+    res.status(200).json(topSellers);
+  } catch (error) {
+    next(error);
+  }
+};

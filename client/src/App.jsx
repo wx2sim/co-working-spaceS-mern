@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
@@ -16,6 +16,9 @@ import Schedule from './pages/Schedule';
 import AdminUsers from './pages/AdminUsers';
 import Settings from './pages/Settings';
 import ThemeProvider from './components/ThemeProvider';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { signInSuccess, signOutUserSuccess } from './redux/user/userSlice';
 
 // Error Pages
 import NotFound from './pages/Other Pages/NotFound';
@@ -71,6 +74,23 @@ function DynamicErrorPage() {
 }
 
 export default function App() {
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector(state => state.user);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!currentUser || currentUser.role) return;
+
+      try {
+        const { data } = await axios.get('/api/user/me');
+        dispatch(signInSuccess(data));
+      } catch (error) {
+        dispatch(signOutUserSuccess());
+      }
+    };
+    fetchUser();
+  }, [dispatch, currentUser]);
+
   return (
     <BrowserRouter>
       <ThemeProvider>

@@ -8,11 +8,40 @@ import adminRouter from './routes/admin.route.js';
 import messageRouter from './routes/message.route.js';
 import bookingRouter from './routes/booking.route.js';
 import taskRouter from './routes/task.route.js';
+import reviewRouter from './routes/review.route.js';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'mongo-sanitize';
+
 dotenv.config();
+
 const app = express();
-app.use(express.json());
+
+// Security Middleware
+app.use(helmet());
+app.use(express.json({ limit: '10kb' })); // Body size limit to prevent DDoS
+app.use((req, res, next) => {
+  req.body = mongoSanitize(req.body); // Prevent NoSQL injection
+  next();
+});
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 500, // Balanced limit for polling and general usage
+  message: 'Too many requests from this IP'
+});
+
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Max 10 attempts per hour for signin/up
+  message: 'Too many login attempts, please try again in an hour'
+});
+
+app.use('/api/auth', authLimiter);
+app.use('/api/', limiter);
+
 app.use(cookieParser());
 
 mongoose.connect(process.env.MONGO).then(() => {
@@ -31,6 +60,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/message', messageRouter);
 app.use('/api/booking', bookingRouter);
 app.use('/api/task', taskRouter);
+app.use('/api/review', reviewRouter);
 
 app.use((err, req, res, next) => {
  const statusCode = err.statusCode || 500;

@@ -167,6 +167,16 @@ export default function Profile() {
     }
   };
 
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      const { data } = await axios.delete(`/api/booking/cancel/${bookingId}`);
+      toast.success('Reservation cancelled successfully');
+      setBookedSpaces((prev) => prev.filter((b) => b._id !== bookingId));
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to cancel booking');
+    }
+  };
+
   const handleShowAdminUsers = async () => {
     if (adminUsersFetched) {
       setAdminUsers([]);
@@ -570,9 +580,21 @@ export default function Profile() {
                             </div>
                           </div>
                         )}
-                        <p className='text-[10px] text-slate-400 absolute bottom-3 right-4'>
-                          {new Date(space.createdAt).toLocaleDateString()}
-                        </p>
+                        <div className='flex items-center justify-between mt-auto'>
+                          <p className='text-[10px] text-slate-400'>
+                            {new Date(space.createdAt).toLocaleDateString()}
+                          </p>
+                          
+                          <SmartModal
+                            triggerText="Cancel"
+                            triggerColorClass="text-[10px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest transition-colors"
+                            modalTitle="Cancel Reservation"
+                            modalContent="Are you sure you want to cancel this booking? This will remove your reservation."
+                            okText="Yes, Cancel"
+                            okColorClass="bg-red-600 !text-white hover:!bg-red-700"
+                            onOkAction={() => handleCancelBooking(space._id)}
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>

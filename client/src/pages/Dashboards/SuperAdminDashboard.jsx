@@ -9,6 +9,7 @@ import {
   FaClipboardList, FaUserShield, FaDoorOpen, FaEnvelope, FaSearch, FaClock
 } from 'react-icons/fa';
 import TaskModal from '../../components/TaskModal';
+import AddReviewModal from '../../components/AddReviewModal';
 
 export default function SuperAdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -27,6 +28,7 @@ export default function SuperAdminDashboard() {
   const [tasks, setTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [loadingTasks, setLoadingTasks] = useState(true);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -163,6 +165,12 @@ export default function SuperAdminDashboard() {
             >
               <FaClock size={12} /> Create Task
             </button>
+            <button 
+              onClick={() => setIsReviewModalOpen(true)}
+              className='text-xs font-bold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-sm'
+            >
+              <FaArrowUp size={12} /> Add Review
+            </button>
             <Link
               to='/profile'
               className='text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1'
@@ -180,6 +188,12 @@ export default function SuperAdminDashboard() {
             }} 
             onTaskCreated={handleTaskCreated} 
             taskToEdit={taskToEdit}
+        />
+
+        <AddReviewModal 
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          onReviewAdded={() => {}}
         />
 
         {/* Stats Row */}

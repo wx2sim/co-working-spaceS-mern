@@ -25,8 +25,8 @@ export const signin = async (req, res, next) => {
     if (!validUser) return next(errorHandler(404, 'User not found!'));
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, 'Wrong credentials!'));
-    const token = jwt.sign({ id: validUser._id , role: validUser.role }, process.env.JWT_SECRET);
-    const { password: pass, ...rest } = validUser._doc;
+    const token = jwt.sign({ id: validUser._id  }, process.env.JWT_SECRET);
+    const { password: pass, role, ...rest } = validUser._doc;
     res
       .cookie('access_token', token, { httpOnly: true })
       .status(200)
@@ -41,8 +41,8 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     
     if (user) {
-      const token = jwt.sign({ id: user._id , role: user.role }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = user._doc;
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const { password: pass, role, ...rest } = user._doc;
       
       res
         .cookie('access_token', token, { httpOnly: true })
@@ -63,7 +63,7 @@ export const google = async (req, res, next) => {
       
       await newUser.save();
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = newUser._doc;
+      const { password: pass, role, ...rest } = newUser._doc;
       
       res
         .cookie('access_token', token, { httpOnly: true })

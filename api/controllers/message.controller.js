@@ -25,6 +25,9 @@ export const sendMessage = async (req, res, next) => {
 
 export const getMessages = async (req, res, next) => {
   try {
+    const limit = parseInt(req.query.limit) || 100;
+    const startIndex = parseInt(req.query.startIndex) || 0;
+
     // Get messages where the current user is either sender or receiver and hasn't deleted them
     const messages = await Message.find({
       $and: [
@@ -35,7 +38,9 @@ export const getMessages = async (req, res, next) => {
     .populate('sender', 'username avatar email')
     .populate('receiver', 'username avatar email')
     .populate('listing', 'name imageUrls')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .skip(startIndex);
 
     res.status(200).json(messages);
   } catch (error) {
@@ -97,19 +102,18 @@ export const deleteConversation = async (req, res, next) => {
       return next(errorHandler(403, 'Conversations between administrators cannot be deleted.'));
     }
 
-    const messages = await Message.find({
-      $or: [
-        { sender: userId, receiver: contactId },
-        { sender: contactId, receiver: userId }
-      ]
-    });
-
-    for (let msg of messages) {
-       if (!msg.deletedBy.includes(userId)) {
-           msg.deletedBy.push(userId);
-           await msg.save();
-       }
-    }
+    await Message.updateMany(
+      {
+        $or: [
+          { sender: userId, receiver: contactId },
+          { sender: contactId, receiver: userId }
+        ],
+        deletedBy: { $ne: userId }
+      },
+      {
+        $addToSet: { deletedBy: userId }
+      }
+    );
 
     res.status(200).json({ success: true, message: 'Conversation deleted from your view.' });
   } catch (error) {

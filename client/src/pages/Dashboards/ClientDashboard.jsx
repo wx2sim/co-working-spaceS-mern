@@ -30,7 +30,7 @@ export default function ClientDashboard() {
 
     const fetchBookings = async () => {
       try {
-        const { data } = await axios.get(`/api/user/spaces/${currentUser._id}`);
+        const { data } = await axios.get('/api/booking/client');
         setBookedSpaces(Array.isArray(data) ? data.slice(0, 3) : []);
       } catch (err) {
         console.log('Could not fetch bookings');
@@ -184,8 +184,8 @@ export default function ClientDashboard() {
                     <div key={space._id} className='flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-2.5'>
                       <FaCalendarCheck className='text-indigo-500 text-sm flex-shrink-0' />
                       <div className='min-w-0'>
-                        <p className='text-xs font-semibold text-slate-700 truncate'>{space.listingName || 'Workspace'}</p>
-                        <p className='text-[10px] text-slate-400'>{new Date(space.date).toLocaleDateString()}</p>
+                        <p className='text-xs font-semibold text-slate-700 truncate'>{space.listing?.name || 'Workspace'}</p>
+                        <p className='text-[10px] text-slate-400'>{new Date(space.createdAt).toLocaleDateString()}</p>
                       </div>
                       <span className='text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold ml-auto whitespace-nowrap'>
                         {space.status || 'Confirmed'}

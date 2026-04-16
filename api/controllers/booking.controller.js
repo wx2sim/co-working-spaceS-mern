@@ -107,3 +107,29 @@ export const getClientBookings = async (req, res, next) => {
     next(error);
   }
 };
+
+export const cancelBooking = async (req, res, next) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return next(errorHandler(404, 'Booking not found'));
+
+    // Check if user is the one who booked or the owner
+    if (booking.user.toString() !== req.user.id) {
+      return next(errorHandler(401, 'You can only cancel your own bookings'));
+    }
+
+    // If it was already approved, restore the availability
+    if (booking.status === 'approved') {
+      const listing = await Listing.findById(booking.listing);
+      if (listing && listing.availableRooms !== undefined) {
+        listing.availableRooms = listing.availableRooms + 1;
+        await listing.save();
+      }
+    }
+
+    await Booking.findByIdAndDelete(req.params.id);
+    res.status(200).json('Booking has been cancelled');
+  } catch (error) {
+    next(error);
+  }
+};

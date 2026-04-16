@@ -66,6 +66,11 @@ const listingSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+listingSchema.index({ userRef: 1 });
+listingSchema.index({ type: 1 });
+listingSchema.index({ offer: 1 });
+
 const Listing = mongoose.model('Listing', listingSchema);
 
 export default Listing;
