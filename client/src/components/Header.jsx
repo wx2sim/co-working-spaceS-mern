@@ -7,10 +7,13 @@ import { Drawer } from 'antd';
 import ProfileDropdown from './ProfileDropdown';
 import SmartButton from '../components/SmartButton';
 import axios from 'axios';
+import { useSocketContext } from '../context/SocketContext';
+import toast from 'react-hot-toast';
 
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
+  const { socket } = useSocketContext();
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -19,6 +22,7 @@ function Header() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
 
   useEffect(() => {
     if (currentUser) {
@@ -30,13 +34,66 @@ function Header() {
           console.log(error);
         }
       };
+
+      const fetchPending = async () => {
+        if (currentUser.role === 'admin' || currentUser.role === 'user' || currentUser.role === 'superadmin') {
+            try {
+                const { data } = await axios.get('/api/booking/pending-count');
+                setPendingBookingsCount(data.count || 0);
+            } catch (error) { console.log(error); }
+        }
+      }
+
       // Fetch immediately on mount or user change
       fetchUnread();
-      // Poll every 30 seconds for new messages
-      const interval = setInterval(fetchUnread, 30000);
+      fetchPending();
+
+      // Poll every 30 seconds for new messages and bookings
+      const interval = setInterval(() => {
+        fetchUnread();
+        fetchPending();
+      }, 30000);
       return () => clearInterval(interval);
     }
   }, [currentUser]);
+
+  // Socket.io listeners
+  useEffect(() => {
+    if (socket) {
+      socket.on('new_booking_request', (data) => {
+        toast.success(`📅 ${data.message}`, {
+            duration: 5000,
+            icon: '🏢'
+        });
+        setPendingBookingsCount(prev => prev + 1);
+      });
+
+      socket.on('receive_message', (message) => {
+        toast(`✉️ New message: ${message.content.substring(0, 30)}...`, {
+            duration: 4000,
+            icon: '💬'
+        });
+        // Optionally refetch unread count
+        const fetchUnread = async () => {
+            const { data } = await axios.get('/api/message/unread-count');
+            setUnreadCount(data.count || 0);
+        };
+        fetchUnread();
+      });
+
+      socket.on('booking_status_updated', (data) => {
+        toast.success(`📢 ${data.message}`, {
+            duration: 6000,
+        });
+      });
+
+      return () => {
+        socket.off('new_booking_request');
+        socket.off('receive_message');
+        socket.off('booking_status_updated');
+      };
+    }
+  }, [socket]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -110,7 +167,7 @@ function Header() {
         {currentUser && (
           <>
             <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} />
-            <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />
+            <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} badge={pendingBookingsCount} />
           </>
         )}
       </>

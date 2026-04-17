@@ -1,3 +1,4 @@
+import { app, server, io } from './socket.js';
 import express from 'express';
 import mongoose from 'mongoose';
 import userRouter from './routes/user.route.js'
@@ -19,7 +20,7 @@ import mongoSanitize from 'mongo-sanitize';
 
 dotenv.config();
 
-const app = express();
+// app is now imported from socket.js
 
 // Security Middleware
 app.use(helmet());
@@ -35,10 +36,16 @@ app.use(cookieParser());
 
 mongoose.connect(process.env.MONGO).then(() => {
   console.log('Connected to Mongodb');
-  app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-});
+  server.listen(3001, () => {
+    console.log('Server is running on port 3001');
+  });
 }).catch((err) => { console.log('Error Connecting to Mongodb',err)});
+
+// Fast shutdown for development efficiency
+process.on('SIGUSR2', () => {
+    if (io) io.close();
+    process.exit(0);
+});
 
 
 app.use('/api/user', userRouter);

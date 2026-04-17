@@ -1,6 +1,7 @@
 import Message from '../models/message.model.js';
 import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
+import { getReceiverSocketId, io } from '../socket.js';
 
 export const sendMessage = async (req, res, next) => {
   try {
@@ -17,7 +18,18 @@ export const sendMessage = async (req, res, next) => {
       content
     });
 
-    res.status(201).json(newMessage);
+    // Notify receiver with populated data
+    const populatedMessage = await Message.findById(newMessage._id)
+      .populate('sender', 'username avatar email')
+      .populate('receiver', 'username avatar email')
+      .populate('listing', 'name imageUrls');
+
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('receive_message', populatedMessage);
+    }
+
+    res.status(201).json(populatedMessage);
   } catch (error) {
     next(error);
   }

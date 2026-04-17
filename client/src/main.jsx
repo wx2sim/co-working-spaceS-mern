@@ -6,11 +6,15 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { Toaster } from 'react-hot-toast';
 
+import { SocketContextProvider } from './context/SocketContext.jsx';
+
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-    <Toaster  position='top-center '/>
-    <App />
+    <SocketContextProvider>
+      <Toaster  position='top-center '/>
+      <App />
+    </SocketContextProvider>
     </PersistGate>
   </Provider>,
 ) 

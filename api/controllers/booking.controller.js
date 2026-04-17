@@ -1,6 +1,7 @@
 import Booking from '../models/booking.model.js';
 import Listing from '../models/listing.model.js';
 import { errorHandler } from '../utils/error.js';
+import { getReceiverSocketId, io } from '../socket.js';
 
 export const createBooking = async (req, res, next) => {
   try {
@@ -51,6 +52,19 @@ export const createBooking = async (req, res, next) => {
       paymentMethod,
       bookingDate: new Date(bookingDate)
     });
+
+    // Notify owner
+    const populatedBooking = await Booking.findById(booking._id)
+      .populate('user', 'username email avatar')
+      .populate('listing', 'name imageUrls availableRooms rooms');
+
+    const receiverSocketId = getReceiverSocketId(listing.userRef);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('new_booking_request', {
+        message: `New booking request for ${listing.name}`,
+        booking: populatedBooking
+      });
+    }
 
     res.status(201).json(booking);
   } catch (error) {
@@ -106,6 +120,15 @@ export const approveBooking = async (req, res, next) => {
     booking.status = 'approved';
     await booking.save();
 
+    // Notify client
+    const receiverSocketId = getReceiverSocketId(booking.user);
+    if (receiverSocketId) {
+        io.to(receiverSocketId).emit('booking_status_updated', {
+            message: `Your booking for property was approved!`,
+            booking
+        });
+    }
+
     res.status(200).json(booking);
   } catch (error) {
     next(error);
@@ -126,6 +149,15 @@ export const rejectBooking = async (req, res, next) => {
 
     booking.status = 'rejected';
     await booking.save();
+
+    // Notify client
+    const receiverSocketId = getReceiverSocketId(booking.user);
+    if (receiverSocketId) {
+        io.to(receiverSocketId).emit('booking_status_updated', {
+            message: `Your booking request was rejected.`,
+            booking
+        });
+    }
 
     res.status(200).json(booking);
   } catch (error) {
@@ -168,4 +200,16 @@ export const cancelBooking = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const getPendingCount = async (req, res, next) => {
+    try {
+        const count = await Booking.countDocuments({
+            owner: req.user.id,
+            status: 'pending'
+        });
+        res.status(200).json({ count });
+    } catch (error) {
+        next(error);
+    }
 };

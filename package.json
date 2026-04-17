@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon api/index.js",
+    "dev": "npx kill-port 3001 && nodemon api/index.js",
     "start": "node api/index.js"
   },
   "keywords": [],
@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongo-sanitize": "^1.1.0",
     "mongoose": "^9.3.3",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "socket.io": "^4.8.3"
   }
 }

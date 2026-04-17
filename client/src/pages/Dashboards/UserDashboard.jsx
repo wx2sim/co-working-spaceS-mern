@@ -13,9 +13,11 @@ import toast from 'react-hot-toast';
 import StatCard from '../../components/StatCard';
 import AnalyticsChart from '../../components/AnalyticsChart';
 import { FaWallet, FaClipboardCheck, FaBuilding, FaClock } from 'react-icons/fa';
+import { useSocketContext } from '../../context/SocketContext';
 
 export default function UserDashboard() {
   const { currentUser } = useSelector((state) => state.user);
+  const { socket } = useSocketContext();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('listings');
@@ -67,6 +69,32 @@ export default function UserDashboard() {
     fetchBookings();
     fetchOwnerStats();
   }, [currentUser._id, days]);
+
+  // Real-time updates for bookings
+  useEffect(() => {
+    if (socket) {
+      socket.on('new_booking_request', (data) => {
+        // Add newest booking to the top
+        setBookings((prev) => [data.booking, ...prev]);
+        
+        // Update stats badge if ownerStats exists
+        if (ownerStats) {
+            const updatedCounts = [...(ownerStats.bookingStatusCounts || [])];
+            const pendingIndex = updatedCounts.findIndex(s => s._id === 'pending');
+            if (pendingIndex !== -1) {
+                updatedCounts[pendingIndex].count += 1;
+            } else {
+                updatedCounts.push({ _id: 'pending', count: 1 });
+            }
+            setOwnerStats({ ...ownerStats, bookingStatusCounts: updatedCounts });
+        }
+      });
+
+      return () => {
+        socket.off('new_booking_request');
+      };
+    }
+  }, [socket, ownerStats]);
 
   const greeting = () => {
     const hour = new Date().getHours();

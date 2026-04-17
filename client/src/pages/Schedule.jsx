@@ -6,9 +6,11 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import TaskModal from '../components/TaskModal';
+import { useSocketContext } from '../context/SocketContext';
 
 export default function Schedule() {
   const { currentUser } = useSelector((state) => state.user);
+  const { socket } = useSocketContext();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
@@ -43,6 +45,24 @@ export default function Schedule() {
     fetchMessages();
     fetchTasks();
   }, []);
+
+  // Listen for incoming messages via socket
+  useEffect(() => {
+    if (socket) {
+      socket.on('receive_message', (newMessage) => {
+        // Prevent duplicate if we were the sender (we already updated state locally)
+        setMessages((prev) => {
+          const isDuplicate = prev.some(m => m._id === newMessage._id);
+          if (isDuplicate) return prev;
+          return [...prev, newMessage];
+        });
+      });
+
+      return () => {
+        socket.off('receive_message');
+      };
+    }
+  }, [socket]);
 
   // Scroll to bottom when thread changes or new message
   useEffect(() => {
@@ -92,13 +112,17 @@ export default function Schedule() {
     const lastMessage = activeThread.messages[activeThread.messages.length - 1];
     
     try {
-      await axios.post('/api/message/send', {
+      const { data } = await axios.post('/api/message/send', {
         receiverId: activeThread.contact._id,
         listingId: lastMessage.listing?._id,
         content: replyText
       });
       setReplyText('');
-      fetchMessages(); // Refresh messages
+      
+      // Update local state immediately for a snappy feel
+      setMessages((prev) => [...prev, data]);
+      // Also potentially fetch to ensure sync, but the local update handles the UI
+      // fetchMessages(); 
     } catch (error) {
       toast.error('Failed to send message');
     }
