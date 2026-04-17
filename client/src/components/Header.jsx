@@ -146,6 +146,7 @@ function Header() {
       return (
         <>
           <NavLink to='/admin/users' text='Users' onClick={handleLinkClick} />
+          <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} />
           <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />
         </>
       );
