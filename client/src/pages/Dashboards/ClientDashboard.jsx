@@ -21,7 +21,7 @@ export default function ClientDashboard() {
   useEffect(() => {
     const fetchRecent = async () => {
       try {
-        const { data } = await axios.get('/api/listing/get?limit=4&sort=createdAt&order=desc');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/listing/get?limit=4&sort=createdAt&order=desc`);
         setRecentListings(data);
       } catch (err) {
         console.log('Could not fetch listings');
@@ -32,12 +32,12 @@ export default function ClientDashboard() {
 
     const fetchBookings = async () => {
       try {
-        const { data } = await axios.get('/api/booking/client');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/client`);
         setBookedSpaces(Array.isArray(data) ? data.slice(0, 3) : []);
         
         // Mark as seen when dashboard is opened
         if (Array.isArray(data) && data.some(b => !b.statusSeenByClient)) {
-            await axios.put('/api/booking/mark-status-seen');
+            await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/booking/mark-status-seen`);
         }
       } catch (err) {
         console.log('Could not fetch bookings');
@@ -48,7 +48,7 @@ export default function ClientDashboard() {
 
     const checkUpgrade = async () => {
       try {
-        const { data } = await axios.get('/api/upgrade/my-status');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/my-status`);
         setUpgradeStatus(data.status);
       } catch (err) { /* ignore */ }
     };

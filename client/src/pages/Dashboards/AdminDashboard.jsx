@@ -39,7 +39,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await axios.get(`/api/admin/users/${currentUser._id}`, {
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${currentUser._id}`, {
           params: { limit: 5, sort: 'activityScore', order: 'desc', roleFilter: teamTab }
         });
         setUsers(data.users || []);
@@ -57,7 +57,7 @@ export default function AdminDashboard() {
 
     const fetchRequests = async () => {
       try {
-        const { data } = await axios.get('/api/upgrade/pending');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/pending`);
         setUpgradeRequests(Array.isArray(data) ? data : []);
       } catch (err) {
         console.log('Could not fetch upgrade requests');
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
 
     const fetchTasks = async () => {
       try {
-        const { data } = await axios.get('/api/task/all');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/task/all`);
         setTasks(data);
       } catch (err) { console.log('Could not fetch tasks'); }
       finally { setLoadingTasks(false); }
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
 
     const fetchReviews = async () => {
       try {
-        const { data } = await axios.get('/api/review/get');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/review/get`);
         setReviews(data);
       } catch (err) { console.log('Could not fetch reviews'); }
       finally { setLoadingReviews(false); }
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
       try {
         setLoadingStats(true);
-        const { data } = await axios.get('/api/stats/platform', { params: { range } });
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/platform`, { params: { range } });
         setStats(data);
       } catch (err) { console.log('Could not fetch stats'); }
       finally { setLoadingStats(false); }
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
 
   const handleApprove = async (id) => {
     try {
-      await axios.post(`/api/upgrade/approve/${id}`);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/approve/${id}`);
       setUpgradeRequests(prev => prev.filter(r => r._id !== id));
       toast.success('Request approved! User upgraded to seller.');
     } catch (err) {
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
 
   const handleDeny = async (id) => {
     try {
-      await axios.post(`/api/upgrade/deny/${id}`);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/deny/${id}`);
       setUpgradeRequests(prev => prev.filter(r => r._id !== id));
       toast.success('Request denied.');
     } catch (err) {
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm('Are you sure you want to delete this task?')) return;
     try {
-      await axios.delete(`/api/task/delete/${taskId}`);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/task/delete/${taskId}`);
       setTasks(tasks.filter(t => t._id !== taskId));
       toast.success('Task deleted successfully');
     } catch (error) {
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
   const handleDeleteReview = async (id) => {
     if (!window.confirm('Delete this testimonial?')) return;
     try {
-      await axios.delete(`/api/review/delete/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/review/delete/${id}`);
       setReviews(reviews.filter(r => r._id !== id));
       toast.success('Review deleted');
     } catch (err) { toast.error('Failed to delete'); }

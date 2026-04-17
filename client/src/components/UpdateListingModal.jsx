@@ -137,7 +137,7 @@ export default function UpdateListingModal({ isOpen, onClose, listing, onUpdateS
       
       setLoading(true);
       setError(false);
-      const { data } = await axios.post(`/api/listing/update/${listing._id}`, {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/listing/update/${listing._id}`, {
         ...formData,
         userRef: currentUser._id,
       });

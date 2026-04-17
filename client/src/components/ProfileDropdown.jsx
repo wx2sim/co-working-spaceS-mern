@@ -19,7 +19,7 @@ export default function ProfileDropdown({ currentUser }) {
   const handleSignOut = async ()=> {
       try {
         dispatch(signOutUserStart());
-        const { data } = await axios.post(`/api/auth/signout`);
+        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signout`);
         console.log(data);
         if (data.success === false) {
           toast.error(data.message, { duration: 3000 });

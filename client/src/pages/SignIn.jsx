@@ -38,7 +38,7 @@ export default function SignIn() {
     e.preventDefault();
     try {
       dispatch(signInStart());
-      const { data } = await axios.post('/api/auth/signin', formData);
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signin`, formData);
       if (data.success === false) {
         dispatch(signInFailure(data.message));
         return;

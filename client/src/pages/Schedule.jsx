@@ -23,7 +23,7 @@ export default function Schedule() {
 
   const fetchMessages = async () => {
     try {
-      const { data } = await axios.get('/api/message/all');
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/message/all`);
       setMessages(data);
     } catch (error) {
       toast.error('Failed to load messages');
@@ -34,7 +34,7 @@ export default function Schedule() {
 
   const fetchTasks = async () => {
     try {
-      const { data } = await axios.get('/api/task/all');
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/task/all`);
       setUpcomingEvents(data);
     } catch (error) {
       console.log('Failed to fetch tasks');
@@ -112,7 +112,7 @@ export default function Schedule() {
     const lastMessage = activeThread.messages[activeThread.messages.length - 1];
     
     try {
-      const { data } = await axios.post('/api/message/send', {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/message/send`, {
         receiverId: activeThread.contact._id,
         listingId: lastMessage.listing?._id,
         content: replyText
@@ -137,7 +137,7 @@ export default function Schedule() {
     if (unreadMessages.length > 0) {
        for (let msg of unreadMessages) {
          try {
-           await axios.put(`/api/message/read/${msg._id}`);
+           await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/message/read/${msg._id}`);
          } catch(e) {}
        }
        fetchMessages();
@@ -147,7 +147,7 @@ export default function Schedule() {
   const handleDeleteConversation = async () => {
     if (!activeContactId) return;
     try {
-      await axios.delete(`/api/message/conversation/${activeContactId}`);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/message/conversation/${activeContactId}`);
       toast.success('Conversation has been deleted from your inbox.');
       setActiveContactId(null);
       fetchMessages();
@@ -162,7 +162,7 @@ export default function Schedule() {
 
   const handleMarkTaskDone = async (taskId) => {
     try {
-      const { data } = await axios.put(`/api/task/update/${taskId}`, { status: 'Done' });
+      const { data } = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/task/update/${taskId}`, { status: 'Done' });
       setUpcomingEvents(upcomingEvents.map(ev => ev._id === taskId ? data : ev));
     } catch (error) {
       toast.error('Failed to mark task as done');

@@ -121,7 +121,7 @@ export default function CreateListingModal({ isOpen, onClose }) {
       setLoading(true);
       setError(false);
       
-      const { data } = await axios.post('/api/listing/create', {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/listing/create`, {
         ...formData,
         userRef: currentUser._id,
       });

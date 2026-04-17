@@ -29,7 +29,7 @@ function Header() {
     if (currentUser) {
       const fetchUnread = async () => {
         try {
-          const { data } = await axios.get('/api/message/unread-count');
+          const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/message/unread-count`);
           setUnreadCount(data.count || 0);
         } catch (error) {
           console.log(error);
@@ -39,13 +39,13 @@ function Header() {
       const fetchPending = async () => {
         if (currentUser.role === 'admin' || currentUser.role === 'user' || currentUser.role === 'superadmin') {
             try {
-                const { data } = await axios.get('/api/booking/pending-count');
+                const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/pending-count`);
                 setPendingBookingsCount(data.count || 0);
             } catch (error) { console.log(error); }
         }
         if (currentUser.role === 'client') {
             try {
-                const { data } = await axios.get('/api/booking/unseen-status-count');
+                const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/unseen-status-count`);
                 setUnseenStatusCount(data.count || 0);
             } catch (error) { console.log(error); }
         }
@@ -82,7 +82,7 @@ function Header() {
         });
         // Optionally refetch unread count
         const fetchUnread = async () => {
-            const { data } = await axios.get('/api/message/unread-count');
+            const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/message/unread-count`);
             setUnreadCount(data.count || 0);
         };
         fetchUnread();

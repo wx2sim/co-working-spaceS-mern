@@ -23,11 +23,11 @@ export default function TaskModal({ isOpen, onClose, onTaskCreated, taskToEdit }
     setLoading(true);
     try {
       if (taskToEdit) {
-        const { data } = await axios.put(`/api/task/update/${taskToEdit._id}`, newTask);
+        const { data } = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/task/update/${taskToEdit._id}`, newTask);
         onTaskCreated(data); // Using same callback for simplicity
         toast.success('Task updated successfully');
       } else {
-        const { data } = await axios.post('/api/task/create', newTask);
+        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/task/create`, newTask);
         onTaskCreated(data);
         setNewTask({ title: '', date: '', time: '' });
         toast.success('Task created successfully');

@@ -44,7 +44,7 @@ export default function AddReviewModal({ isOpen, onClose, onReviewAdded, reviewT
       const fetchUsers = async () => {
         try {
           setLoadingUsers(true);
-          const { data } = await axios.get(`/api/admin/users/${currentUser._id}`, {
+          const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${currentUser._id}`, {
             params: { limit: 1000 }
           });
           setUsers(data.users || []);
@@ -63,11 +63,11 @@ export default function AddReviewModal({ isOpen, onClose, onReviewAdded, reviewT
     setLoading(true);
     try {
       if (reviewToEdit) {
-        const { data } = await axios.put(`/api/review/update/${reviewToEdit._id}`, formData);
+        const { data } = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/review/update/${reviewToEdit._id}`, formData);
         toast.success('Review updated successfully!');
         onReviewAdded(data);
       } else {
-        const { data } = await axios.post('/api/review/create', formData);
+        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/review/create`, formData);
         toast.success('Review added successfully!');
         onReviewAdded(data);
       }

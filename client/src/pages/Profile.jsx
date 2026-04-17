@@ -59,7 +59,7 @@ export default function Profile() {
     if (currentUser?.role === 'client') {
       const checkUpgradeStatus = async () => {
         try {
-          const { data } = await axios.get('/api/upgrade/my-status');
+          const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/my-status`);
           setUpgradeStatus(data.status);
         } catch (err) {
           console.log('Could not check upgrade status');
@@ -99,7 +99,7 @@ export default function Profile() {
     e.preventDefault();
     try {
       dispatch(updateUserStart());
-      const { data } = await axios.post(`/api/user/update/${currentUser._id}`, formData);
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user/update/${currentUser._id}`, formData);
       if (data.success === false) {
         toast.error(data.message, { duration: 3000 });
         dispatch(updateUserFailure(data.message));
@@ -118,7 +118,7 @@ export default function Profile() {
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
-      const { data } = await axios.delete(`/api/user/delete/${currentUser._id}`);
+      const { data } = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/user/delete/${currentUser._id}`);
       if (data.success === false) {
         toast.error(data.message, { duration: 3000 });
         dispatch(deleteUserFailure(data));
@@ -136,7 +136,7 @@ export default function Profile() {
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const { data } = await axios.post(`/api/auth/signout`);
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signout`);
       if (data.success === false) {
         toast.error(data.message, { duration: 3000 });
         dispatch(signOutUserFailure(data));
@@ -160,7 +160,7 @@ export default function Profile() {
     }
     try {
       setShowBookedSpacesError(false);
-      const { data } = await axios.get(`/api/booking/client`);
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/client`);
       setBookedSpaces(data);
       setBookedSpacesFetched(true);
     } catch (error) {
@@ -170,7 +170,7 @@ export default function Profile() {
 
   const handleCancelBooking = async (bookingId) => {
     try {
-      const { data } = await axios.delete(`/api/booking/cancel/${bookingId}`);
+      const { data } = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/booking/cancel/${bookingId}`);
       toast.success('Reservation cancelled successfully');
       setBookedSpaces((prev) => prev.filter((b) => b._id !== bookingId));
     } catch (error) {
@@ -186,7 +186,7 @@ export default function Profile() {
     }
     try {
       setShowAdminUsersError(false);
-      const { data } = await axios.get(`/api/admin/users/${currentUser._id}`);
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${currentUser._id}`);
       if (data.success === false) return setShowAdminUsersError(true);
       setAdminUsers(data);
       setAdminUsersFetched(true);
@@ -210,7 +210,7 @@ export default function Profile() {
         ...upgradeForm,
         phoneNumber: '+213' + upgradeForm.phoneNumber.replace(/^\+?213/, ''),
       };
-      await axios.post('/api/upgrade/request', payload);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/request`, payload);
       setUpgradeStatus('pending');
       setIsUpgradeModalOpen(false);
       toast.success('Upgrade request sent successfully!');
@@ -230,7 +230,7 @@ export default function Profile() {
       return;
     }
     try {
-      const { data } = await axios.get('/api/upgrade/pending');
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/pending`);
       setUpgradeRequests(data);
       setUpgradeRequestsFetched(true);
     } catch (err) {
@@ -240,7 +240,7 @@ export default function Profile() {
 
   const handleApproveRequest = async (requestId) => {
     try {
-      await axios.post(`/api/upgrade/approve/${requestId}`);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/approve/${requestId}`);
       setUpgradeRequests((prev) => prev.filter((r) => r._id !== requestId));
       toast.success('Request approved! User upgraded to seller.');
     } catch (err) {
@@ -250,7 +250,7 @@ export default function Profile() {
 
   const handleDenyRequest = async (requestId) => {
     try {
-      await axios.post(`/api/upgrade/deny/${requestId}`);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/deny/${requestId}`);
       setUpgradeRequests((prev) => prev.filter((r) => r._id !== requestId));
       toast.success('Request denied.');
     } catch (err) {
@@ -263,10 +263,10 @@ export default function Profile() {
     if (!contactMessage.trim()) return toast.error('Please enter a message');
     setSendingMessage(true);
     try {
-      const { data: adminData } = await axios.get('/api/admin/support-admin');
+      const { data: adminData } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/support-admin`);
       if (!adminData || !adminData._id) throw new Error('No admin found');
 
-      await axios.post('/api/message/send', {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/message/send`, {
         receiverId: adminData._id,
         content: contactMessage
       });

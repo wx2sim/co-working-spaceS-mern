@@ -36,7 +36,7 @@ export default function UserDashboard() {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const { data } = await axios.get(`/api/user/listings/${currentUser._id}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user/listings/${currentUser._id}`);
         if (Array.isArray(data)) {
           setListings(data);
         }
@@ -49,7 +49,7 @@ export default function UserDashboard() {
 
     const fetchBookings = async () => {
       try {
-        const { data } = await axios.get('/api/booking/owner');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/owner`);
         setBookings(data);
       } catch (err) {
         console.log('Error fetching bookings');
@@ -60,7 +60,7 @@ export default function UserDashboard() {
 
     const fetchOwnerStats = async () => {
         try {
-            const { data } = await axios.get('/api/stats/owner', { params: { range } });
+            const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/owner`, { params: { range } });
             setOwnerStats(data);
         } catch (err) { console.log('Error fetching owner stats'); }
     }
@@ -104,7 +104,7 @@ export default function UserDashboard() {
           if (data.booking.owner === currentUser._id) {
             const fetchOwnerStats = async () => {
                 try {
-                    const { data } = await axios.get('/api/stats/owner', { params: { range } });
+                    const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/owner`, { params: { range } });
                     setOwnerStats(data);
                 } catch (err) { console.log('Error refreshing stats'); }
             };
@@ -130,7 +130,7 @@ export default function UserDashboard() {
 
   const handleListingDelete = async (listingId) => {
     try {
-      const { data } = await axios.delete(`/api/listing/delete/${listingId}`);
+      const { data } = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/listing/delete/${listingId}`);
       if (data.success === false) return toast.error(data.message);
 
       setListings((prev) => prev.filter((listing) => listing._id !== listingId));
@@ -148,11 +148,11 @@ export default function UserDashboard() {
 
   const handleApproveBooking = async (id) => {
     try {
-      await axios.put(`/api/booking/approve/${id}`);
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/booking/approve/${id}`);
       setBookings(prev => prev.map(b => b._id === id ? { ...b, status: 'approved' } : b));
       
       // Refresh stats in real-time
-      const { data } = await axios.get('/api/stats/owner', { params: { range } });
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/owner`, { params: { range } });
       setOwnerStats(data);
       
       toast.success('Booking approved!');
@@ -163,11 +163,11 @@ export default function UserDashboard() {
 
   const handleRejectBooking = async (id) => {
     try {
-      await axios.put(`/api/booking/reject/${id}`);
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/booking/reject/${id}`);
       setBookings(prev => prev.map(b => b._id === id ? { ...b, status: 'rejected' } : b));
       
       // Refresh stats in real-time
-      const { data } = await axios.get('/api/stats/owner', { params: { range } });
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/owner`, { params: { range } });
       setOwnerStats(data);
       
       toast.success('Booking rejected!');

@@ -13,7 +13,7 @@ export default function Contact({ listing }) {
   useEffect(() => {
     const fetchLandlord = async () => {
       try {
-        const { data } = await axios.get(`/api/user/${listing.userRef}`)
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user/${listing.userRef}`)
         setLandlord(data);
       } catch (error) {
         console.log(error);
@@ -50,7 +50,7 @@ export default function Contact({ listing }) {
             <button
               onClick={async () => {
                 try {
-                  const { data } = await axios.post('/api/message/send', {
+                  const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/message/send`, {
                     receiverId: landlord._id,
                     listingId: listing._id,
                     content: message

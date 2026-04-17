@@ -39,7 +39,7 @@ export default function SignUp() {
 
     try {
       setLoading(true);
-      const { data } = await axios.post('/api/auth/signup', formData);
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, formData);
       await new Promise(resolve => setTimeout(resolve, 1500));
       setLoading(false);
       navigate('/signin');

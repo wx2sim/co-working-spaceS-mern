@@ -25,13 +25,13 @@ export default function Home() {
     const fetchAllData = async () => {
       try {
         const [offers, latest, rent, sale, services, reviewsRes, providersRes] = await Promise.allSettled([
-          axios.get('/api/listing/get?offer=true&limit=4&sort=discountPrice&order=asc'),
-          axios.get('/api/listing/get?category=property&limit=4&sort=createdAt&order=desc'),
-          axios.get('/api/listing/get?type=rent&category=property&limit=4&sort=averageRating&order=desc'),
-          axios.get('/api/listing/get?type=sale&category=property&limit=4&sort=averageRating&order=desc'),
-          axios.get('/api/listing/get?category=service&limit=4&sort=averageRating&order=desc'),
-          axios.get('/api/review/get'),
-          axios.get('/api/user/top-providers')
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/listing/get?offer=true&limit=4&sort=discountPrice&order=asc`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/listing/get?category=property&limit=4&sort=createdAt&order=desc`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/listing/get?type=rent&category=property&limit=4&sort=averageRating&order=desc`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/listing/get?type=sale&category=property&limit=4&sort=averageRating&order=desc`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/listing/get?category=service&limit=4&sort=averageRating&order=desc`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/review/get`),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user/top-providers`)
         ]);
 
         if (offers.status === 'fulfilled') setOfferListings(offers.value.data);

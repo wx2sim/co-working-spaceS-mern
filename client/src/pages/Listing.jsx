@@ -85,7 +85,7 @@ export default function Listing() {
         bookingDate
       };
       
-      await axios.post('/api/booking/create', payload);
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/booking/create`, payload);
       setBookingSuccess(true);
       setBookingLoading(false);
       
@@ -103,7 +103,7 @@ export default function Listing() {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`/api/listing/get/${params.listingId}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/listing/get/${params.listingId}`);
         if (data.success === false) {
           setError(true);
           setLoading(false);
@@ -122,7 +122,7 @@ export default function Listing() {
     const fetchUserRating = async () => {
       if (!currentUser) return;
       try {
-        const { data } = await axios.get(`/api/rating/get/${params.listingId}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/rating/get/${params.listingId}`);
         if (data) setUserRating(data.rating);
       } catch (err) { console.log(err); }
     };
@@ -138,7 +138,7 @@ export default function Listing() {
     }
     try {
       setRatingLoading(true);
-      const { data } = await axios.post('/api/rating/add', {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/rating/add`, {
         listingId: listing._id,
         rating: newRating
       });
