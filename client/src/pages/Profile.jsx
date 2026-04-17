@@ -99,7 +99,7 @@ export default function Profile() {
     e.preventDefault();
     try {
       dispatch(updateUserStart());
-      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user/update/${currentUser._id}`, formData);
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user/update/${currentUser._id}`, formData, { withCredentials: true });
       if (data.success === false) {
         toast.error(data.message, { duration: 3000 });
         dispatch(updateUserFailure(data.message));
@@ -585,7 +585,7 @@ export default function Profile() {
                           <p className='text-[10px] text-slate-400'>
                             {new Date(space.createdAt).toLocaleDateString()}
                           </p>
-                          
+
                           <SmartModal
                             triggerText="Cancel"
                             triggerColorClass="text-[10px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest transition-colors"
