@@ -5,27 +5,56 @@ import Listing from '../models/listing.model.js';
 import { errorHandler } from '../utils/error.js';
 
 /**
+ * Helper to determine date limit and grouping format based on range
+ */
+const getRangeConfig = (range) => {
+    const now = new Date();
+    let dateLimit = new Date();
+    let format = "%d %b"; // Default: 17 Apr
+
+    switch (range) {
+        case 'today':
+            dateLimit.setHours(now.getHours() - 24);
+            format = "%H:00";
+            break;
+        case 'week':
+            dateLimit.setDate(now.getDate() - 7);
+            format = "%d %b";
+            break;
+        case 'year':
+            dateLimit.setFullYear(now.getFullYear() - 1);
+            format = "%b %Y";
+            break;
+        case 'month':
+        default:
+            dateLimit.setDate(now.getDate() - 30);
+            format = "%d %b";
+            break;
+    }
+    return { dateLimit, format };
+};
+
+/**
  * SuperAdmin Stats: Platform-wide overview
  */
 export const getPlatformStats = async (req, res, next) => {
   try {
-    const { days = 30 } = req.query;
-    const dateLimit = new Date();
-    dateLimit.setDate(dateLimit.getDate() - parseInt(days));
+    const { range = 'month' } = req.query;
+    const { dateLimit, format } = getRangeConfig(range);
 
     // 1. User Growth (Last X days)
     const userGrowth = await User.aggregate([
       { $match: { createdAt: { $gte: dateLimit } } },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: { $dateToString: { format: format, date: "$createdAt" } },
           count: { $sum: 1 }
         }
       },
       { $sort: { "_id": 1 } }
     ]);
 
-    // 2. Revenue over time (Last X days, based on Approval date)
+    // 2. Revenue over time
     const revenueStats = await Booking.aggregate([
       { 
         $match: { 
@@ -35,7 +64,7 @@ export const getPlatformStats = async (req, res, next) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } },
+          _id: { $dateToString: { format: format, date: "$updatedAt" } },
           income: { $sum: "$finalPrice" },
           count: { $sum: 1 }
         }
@@ -74,9 +103,8 @@ export const getPlatformStats = async (req, res, next) => {
  */
 export const getOwnerStats = async (req, res, next) => {
   try {
-    const { days = 30, targetId } = req.query;
-    const dateLimit = new Date();
-    dateLimit.setDate(dateLimit.getDate() - parseInt(days));
+    const { range = 'month', targetId } = req.query;
+    const { dateLimit, format } = getRangeConfig(range);
     
     // Only superadmin can request stats for a different owner
     let ownerId = req.user.id;
@@ -95,7 +123,7 @@ export const getOwnerStats = async (req, res, next) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } },
+          _id: { $dateToString: { format: format, date: "$updatedAt" } },
           income: { $sum: "$finalPrice" },
           count: { $sum: 1 }
         }

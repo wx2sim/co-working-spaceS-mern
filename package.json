@@ -18,8 +18,7 @@
       "node_modules",
       ".git"
     ],
-    "delay": "500",
-    "exec": "node api/index.js"
+    "delay": "500"
   },
   "keywords": [],
   "author": "",

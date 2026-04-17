@@ -34,7 +34,7 @@ export default function AdminDashboard() {
   // Analytics State
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [days, setDays] = useState(30);
+  const [range, setRange] = useState('month');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
       try {
         setLoadingStats(true);
-        const { data } = await axios.get('/api/stats/platform', { params: { days } });
+        const { data } = await axios.get('/api/stats/platform', { params: { range } });
         setStats(data);
       } catch (err) { console.log('Could not fetch stats'); }
       finally { setLoadingStats(false); }
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
     fetchTasks();
     fetchReviews();
     fetchStats();
-  }, [currentUser._id, teamTab, days]);
+  }, [currentUser._id, teamTab, range]);
 
   const handleApprove = async (id) => {
     try {
@@ -227,13 +227,14 @@ export default function AdminDashboard() {
               <FaChartLine className='text-indigo-600' /> Financial Analytics
             </h2>
             <select 
-               value={days} 
-               onChange={(e) => setDays(e.target.value)}
+               value={range} 
+               onChange={(e) => setRange(e.target.value)}
                className='text-xs font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer'
             >
-              <option value={7}>Last 7 Days</option>
-              <option value={30}>Last 30 Days</option>
-              <option value={90}>Last 90 Days</option>
+              <option value="today">Today</option>
+              <option value="week">Last 7 Days</option>
+              <option value="month">Last 30 Days</option>
+              <option value="year">This Year</option>
             </select>
           </div>
 

@@ -27,7 +27,7 @@ export default function UserDashboard() {
 
   // New Analytics State
   const [ownerStats, setOwnerStats] = useState(null);
-  const [days, setDays] = useState(30);
+  const [range, setRange] = useState('month');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -60,7 +60,7 @@ export default function UserDashboard() {
 
     const fetchOwnerStats = async () => {
         try {
-            const { data } = await axios.get('/api/stats/owner', { params: { days } });
+            const { data } = await axios.get('/api/stats/owner', { params: { range } });
             setOwnerStats(data);
         } catch (err) { console.log('Error fetching owner stats'); }
     }
@@ -68,7 +68,7 @@ export default function UserDashboard() {
     fetchListings();
     fetchBookings();
     fetchOwnerStats();
-  }, [currentUser._id, days]);
+  }, [currentUser._id, range]);
 
   // Real-time updates for bookings
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function UserDashboard() {
           if (data.booking.owner === currentUser._id) {
             const fetchOwnerStats = async () => {
                 try {
-                    const { data } = await axios.get('/api/stats/owner', { params: { days } });
+                    const { data } = await axios.get('/api/stats/owner', { params: { range } });
                     setOwnerStats(data);
                 } catch (err) { console.log('Error refreshing stats'); }
             };
@@ -119,7 +119,7 @@ export default function UserDashboard() {
         socket.off('booking_status_updated');
       };
     }
-  }, [socket, currentUser._id, days]);
+  }, [socket, currentUser._id, range]);
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -152,7 +152,7 @@ export default function UserDashboard() {
       setBookings(prev => prev.map(b => b._id === id ? { ...b, status: 'approved' } : b));
       
       // Refresh stats in real-time
-      const { data } = await axios.get('/api/stats/owner', { params: { days } });
+      const { data } = await axios.get('/api/stats/owner', { params: { range } });
       setOwnerStats(data);
       
       toast.success('Booking approved!');
@@ -167,7 +167,7 @@ export default function UserDashboard() {
       setBookings(prev => prev.map(b => b._id === id ? { ...b, status: 'rejected' } : b));
       
       // Refresh stats in real-time
-      const { data } = await axios.get('/api/stats/owner', { params: { days } });
+      const { data } = await axios.get('/api/stats/owner', { params: { range } });
       setOwnerStats(data);
       
       toast.success('Booking rejected!');
@@ -205,13 +205,14 @@ export default function UserDashboard() {
               <FaChartLine className='text-indigo-600' /> Financial Analytics
             </h2>
             <select 
-               value={days} 
-               onChange={(e) => setDays(e.target.value)}
+               value={range} 
+               onChange={(e) => setRange(e.target.value)}
                className='text-xs font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer'
             >
-              <option value={7}>Last 7 Days</option>
-              <option value={30}>Last 30 Days</option>
-              <option value={90}>Last 90 Days</option>
+              <option value="today">Today</option>
+              <option value="week">Last 7 Days</option>
+              <option value="month">Last 30 Days</option>
+              <option value="year">This Year</option>
             </select>
           </div>
 
