@@ -42,7 +42,7 @@
 
 | Dashboard Overview | Real-time Messaging | Financial Analytics |
 | :--- | :--- | :--- |
-| ![Placeholder](./images/UserDashboard.png) | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Messaging+System) | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Income+Charts) |
+| ![Placeholder](.\public\images\UserDashboard.png) | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Messaging+System) | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Income+Charts) |
 
 ---
 
