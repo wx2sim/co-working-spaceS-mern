@@ -82,7 +82,7 @@ export default function App() {
       if (!currentUser || currentUser.role) return;
 
       try {
-        const { data } = await axios.get('/api/user/me');
+        const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user/me`);
         dispatch(signInSuccess(data));
       } catch (error) {
         dispatch(signOutUserSuccess());
