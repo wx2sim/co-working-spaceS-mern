@@ -18,6 +18,7 @@ import helmet from 'helmet';
 import { generalLimiter } from './utils/rateLimiters.js';
 import mongoSanitize from 'mongo-sanitize';
 import cors from 'cors';
+import path from 'path';
 
 dotenv.config();
 
@@ -41,8 +42,9 @@ app.use(cookieParser());
 
 mongoose.connect(process.env.MONGO).then(() => {
   console.log('Connected to Mongodb');
-  server.listen(3001, () => {
-    console.log('Server is running on port 3001');
+  const PORT = process.env.PORT || 3001;
+  server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
 }).catch((err) => { console.log('Error Connecting to Mongodb', err) });
 
@@ -64,6 +66,13 @@ app.use('/api/task', taskRouter);
 app.use('/api/review', reviewRouter);
 app.use('/api/rating', ratingRouter);
 app.use('/api/stats', statsRouter);
+
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, '/client/dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+});
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
