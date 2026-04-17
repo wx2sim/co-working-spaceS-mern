@@ -42,7 +42,7 @@
 
 | Dashboard Overview | Real-time Messaging | Financial Analytics |
 | :--- | :--- | :--- |
-| <img src="/images/UserDashboard.png" alt="CoSpace Dashboard" /> | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Messaging+System) | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Income+Charts) |
+| <img src="client/public/images/UserDashboard.png" alt="CoSpace Dashboard" /> | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Messaging+System) | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Income+Charts) |
 
 ---
 
