@@ -13,7 +13,10 @@ export const verifyUserToken = (req, res, next) => {
       const user = await User.findById(decoded.id).select('-password');
       if (!user) return next(errorHandler(404, 'User not found'));
       
+      // Ensure req.user has a stable string ID and the full user document
       req.user = user;
+      req.user.id = user._id.toString(); 
+      
       next();
     } catch (error) {
       next(error);

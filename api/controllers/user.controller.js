@@ -21,7 +21,7 @@ export const getMe = async (req, res, next) => {
 };
 
 export const updateUser = async (req, res, next) => {
-  if (req.user.id !== req.params.id)
+  if (req.user.id.toString() !== req.params.id.toString())
     return next(errorHandler(401, 'You can only update your account!'));
 
   // Protect superadmin from being modified
@@ -52,7 +52,7 @@ export const updateUser = async (req, res, next) => {
 };
 
 export const deleteUser = async (req, res, next) => {
-  if (req.user.id !== req.params.id)
+  if (req.user.id.toString() !== req.params.id.toString())
     return next(errorHandler(401, 'You can only delete your own account!'));
 
   // Protect superadmin from being deleted
@@ -69,7 +69,7 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 export const getUserListings = async (req, res, next) => {
-  if (req.user.id === req.params.id) {
+  if (req.user.id.toString() === req.params.id.toString()) {
     try {
       const listings = await Listing.find({ userRef: req.params.id });
       res.status(200).json(listings);
