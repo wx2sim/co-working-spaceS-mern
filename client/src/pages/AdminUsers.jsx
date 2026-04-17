@@ -35,7 +35,7 @@ export default function AdminUsers() {
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`/api/admin/users/${currentUser._id}`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${currentUser._id}`, {
         params: {
           startIndex,
           limit,
@@ -62,7 +62,7 @@ export default function AdminUsers() {
   const handleDeleteUser = async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      await axios.delete(`/api/admin/delete/${userId}`);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/delete/${userId}`);
       toast.success('User deleted successfully');
       fetchUsers();
     } catch (err) {
