@@ -23,6 +23,7 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
+  const [unseenStatusCount, setUnseenStatusCount] = useState(0);
 
   useEffect(() => {
     if (currentUser) {
@@ -40,6 +41,12 @@ function Header() {
             try {
                 const { data } = await axios.get('/api/booking/pending-count');
                 setPendingBookingsCount(data.count || 0);
+            } catch (error) { console.log(error); }
+        }
+        if (currentUser.role === 'client') {
+            try {
+                const { data } = await axios.get('/api/booking/unseen-status-count');
+                setUnseenStatusCount(data.count || 0);
             } catch (error) { console.log(error); }
         }
       }
@@ -85,6 +92,9 @@ function Header() {
         toast.success(`📢 ${data.message}`, {
             duration: 6000,
         });
+        if (currentUser.role === 'client') {
+            setUnseenStatusCount(prev => prev + 1);
+        }
       });
 
       return () => {
@@ -153,6 +163,7 @@ function Header() {
               colorClass="!bg-slate-900 !text-white hover:!bg-slate-800 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all w-full md:w-auto"
               text="Dashboard"
               showAlert={false}
+              badge={unseenStatusCount}
             />
           </li>
         </>

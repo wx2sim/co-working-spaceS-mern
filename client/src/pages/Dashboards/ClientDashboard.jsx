@@ -34,6 +34,11 @@ export default function ClientDashboard() {
       try {
         const { data } = await axios.get('/api/booking/client');
         setBookedSpaces(Array.isArray(data) ? data.slice(0, 3) : []);
+        
+        // Mark as seen when dashboard is opened
+        if (Array.isArray(data) && data.some(b => !b.statusSeenByClient)) {
+            await axios.put('/api/booking/mark-status-seen');
+        }
       } catch (err) {
         console.log('Could not fetch bookings');
       } finally {
@@ -202,12 +207,21 @@ export default function ClientDashboard() {
                   {bookedSpaces.map((space) => (
                     <div key={space._id} className='flex items-center gap-3 bg-slate-50 rounded-xl px-3 py-2.5'>
                       <FaCalendarCheck className='text-indigo-500 text-sm flex-shrink-0' />
-                      <div className='min-w-0'>
-                        <p className='text-xs font-semibold text-slate-700 truncate'>{space.listing?.name || 'Workspace'}</p>
+                      <div className='min-w-0 flex-1 flex flex-col'>
+                        <div className="flex items-center gap-2">
+                           <p className='text-xs font-semibold text-slate-700 truncate'>{space.listing?.name || 'Workspace'}</p>
+                           {!space.statusSeenByClient && (
+                             <span className="bg-red-500 w-1.5 h-1.5 rounded-full ring-2 ring-white"></span>
+                           )}
+                        </div>
                         <p className='text-[10px] text-slate-400'>{new Date(space.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <span className='text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold ml-auto whitespace-nowrap'>
-                        {space.status || 'Confirmed'}
+                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ml-auto whitespace-nowrap ${
+                        space.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 
+                        space.status === 'rejected' ? 'bg-red-100 text-red-700' : 
+                        'bg-amber-100 text-amber-700'
+                      }`}>
+                        {space.status || 'Pending'}
                       </span>
                     </div>
                   ))}

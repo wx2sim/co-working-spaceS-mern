@@ -37,6 +37,10 @@ const bookingSchema = new mongoose.Schema({
   bookingDate: {
     type: Date,
     required: true,
+  },
+  statusSeenByClient: {
+    type: Boolean,
+    default: true,
   }
 }, { timestamps: true });
 

@@ -1,7 +1,0 @@
-{
-  "watch": ["api"],
-  "ext": "js,mjs,cjs,json",
-  "ignore": ["client", "node_modules", ".git"],
-  "delay": "500",
-  "exec": "node api/index.js"
-}

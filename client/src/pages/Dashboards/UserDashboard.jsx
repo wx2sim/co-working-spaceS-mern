@@ -96,6 +96,31 @@ export default function UserDashboard() {
     }
   }, [socket, ownerStats]);
 
+  // Real-time stats updates when a booking status changes (e.g. approved by admin)
+  useEffect(() => {
+    if (socket) {
+      socket.on('booking_status_updated', (data) => {
+          // If the booking belongs to this owner, refresh stats
+          if (data.booking.owner === currentUser._id) {
+            const fetchOwnerStats = async () => {
+                try {
+                    const { data } = await axios.get('/api/stats/owner', { params: { days } });
+                    setOwnerStats(data);
+                } catch (err) { console.log('Error refreshing stats'); }
+            };
+            fetchOwnerStats();
+            
+            // Also update the local booking list if it's there
+            setBookings(prev => prev.map(b => b._id === data.booking._id ? { ...b, status: data.booking.status } : b));
+          }
+      });
+
+      return () => {
+        socket.off('booking_status_updated');
+      };
+    }
+  }, [socket, currentUser._id, days]);
+
   const greeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good Morning';
@@ -125,6 +150,11 @@ export default function UserDashboard() {
     try {
       await axios.put(`/api/booking/approve/${id}`);
       setBookings(prev => prev.map(b => b._id === id ? { ...b, status: 'approved' } : b));
+      
+      // Refresh stats in real-time
+      const { data } = await axios.get('/api/stats/owner', { params: { days } });
+      setOwnerStats(data);
+      
       toast.success('Booking approved!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error approving booking');
@@ -135,6 +165,11 @@ export default function UserDashboard() {
     try {
       await axios.put(`/api/booking/reject/${id}`);
       setBookings(prev => prev.map(b => b._id === id ? { ...b, status: 'rejected' } : b));
+      
+      // Refresh stats in real-time
+      const { data } = await axios.get('/api/stats/owner', { params: { days } });
+      setOwnerStats(data);
+      
       toast.success('Booking rejected!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error rejecting booking');

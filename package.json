@@ -2,11 +2,24 @@
   "name": "co-working-spaces-mern",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "api/index.js",
   "type": "module",
   "scripts": {
-    "dev": "npx kill-port 3001 && nodemon api/index.js",
+    "dev": "npx kill-port 3001 && nodemon",
     "start": "node api/index.js"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "api"
+    ],
+    "ext": "js,mjs,cjs,json",
+    "ignore": [
+      "client",
+      "node_modules",
+      ".git"
+    ],
+    "delay": "500",
+    "exec": "node api/index.js"
   },
   "keywords": [],
   "author": "",

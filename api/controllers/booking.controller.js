@@ -118,6 +118,7 @@ export const approveBooking = async (req, res, next) => {
     }
 
     booking.status = 'approved';
+    booking.statusSeenByClient = false;
     await booking.save();
 
     // Notify client
@@ -148,6 +149,7 @@ export const rejectBooking = async (req, res, next) => {
     }
 
     booking.status = 'rejected';
+    booking.statusSeenByClient = false;
     await booking.save();
 
     // Notify client
@@ -209,6 +211,29 @@ export const getPendingCount = async (req, res, next) => {
             status: 'pending'
         });
         res.status(200).json({ count });
+    } catch (error) {
+        next(error);
+    }
+};
+export const getUnseenStatusCount = async (req, res, next) => {
+    try {
+        const count = await Booking.countDocuments({
+            user: req.user.id,
+            statusSeenByClient: false
+        });
+        res.status(200).json({ count });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const markStatusAsSeen = async (req, res, next) => {
+    try {
+        await Booking.updateMany(
+            { user: req.user.id, statusSeenByClient: false },
+            { $set: { statusSeenByClient: true } }
+        );
+        res.status(200).json({ success: true });
     } catch (error) {
         next(error);
     }
