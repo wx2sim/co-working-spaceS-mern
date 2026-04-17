@@ -3,7 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import userRouter from './routes/user.route.js'
 import authRouter from './routes/auth.route.js'
-import listingRouter  from './routes/listing.route.js';
+import listingRouter from './routes/listing.route.js';
 import upgradeRouter from './routes/upgrade.route.js';
 import adminRouter from './routes/admin.route.js';
 import messageRouter from './routes/message.route.js';
@@ -17,12 +17,17 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import { generalLimiter } from './utils/rateLimiters.js';
 import mongoSanitize from 'mongo-sanitize';
+import cors from 'cors';
 
 dotenv.config();
 
 // app is now imported from socket.js
 
 // Security Middleware
+app.use(cors({
+  origin: '*', // Your frontend URL
+  credentials: true
+}));
 app.use(helmet());
 app.use(express.json({ limit: '10kb' })); // Body size limit to prevent DDoS
 app.use((req, res, next) => {
@@ -39,18 +44,18 @@ mongoose.connect(process.env.MONGO).then(() => {
   server.listen(3001, () => {
     console.log('Server is running on port 3001');
   });
-}).catch((err) => { console.log('Error Connecting to Mongodb',err)});
+}).catch((err) => { console.log('Error Connecting to Mongodb', err) });
 
 // Fast shutdown for development efficiency
 process.on('SIGUSR2', () => {
-    if (io) io.close();
-    process.exit(0);
+  if (io) io.close();
+  process.exit(0);
 });
 
 
 app.use('/api/user', userRouter);
-app.use('/api/auth' , authRouter);
-app.use('/api/listing' , listingRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/listing', listingRouter);
 app.use('/api/upgrade', upgradeRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/message', messageRouter);
@@ -61,11 +66,11 @@ app.use('/api/rating', ratingRouter);
 app.use('/api/stats', statsRouter);
 
 app.use((err, req, res, next) => {
- const statusCode = err.statusCode || 500;
- const message = err.message || 'internal Server Error';
- return res.status(statusCode).json({
-  success: false,
-  statusCode,
-  message,
- });
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'internal Server Error';
+  return res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+  });
 });
