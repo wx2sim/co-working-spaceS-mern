@@ -42,7 +42,7 @@
 
 | Dashboard Overview | Real-time Messaging | Financial Analytics |
 | :--- | :--- | :--- |
-| <img src="/images/UserDashboard.png" alt="CoSpace Dashboard" /> | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Messaging+System) | ![Placeholder](https://placehold.co/600x400/0f172a/white?text=Income+Charts) |
+| <img src="client/public/images/UserDashboard.png" alt="CoSpace Dashboard" /> | <img src="client/public/images/RealtimeMessaging.png" alt="CoSpace Dashboard" />  | <img src="client/public/images/AnalyticsAdminDashboard.png" alt="CoSpace Dashboard" /> |
 
 ---
 
@@ -112,8 +112,8 @@ Follow these steps to get your local development environment running.
 ## 👤 Author
 
 **Wassim Mahdjoubi**
-- Website: [Your Portfolio/Link]
-- LinkedIn: [Your Profile]
+- Website: [wx2sim.github.io]
+- LinkedIn: [www.linkedin.com/in/mahdjoubiwassim00]
 - GitHub: [@wx2sim](https://github.com/wx2sim)
 
 ---
