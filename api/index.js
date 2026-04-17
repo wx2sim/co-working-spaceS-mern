@@ -26,7 +26,7 @@ dotenv.config();
 
 // Security Middleware
 app.use(cors({
-  origin: '*', // Your frontend URL
+  origin: 'https://co-working-space-s-mern.vercel.app', // Your frontend URL
   credentials: true
 }));
 app.use(helmet());
