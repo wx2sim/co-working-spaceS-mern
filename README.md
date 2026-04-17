@@ -112,8 +112,8 @@ Follow these steps to get your local development environment running.
 ## 👤 Author
 
 **Wassim Mahdjoubi**
-- Website: [Your Portfolio/Link]
-- LinkedIn: [Your Profile]
+- Website: [wx2sim.github.io]
+- LinkedIn: [www.linkedin.com/in/mahdjoubiwassim00]
 - GitHub: [@wx2sim](https://github.com/wx2sim)
 
 ---
