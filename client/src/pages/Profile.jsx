@@ -99,7 +99,7 @@ export default function Profile() {
     e.preventDefault();
     try {
       dispatch(updateUserStart());
-      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user/update/${currentUser._id}`, formData, { withCredentials: true });
+      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user/update/${currentUser._id}`, formData);
       if (data.success === false) {
         toast.error(data.message, { duration: 3000 });
         dispatch(updateUserFailure(data.message));
