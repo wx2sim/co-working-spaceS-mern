@@ -23,10 +23,20 @@ import path from 'path';
 dotenv.config();
 
 // app is now imported from socket.js
-
+const allowedOrigins = [
+  'https://co-working-space-s-mern.vercel.app', //prod
+  'http://localhost:5173',                      // (Vite)
+  'http://localhost:3001'                       // api
+];
 // Security Middleware
 app.use(cors({
-  origin: 'https://co-working-space-s-mern.vercel.app', // Your frontend URL
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(helmet());
