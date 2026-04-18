@@ -44,7 +44,11 @@ export default function SignIn() {
         return;
       }
       dispatch(signInSuccess(data));
-      navigate('/');
+      if (!data.isVerified) {
+        navigate('/verify-email', { state: { email: data.email } });
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       console.log("Raw Error from Backend:", error.response);
       const errorMessage = error.response?.data?.message || error.message;

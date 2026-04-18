@@ -23,3 +23,10 @@ export const verifyUserToken = (req, res, next) => {
     }
   });
 };
+
+export const checkVerification = (req, res, next) => {
+  if (!req.user.isVerified) {
+    return next(errorHandler(403, 'Your email is not verified! Please verify your email to access this feature.'));
+  }
+  next();
+};

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import OAuth from '../components/OAuth';
 import AnimatedPage from '../components/AnimatedPage';
 
@@ -40,8 +41,8 @@ export default function SignUp() {
     try {
       setLoading(true);
       const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, formData);
-      await new Promise(resolve => setTimeout(resolve, 1500));
       setLoading(false);
+      toast.success('Account created! Please sign in to verify your email.');
       navigate('/signin');
 
     } catch (error) {
