@@ -121,23 +121,39 @@ function Header() {
     }
   }, [location.search]);
 
-  const NavLink = ({ to, text, onClick, badge }) => (
-    <li className='relative'>
-      <Link
-        to={to}
-        onClick={onClick}
-        className='text-slate-600 text-base md:text-sm font-medium transition-colors duration-300 hover:text-slate-900 relative group whitespace-nowrap block'
-      >
-        {text}
-        {badge > 0 && (
-          <span className="absolute -top-1.5 -right-3 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
-            {badge > 9 ? '9+' : badge}
-          </span>
-        )}
-        <span className='absolute left-0 -bottom-1 w-0 h-[2px] bg-slate-900 transition-all duration-300 group-hover:w-full'></span>
-      </Link>
-    </li>
-  );
+  const NavLink = ({ to, text, onClick, badge, disabled = false }) => {
+    const handleDisabledClick = (e) => {
+      if (disabled) {
+        e.preventDefault();
+        toast.error('Please verify your email first!', {
+          icon: '✉️',
+          duration: 3000
+        });
+        return;
+      }
+      if (onClick) onClick();
+    };
+
+    return (
+      <li className='relative'>
+        <Link
+          to={disabled ? '#' : to}
+          onClick={handleDisabledClick}
+          className={`text-slate-600 text-base md:text-sm font-medium transition-colors duration-300 relative group whitespace-nowrap block ${
+            disabled ? 'opacity-50 cursor-not-allowed' : 'hover:text-slate-900 leading-relaxed'
+          }`}
+        >
+          {text}
+          {badge > 0 && (
+            <span className="absolute -top-1.5 -right-3 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+              {badge > 9 ? '9+' : badge}
+            </span>
+          )}
+          {!disabled && <span className='absolute left-0 -bottom-1 w-0 h-[2px] bg-slate-900 transition-all duration-300 group-hover:w-full'></span>}
+        </Link>
+      </li>
+    );
+  };
 
   const renderLinks = (isMobile = false) => {
     const handleLinkClick = () => { if (isMobile) setIsDrawerOpen(false); };
@@ -146,8 +162,8 @@ function Header() {
       return (
         <>
           <NavLink to='/admin/users' text='Users' onClick={handleLinkClick} />
-          <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} />
-          <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} />
+          <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
+          <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} disabled={!currentUser.isVerified} />
         </>
       );
     }
@@ -157,11 +173,16 @@ function Header() {
         <>
           <NavLink to='/' text='Home' onClick={handleLinkClick} />
           <NavLink to='/about' text='About' onClick={handleLinkClick} />
-          <NavLink to='/schedule' text='Schedule' onClick={handleLinkClick} badge={unreadCount} />
+          <NavLink to='/schedule' text='Schedule' onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
           <li>
             <SmartButton
-              actionFunction={() => { navigate('/dashboard'); handleLinkClick(); }}
-              colorClass="!bg-slate-900 !text-white hover:!bg-slate-800 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all w-full md:w-auto"
+              actionFunction={() => { 
+                if (!currentUser.isVerified) {
+                  return toast.error('Please verify your email first!');
+                }
+                navigate('/dashboard'); handleLinkClick(); 
+              }}
+              colorClass={`!bg-slate-900 !text-white hover:!bg-slate-800 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all w-full md:w-auto ${!currentUser.isVerified ? 'opacity-50' : ''}`}
               text="Dashboard"
               showAlert={false}
               badge={unseenStatusCount}
@@ -178,8 +199,8 @@ function Header() {
         <NavLink to='/map' text='Map' onClick={handleLinkClick} />
         {currentUser && (
           <>
-            <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} />
-            <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} badge={pendingBookingsCount} />
+            <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
+            <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} badge={pendingBookingsCount} disabled={!currentUser.isVerified} />
           </>
         )}
       </>
@@ -188,6 +209,16 @@ function Header() {
 
   return (
     <header className='fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300'>
+      {currentUser && !currentUser.isVerified && (
+        <div className='bg-red-600 text-white text-center py-2 px-4 flex items-center justify-center gap-3 animate-pulse'>
+          <p className='text-xs sm:text-sm font-bold'>
+            ⚠️ Your email is not verified. Please check your inbox to unlock all features.
+          </p>
+          <Link to='/verify-email' state={{ email: currentUser.email }} className='bg-white text-red-600 px-3 py-1 rounded-full text-[10px] font-black uppercase hover:bg-slate-100 transition-colors'>
+            Verify Now
+          </Link>
+        </div>
+      )}
       <div className='flex justify-between items-center max-w-6xl mx-auto p-4'>
 
         <div className='flex items-center gap-3 shrink-0'>

@@ -66,6 +66,9 @@ export default function Listing() {
       navigate('/signup');
       return;
     }
+    if (!currentUser.isVerified) {
+      return toast.error('Please verify your email first!', { icon: '✉️' });
+    }
     setShowBookingModal(true);
   };
 
@@ -432,8 +435,11 @@ export default function Listing() {
                 <div className='pt-3 border-t border-slate-100 flex flex-wrap gap-2 w-full'>
                   {currentUser && listing.userRef !== currentUser._id && !contact && (
                     <button
-                      onClick={() => setContact(true)}
-                      className='flex-1 min-w-[140px] bg-white border-[1.5px] border-slate-900 text-slate-900 font-bold py-2.5 px-4 rounded-xl hover:bg-slate-50 transition-all duration-300 text-sm'
+                      onClick={() => {
+                        if (!currentUser.isVerified) return toast.error('Please verify your email first!');
+                        setContact(true);
+                      }}
+                      className={`flex-1 min-w-[140px] bg-white border-[1.5px] border-slate-900 text-slate-900 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${!currentUser.isVerified ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50'}`}
                     >
                       Message Owner
                     </button>
@@ -442,7 +448,7 @@ export default function Listing() {
                     <button
                       onClick={handleBookSpaceClick}
                       disabled={listing.category === 'property' && isFullyBooked}
-                      className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${listing.category === 'property' && isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md'}`}
+                      className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${listing.category === 'property' && isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : ( !currentUser?.isVerified ? 'bg-slate-900 text-white opacity-50 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md')}`}
                     >
                       {listing.category === 'property' && isFullyBooked ? 'Fully Booked' : (listing.category === 'service' ? 'Order Service' : 'Book Space')}
                     </button>

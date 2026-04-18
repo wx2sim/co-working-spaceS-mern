@@ -97,6 +97,9 @@ export default function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!currentUser.isVerified) {
+      return toast.error('Please verify your email first!', { icon: '✉️' });
+    }
     try {
       dispatch(updateUserStart());
       const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/user/update/${currentUser._id}`, formData);
@@ -116,6 +119,9 @@ export default function Profile() {
   };
 
   const handleDeleteUser = async () => {
+    if (!currentUser.isVerified) {
+      return toast.error('Please verify your email first!');
+    }
     try {
       dispatch(deleteUserStart());
       const { data } = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/user/delete/${currentUser._id}`);
@@ -153,6 +159,9 @@ export default function Profile() {
   };
 
   const handleShowBookedSpaces = async () => {
+    if (!currentUser.isVerified) {
+      return toast.error('Please verify your email first!');
+    }
     if (bookedSpacesFetched) {
       setBookedSpaces([]);
       setBookedSpacesFetched(false);
@@ -179,6 +188,9 @@ export default function Profile() {
   };
 
   const handleShowAdminUsers = async () => {
+    if (!currentUser.isVerified) {
+      return toast.error('Please verify your email first!');
+    }
     if (adminUsersFetched) {
       setAdminUsers([]);
       setAdminUsersFetched(false);
@@ -224,6 +236,9 @@ export default function Profile() {
   };
 
   const handleShowUpgradeRequests = async () => {
+    if (!currentUser.isVerified) {
+      return toast.error('Please verify your email first!');
+    }
     if (upgradeRequestsFetched) {
       setUpgradeRequests([]);
       setUpgradeRequestsFetched(false);
@@ -300,9 +315,14 @@ export default function Profile() {
                   alt='profile'
                   className='rounded-full h-24 w-24 object-cover border-4 border-slate-50 shadow-sm'
                 />
-                <span className='mt-3 text-xs font-bold px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-wider'>
+                <span className={`mt-3 text-xs font-bold px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-wider ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}>
                   Administrator
                 </span>
+                {!currentUser.isVerified && (
+                  <span className='mt-2 text-[9px] font-black px-2 py-0.5 bg-red-100 text-red-600 rounded-full uppercase'>
+                    Unverified
+                  </span>
+                )}
               </div>
 
               <div className='flex flex-col gap-1'>
@@ -358,7 +378,17 @@ export default function Profile() {
                   </div>
                 </div>
                 <p className='text-xs mt-3 text-center'>
-                  {fileUploadError ? <span className='text-red-500 font-medium'>Upload failed (Max 2MB)</span> : filePerc > 0 && filePerc < 100 ? <span className='text-slate-500'>Uploading {filePerc}%</span> : filePerc === 100 ? <span className='text-green-500 font-medium'>Upload complete!</span> : <span className='text-slate-400'>Click image to change</span>}
+                  {!currentUser.isVerified ? (
+                    <span className='text-red-600 font-bold bg-red-50 px-3 py-1 rounded-full border border-red-100 uppercase text-[10px]'>Unverified Account</span>
+                  ) : fileUploadError ? (
+                    <span className='text-red-500 font-medium'>Upload failed (Max 2MB)</span>
+                  ) : filePerc > 0 && filePerc < 100 ? (
+                    <span className='text-slate-500'>Uploading {filePerc}%</span>
+                  ) : filePerc === 100 ? (
+                    <span className='text-green-500 font-medium'>Upload complete!</span>
+                  ) : (
+                    <span className='text-slate-400'>Click image to change</span>
+                  )}
                 </p>
               </div>
 
@@ -367,7 +397,10 @@ export default function Profile() {
               <input type='password' placeholder='New Password (Optional)' id='password' onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
 
               <div className='pt-2 flex flex-col gap-3'>
-                <button disabled={loading} className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all disabled:opacity-70 text-sm'>
+                <button 
+                  disabled={loading} 
+                  className={`w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all text-sm ${!currentUser.isVerified ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
                   {loading ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
@@ -405,13 +438,13 @@ export default function Profile() {
                 <div className='flex items-center gap-3'>
                   <SmartButton
                     actionFunction={handleShowUpgradeRequests}
-                    colorClass="!bg-gradient-to-r !from-indigo-600 !to-violet-600 !text-white hover:!from-indigo-700 hover:!to-violet-700 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
+                    colorClass={`!bg-gradient-to-r !from-indigo-600 !to-violet-600 !text-white hover:!from-indigo-700 hover:!to-violet-700 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}
                     text={upgradeRequestsFetched ? 'Hide Requests' : 'Upgrade Requests'}
                     showAlert={false}
                   />
                   <SmartButton
                     actionFunction={handleShowAdminUsers}
-                    colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
+                    colorClass={`!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}
                     text={adminUsersFetched ? "Hide Users" : "Show Users"}
                     showAlert={false}
                   />
@@ -526,7 +559,7 @@ export default function Profile() {
                 <div className='flex items-center gap-3'>
                   <SmartButton
                     actionFunction={handleShowBookedSpaces}
-                    colorClass="!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all"
+                    colorClass={`!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}
                     text={bookedSpacesFetched ? "Hide Bookings" : "Check Bookings"}
                     showAlert={false}
                   />
@@ -612,8 +645,11 @@ export default function Profile() {
               <div className='mt-6 pt-5 border-t border-slate-100'>
                 {upgradeStatus === 'none' || upgradeStatus === 'denied' ? (
                   <button
-                    onClick={() => setIsUpgradeModalOpen(true)}
-                    className='w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium py-3 rounded-xl hover:from-indigo-700 hover:to-violet-700 transition-all duration-300 text-sm shadow-sm'
+                    onClick={() => {
+                        if (!currentUser.isVerified) return toast.error('Please verify your email first!');
+                        setIsUpgradeModalOpen(true);
+                    }}
+                    className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium py-3 rounded-xl transition-all duration-300 text-sm shadow-sm ${!currentUser.isVerified ? 'opacity-50 grayscale' : 'hover:from-indigo-700 hover:to-violet-700'}`}
                   >
                     <FaArrowUp className='text-xs' />
                     {upgradeStatus === 'denied' ? 'Re-apply to Become a Seller' : 'Upgrade to Seller'}

@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyUserToken } from "../utils/verifyUser.js";
+import { verifyUserToken, checkVerification } from "../utils/verifyUser.js";
 import { requireRole } from "../utils/verifyRole.js";
 import {
   createUpgradeRequest,
@@ -12,12 +12,12 @@ import {
 const router = express.Router();
 
 // Client routes
-router.post("/request", verifyUserToken, createUpgradeRequest);
+router.post("/request", verifyUserToken, checkVerification, createUpgradeRequest);
 router.get("/my-status", verifyUserToken, getMyUpgradeStatus);
 
 // Admin routes
-router.get("/pending", verifyUserToken, requireRole(["admin", "superadmin"]), getPendingRequests);
-router.post("/approve/:id", verifyUserToken, requireRole(["admin", "superadmin"]), approveRequest);
-router.post("/deny/:id", verifyUserToken, requireRole(["admin", "superadmin"]), denyRequest);
+router.get("/pending", verifyUserToken, checkVerification, requireRole(["admin", "superadmin"]), getPendingRequests);
+router.post("/approve/:id", verifyUserToken, checkVerification, requireRole(["admin", "superadmin"]), approveRequest);
+router.post("/deny/:id", verifyUserToken, checkVerification, requireRole(["admin", "superadmin"]), denyRequest);
 
 export default router;

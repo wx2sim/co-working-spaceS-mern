@@ -5,8 +5,10 @@ import Profile from './pages/Profile';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import About from './pages/About';
+import VerifyEmail from './pages/VerifyEmail';
 import Header from './components/Header';
 import PrivateRoutes from './components/PrivateRoutes';
+import VerifiedRoute from './components/VerifiedRoute';
 import { AnimatePresence } from 'framer-motion';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
@@ -37,6 +39,7 @@ function AnimatedRoutes() {
         <Route path='/' element={<Home />} />
         <Route path='/signin' element={<SignIn />} />
         <Route path='/signup' element={<SignUp />} />
+        <Route path='/verify-email' element={<VerifyEmail />} />
         <Route path='/about' element={<About />} />
         <Route path='/listing/:listingId' element={<Listing />} />
         <Route path='/search' element={<Search />} />
@@ -44,9 +47,13 @@ function AnimatedRoutes() {
         <Route element={<PrivateRoutes />} >
           <Route path='/profile' element={<Profile />} />
           <Route path='/settings' element={<Settings />} />
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/admin/users' element={<AdminUsers />} />
-          <Route path='/schedule' element={<Schedule />} />
+          
+          {/* Sensitive features requiring a verified account */}
+          <Route element={<VerifiedRoute />} >
+            <Route path='/dashboard' element={<Dashboard />} />
+            <Route path='/admin/users' element={<AdminUsers />} />
+            <Route path='/schedule' element={<Schedule />} />
+          </Route>
         </Route>
 
         {/* Error Routes */}
