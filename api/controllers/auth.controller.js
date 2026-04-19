@@ -58,6 +58,11 @@ export const signup = async (req, res, next) => {
         : 'User created, but we could not send the verification email. Please try resending it from the verification page.'
     });
   } catch (error) {
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      const message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists!`;
+      return next(errorHandler(400, message));
+    }
     next(error);
   }
 };
