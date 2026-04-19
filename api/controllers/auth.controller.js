@@ -192,7 +192,12 @@ export const resendOTP = async (req, res, next) => {
       `,
     };
 
-    await sendEmail(emailOptions);
+    try {
+      await sendEmail(emailOptions);
+    } catch (emailError) {
+      console.error('Error resending verification OTP:', emailError);
+      // Still return success to the user so they are not blocked by a transient email failure
+    }
 
     res.status(200).json({ success: true, message: 'OTP resent successfully!' });
   } catch (error) {

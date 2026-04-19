@@ -1,6 +1,13 @@
 import nodemailer from 'nodemailer';
 
 export const sendEmail = async (options) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    const missing = [];
+    if (!process.env.EMAIL_USER) missing.push('EMAIL_USER');
+    if (!process.env.EMAIL_PASS) missing.push('EMAIL_PASS');
+    throw new Error(`Email configuration error: Missing environment variables (${missing.join(', ')}). Please set them in your environment.`);
+  }
+
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: process.env.EMAIL_PORT || 465,
