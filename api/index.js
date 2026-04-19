@@ -42,9 +42,9 @@ app.use(cors({
 app.use(helmet());
 app.use(express.json({ limit: '50kb' })); // Body size limit - safe for high-res profile data
 app.use((req, res, next) => {
-  req.body = mongoSanitize(req.body);
-  req.query = mongoSanitize(req.query);
-  req.params = mongoSanitize(req.params);
+  mongoSanitize(req.body);
+  mongoSanitize(req.query);
+  mongoSanitize(req.params);
   next();
 });
 
