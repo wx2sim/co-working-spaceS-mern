@@ -22,7 +22,8 @@ import path from 'path';
 
 dotenv.config();
 
-// app is now imported from socket.js
+app.set('trust proxy', 1); // Trust Render's proxy
+
 const allowedOrigins = [
   'https://co-working-space-s-mern.vercel.app', //prod
   'http://localhost:5173',                      // (Vite)
@@ -89,9 +90,14 @@ app.get(/(.*)/, (req, res) => {
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
+  
+  // Log the full error to the console for production debugging (viewable in Render logs)
+  console.error(`[Error] ${req.method} ${req.url}:`, err);
+
   return res.status(statusCode).json({
     success: false,
     statusCode,
     message,
+    // Note: Do not expose stack trace in JSON response for security
   });
 });

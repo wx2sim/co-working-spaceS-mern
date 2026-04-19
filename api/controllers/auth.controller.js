@@ -42,7 +42,12 @@ export const signup = async (req, res, next) => {
       `,
     };
 
-    await sendEmail(emailOptions);
+    try {
+      await sendEmail(emailOptions);
+    } catch (emailError) {
+      console.error('Error sending signup verification email:', emailError);
+      // We don't return an error to the user here so they can still sign in and use resend-otp later
+    }
 
     res.status(201).json({ success: true, message: 'User created. Please verify your email!' });
   } catch (error) {
