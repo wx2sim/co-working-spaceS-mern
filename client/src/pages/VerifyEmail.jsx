@@ -2,11 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import AnimatedPage from '../components/AnimatedPage';
 
 export default function VerifyEmail() {
+  const { currentUser } = useSelector((state) => state.user);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -15,7 +16,7 @@ export default function VerifyEmail() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const email = location.state?.email || '';
+  const email = location.state?.email || currentUser?.email || '';
 
   useEffect(() => {
     if (!email) {

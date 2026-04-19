@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import SmartModal from '../components/SmartModal';
@@ -13,11 +13,22 @@ import OAuth from '../components/OAuth';
 import AnimatedPage from '../components/AnimatedPage';
 
 export default function SignIn() {
-  const [formData, setFormData] = useState({});
+  const location = useLocation();
+  const [formData, setFormData] = useState({
+    email: location.state?.email || '',
+    password: '',
+  });
   const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const passwordRef = useRef(null);
   
+  useEffect(() => {
+    if (location.state?.email && passwordRef.current) {
+      passwordRef.current.focus();
+    }
+  }, [location.state?.email]);
+
   useEffect(() => {
     if (error) {const timer = setTimeout(() => {
         dispatch(clearError());
@@ -77,6 +88,7 @@ export default function SignIn() {
                 placeholder='Email'
                 className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 focus:bg-white transition-all duration-300'
                 id='email'
+                value={formData.email}
                 onChange={handleChange}
               />
             </div>
@@ -87,6 +99,8 @@ export default function SignIn() {
                 placeholder='Password'
                 className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 focus:bg-white transition-all duration-300'
                 id='password'
+                ref={passwordRef}
+                value={formData.password}
                 onChange={handleChange}
               />
             </div>

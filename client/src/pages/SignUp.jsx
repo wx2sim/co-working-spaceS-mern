@@ -43,7 +43,7 @@ export default function SignUp() {
       const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, formData);
       setLoading(false);
       toast.success('Account created! Please sign in to verify your email.');
-      navigate('/signin');
+      navigate('/signin', { state: { email: formData.email } });
 
     } catch (error) {
       setLoading(false);
