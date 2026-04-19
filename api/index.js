@@ -40,7 +40,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(helmet());
-app.use(express.json({ limit: '10kb' })); // Body size limit to prevent DDoS
+app.use(express.json({ limit: '50kb' })); // Increased limit for larger payloads like Google photos
 app.use((req, res, next) => {
   req.body = mongoSanitize(req.body);
   req.query = mongoSanitize(req.query);
@@ -89,6 +89,11 @@ app.get(/(.*)/, (req, res) => {
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
+  
+  // Log the full error to the console for easier debugging on production (Render/Vercel)
+  console.error(`[Error] ${statusCode} - ${message}`);
+  if (err.stack) console.error(err.stack);
+
   return res.status(statusCode).json({
     success: false,
     statusCode,
