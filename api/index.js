@@ -40,7 +40,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(helmet());
-app.use(express.json({ limit: '10kb' })); // Body size limit to prevent DDoS
+app.use(express.json({ limit: '50kb' })); // Body size limit - safe for high-res profile data
 app.use((req, res, next) => {
   req.body = mongoSanitize(req.body);
   req.query = mongoSanitize(req.query);
