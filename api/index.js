@@ -42,7 +42,9 @@ app.use(cors({
 app.use(helmet());
 app.use(express.json({ limit: '10kb' })); // Body size limit to prevent DDoS
 app.use((req, res, next) => {
-  req.body = mongoSanitize(req.body); // Prevent NoSQL injection
+  req.body = mongoSanitize(req.body);
+  req.query = mongoSanitize(req.query);
+  req.params = mongoSanitize(req.params);
   next();
 });
 
@@ -86,7 +88,7 @@ app.get(/(.*)/, (req, res) => {
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'internal Server Error';
+  const message = err.message || 'Internal Server Error';
   return res.status(statusCode).json({
     success: false,
     statusCode,

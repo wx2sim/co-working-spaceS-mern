@@ -66,12 +66,9 @@ export default function VerifyEmail() {
       if (data.success) {
         toast.success('Email verified successfully!');
         
-        // Fetch updated user data to unlock features instantly
-        try {
-          const { data: updatedUser } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user/me`);
-          dispatch(signInSuccess(updatedUser));
-        } catch (err) {
-          console.log("Error syncing user state after verification", err);
+        // Use updated user data from response to unlock features instantly
+        if (data.user) {
+          dispatch(signInSuccess(data.user));
         }
 
         setOtp(['', '', '', '', '', '']);

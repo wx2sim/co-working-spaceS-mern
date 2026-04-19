@@ -3,11 +3,7 @@ import userReducer from './user/userSlice.js';
 import themeReducer from './theme/themeSlice.js';
 import {persistReducer, persistStore, } from 'redux-persist';
 
-const storage = {
-  getItem: (key) => Promise.resolve(localStorage.getItem(key)),
-  setItem: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
-  removeItem: (key) => Promise.resolve(localStorage.removeItem(key)),
-};
+import storage from 'redux-persist/lib/storage';
 
 const rootReducer = combineReducers({user: userReducer, theme: themeReducer});
 const persistConfig = {

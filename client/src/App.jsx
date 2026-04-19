@@ -86,7 +86,8 @@ export default function App() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!currentUser || currentUser.role) return;
+      // Only fetch if we have a user in state but are missing role/verification info (incomplete profile)
+      if (!currentUser || (currentUser.role !== undefined && currentUser.isVerified !== undefined)) return;
 
       try {
         const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/user/me`);
@@ -96,7 +97,7 @@ export default function App() {
       }
     };
     fetchUser();
-  }, [dispatch, currentUser]);
+  }, [dispatch, currentUser?.role, currentUser?.isVerified]);
 
   return (
     <BrowserRouter>
