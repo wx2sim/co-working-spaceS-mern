@@ -42,14 +42,21 @@ export const signup = async (req, res, next) => {
       `,
     };
 
+    let emailSent = true;
     try {
       await sendEmail(emailOptions);
     } catch (emailError) {
       console.error('Error sending signup verification email:', emailError);
-      // We don't return an error to the user here so they can still sign in and use resend-otp later
+      emailSent = false;
     }
 
-    res.status(201).json({ success: true, message: 'User created. Please verify your email!' });
+    res.status(201).json({ 
+      success: true, 
+      emailSent,
+      message: emailSent 
+        ? 'User created. Please verify your email!' 
+        : 'User created, but we could not send the verification email. Please try resending it from the verification page.'
+    });
   } catch (error) {
     next(error);
   }
@@ -192,14 +199,21 @@ export const resendOTP = async (req, res, next) => {
       `,
     };
 
+    let emailSent = true;
     try {
       await sendEmail(emailOptions);
     } catch (emailError) {
       console.error('Error resending verification OTP:', emailError);
-      // Still return success to the user so they are not blocked by a transient email failure
+      emailSent = false;
     }
 
-    res.status(200).json({ success: true, message: 'OTP resent successfully!' });
+    res.status(200).json({ 
+      success: true, 
+      emailSent,
+      message: emailSent 
+        ? 'OTP resent successfully!' 
+        : 'OTP regeneration successful, but we could not send the email. Please try again later.'
+    });
   } catch (error) {
     next(error);
   }
