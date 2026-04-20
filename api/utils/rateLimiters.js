@@ -12,7 +12,7 @@ export const authLimiter = rateLimit({
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 500, // Balanced limit for polling and general usage
-  message: 'Too many requests from this IP'
+  message: { success: false, message: 'Too many requests from this IP' }
 });
 
 export const otpLimiter = rateLimit({
