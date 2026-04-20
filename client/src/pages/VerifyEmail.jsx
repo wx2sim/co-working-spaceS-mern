@@ -88,10 +88,14 @@ export default function VerifyEmail() {
     try {
       const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/resend-otp`, { email });
       if (data.success) {
-        toast.success('New OTP sent to your email');
-        setTimer(60);
-        setOtp(['', '', '', '', '', '']);
-        inputRefs.current[0].focus();
+        if (data.emailSent === false) {
+          toast.error(data.message || 'Failed to send email. Check server configuration.');
+        } else {
+          toast.success('New OTP sent to your email');
+          setTimer(60);
+          setOtp(['', '', '', '', '', '']);
+          inputRefs.current[0].focus();
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to resend OTP');
