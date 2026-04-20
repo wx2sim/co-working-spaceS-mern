@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 // Constants for adaptive polling
@@ -9,14 +9,15 @@ const EMPTY_THRESHOLD = 3;       // Increase interval after 3 empty responses
 
 /**
  * useAdaptivePolling - Intelligently polls an endpoint, adjusting frequency based on data receipt and tab visibility.
- * 
- * @param {string} url - The URL to poll
+ * * @param {string} url - The URL to poll
  * @param {function} onDataArrival - Callback function to handle arrived data
  * @param {boolean} enabled - Whether polling is currently active
  * @param {string} timestampQueryParam - the key for the timestamp query param (e.g. 'since')
  */
 export default function useAdaptivePolling(url, onDataArrival, enabled = true, timestampQueryParam = 'since') {
-  const [lastCheck, setLastCheck] = useState(new Date().toISOString());
+
+  const lastCheckRef = useRef(new Date().toISOString());
+
   const intervalRef = useRef(null);
   const consecutiveEmptyRef = useRef(0);
   const currentIntervalMsRef = useRef(BASE_INTERVAL);
@@ -33,8 +34,8 @@ export default function useAdaptivePolling(url, onDataArrival, enabled = true, t
   const executePoll = useCallback(async () => {
     // If not enabled, not visible, or already fetching, skip
     if (!enabled || !isVisibleRef.current || fetchingRef.current) {
-        scheduleNextPoll();
-        return;
+      scheduleNextPoll();
+      return;
     }
 
     fetchingRef.current = true;
@@ -43,12 +44,12 @@ export default function useAdaptivePolling(url, onDataArrival, enabled = true, t
     try {
       // Append query param if needed
       const separator = url.includes('?') ? '&' : '?';
-      const pollUrl = timestampQueryParam 
-        ? `${url}${separator}${timestampQueryParam}=${encodeURIComponent(lastCheck)}`
+      const pollUrl = timestampQueryParam
+        ? `${url}${separator}${timestampQueryParam}=${encodeURIComponent(lastCheckRef.current)}`
         : url;
 
       const { data } = await axios.get(pollUrl);
-      
+
       const hasNewData = Array.isArray(data) ? data.length > 0 : !!data; // Simple heuristic
 
       if (hasNewData) {
@@ -62,14 +63,14 @@ export default function useAdaptivePolling(url, onDataArrival, enabled = true, t
         if (consecutiveEmptyRef.current >= EMPTY_THRESHOLD) {
           // Double the interval up to MAX_INTERVAL
           currentIntervalMsRef.current = Math.min(
-            currentIntervalMsRef.current * BACKOFF_MULTIPLIER, 
+            currentIntervalMsRef.current * BACKOFF_MULTIPLIER,
             MAX_INTERVAL
           );
         }
       }
 
-      // Update timestamp for next poll
-      setLastCheck(requestTimestamp);
+      // Update timestamp silently
+      lastCheckRef.current = requestTimestamp;
 
     } catch (error) {
       // Graceful error handling (429 Too Many Requests, 500, etc)
@@ -79,7 +80,8 @@ export default function useAdaptivePolling(url, onDataArrival, enabled = true, t
       fetchingRef.current = false;
       scheduleNextPoll(); // Schedule the next tick
     }
-  }, [url, enabled, lastCheck, onDataArrival, timestampQueryParam]);
+
+  }, [url, enabled, onDataArrival, timestampQueryParam]);
 
   const scheduleNextPoll = useCallback(() => {
     if (intervalRef.current) {
@@ -95,10 +97,8 @@ export default function useAdaptivePolling(url, onDataArrival, enabled = true, t
     const handleVisibilityChange = () => {
       isVisibleRef.current = document.visibilityState === 'visible';
       if (isVisibleRef.current) {
-        // Tab became visible again, immediately switch back to fast polling
         resetPolling();
       } else {
-        // Tab went hidden, clear current fast timer
         if (intervalRef.current) {
           clearTimeout(intervalRef.current);
         }
@@ -106,16 +106,15 @@ export default function useAdaptivePolling(url, onDataArrival, enabled = true, t
     };
 
     const handleFocus = () => {
-       if (!isVisibleRef.current) {
-         isVisibleRef.current = true;
-         resetPolling();
-       }
+      if (!isVisibleRef.current) {
+        isVisibleRef.current = true;
+        resetPolling();
+      }
     };
 
     const handleBlur = () => {
-       // Optional: treat blur similar to hidden
-       isVisibleRef.current = false;
-       if (intervalRef.current) {
+      isVisibleRef.current = false;
+      if (intervalRef.current) {
         clearTimeout(intervalRef.current);
       }
     };
