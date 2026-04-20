@@ -7,13 +7,13 @@ import { Drawer } from 'antd';
 import ProfileDropdown from './ProfileDropdown';
 import SmartButton from '../components/SmartButton';
 import axios from 'axios';
-import { useSocketContext } from '../context/SocketContext';
+// SocketContext removed in favor of polling
 import toast from 'react-hot-toast';
 
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
-  const { socket } = useSocketContext();
+// No socket context
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -30,7 +30,13 @@ function Header() {
       const fetchUnread = async () => {
         try {
           const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/message/unread-count`);
-          setUnreadCount(data.count || 0);
+          const newCount = data.count || 0;
+          setUnreadCount(prev => {
+            if (newCount > prev && prev !== 0) {
+              toast('✉️ You have new unread messages!', { duration: 4000, icon: '💬' });
+            }
+            return newCount;
+          });
         } catch (error) {
           console.log(error);
         }
@@ -40,13 +46,25 @@ function Header() {
         if (currentUser.role === 'admin' || currentUser.role === 'user' || currentUser.role === 'superadmin') {
             try {
                 const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/pending-count`);
-                setPendingBookingsCount(data.count || 0);
+                const newCount = data.count || 0;
+                setPendingBookingsCount(prev => {
+                    if (newCount > prev && prev !== 0) {
+                        toast.success('📅 New booking request arrived!', { duration: 5000, icon: '🏢' });
+                    }
+                    return newCount;
+                });
             } catch (error) { console.log(error); }
         }
         if (currentUser.role === 'client') {
             try {
                 const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/unseen-status-count`);
-                setUnseenStatusCount(data.count || 0);
+                const newCount = data.count || 0;
+                setUnseenStatusCount(prev => {
+                    if (newCount > prev && prev !== 0) {
+                        toast.success('📢 A booking status was updated!', { duration: 6000 });
+                    }
+                    return newCount;
+                });
             } catch (error) { console.log(error); }
         }
       }
@@ -64,47 +82,7 @@ function Header() {
     }
   }, [currentUser]);
 
-  // Socket.io listeners
-  useEffect(() => {
-    if (socket) {
-      socket.on('new_booking_request', (data) => {
-        toast.success(`📅 ${data.message}`, {
-            duration: 5000,
-            icon: '🏢'
-        });
-        setPendingBookingsCount(prev => prev + 1);
-      });
-
-      socket.on('receive_message', (message) => {
-        toast(`✉️ New message: ${message.content.substring(0, 30)}...`, {
-            duration: 4000,
-            icon: '💬'
-        });
-        // Optionally refetch unread count
-        const fetchUnread = async () => {
-            const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/message/unread-count`);
-            setUnreadCount(data.count || 0);
-        };
-        fetchUnread();
-      });
-
-      socket.on('booking_status_updated', (data) => {
-        toast.success(`📢 ${data.message}`, {
-            duration: 6000,
-        });
-        if (currentUser.role === 'client') {
-            setUnseenStatusCount(prev => prev + 1);
-        }
-      });
-
-      return () => {
-        socket.off('new_booking_request');
-        socket.off('receive_message');
-        socket.off('booking_status_updated');
-      };
-    }
-  }, [socket]);
-
+  // Socket listeners removed
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams(window.location.search);

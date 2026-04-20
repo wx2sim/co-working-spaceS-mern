@@ -13,11 +13,9 @@ import toast from 'react-hot-toast';
 import StatCard from '../../components/StatCard';
 import AnalyticsChart from '../../components/AnalyticsChart';
 import { FaWallet, FaClipboardCheck, FaBuilding, FaClock } from 'react-icons/fa';
-import { useSocketContext } from '../../context/SocketContext';
 
 export default function UserDashboard() {
   const { currentUser } = useSelector((state) => state.user);
-  const { socket } = useSocketContext();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('listings');
@@ -68,58 +66,15 @@ export default function UserDashboard() {
     fetchListings();
     fetchBookings();
     fetchOwnerStats();
+
+    // Poll every 30 seconds to keep stats and bookings fresh (mimics previous socket behavior without overhead)
+    const interval = setInterval(() => {
+        fetchBookings();
+        fetchOwnerStats();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [currentUser._id, range]);
-
-  // Real-time updates for bookings
-  useEffect(() => {
-    if (socket) {
-      socket.on('new_booking_request', (data) => {
-        // Add newest booking to the top
-        setBookings((prev) => [data.booking, ...prev]);
-        
-        // Update stats badge if ownerStats exists
-        if (ownerStats) {
-            const updatedCounts = [...(ownerStats.bookingStatusCounts || [])];
-            const pendingIndex = updatedCounts.findIndex(s => s._id === 'pending');
-            if (pendingIndex !== -1) {
-                updatedCounts[pendingIndex].count += 1;
-            } else {
-                updatedCounts.push({ _id: 'pending', count: 1 });
-            }
-            setOwnerStats({ ...ownerStats, bookingStatusCounts: updatedCounts });
-        }
-      });
-
-      return () => {
-        socket.off('new_booking_request');
-      };
-    }
-  }, [socket, ownerStats]);
-
-  // Real-time stats updates when a booking status changes (e.g. approved by admin)
-  useEffect(() => {
-    if (socket) {
-      socket.on('booking_status_updated', (data) => {
-          // If the booking belongs to this owner, refresh stats
-          if (data.booking.owner === currentUser._id) {
-            const fetchOwnerStats = async () => {
-                try {
-                    const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/owner`, { params: { range } });
-                    setOwnerStats(data);
-                } catch (err) { console.log('Error refreshing stats'); }
-            };
-            fetchOwnerStats();
-            
-            // Also update the local booking list if it's there
-            setBookings(prev => prev.map(b => b._id === data.booking._id ? { ...b, status: data.booking.status } : b));
-          }
-      });
-
-      return () => {
-        socket.off('booking_status_updated');
-      };
-    }
-  }, [socket, currentUser._id, range]);
 
   const greeting = () => {
     const hour = new Date().getHours();

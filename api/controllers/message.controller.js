@@ -1,7 +1,6 @@
 import Message from '../models/message.model.js';
 import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
-import { getReceiverSocketId, io } from '../socket.js';
 
 export const sendMessage = async (req, res, next) => {
   try {
@@ -24,10 +23,7 @@ export const sendMessage = async (req, res, next) => {
       .populate('receiver', 'username avatar email')
       .populate('listing', 'name imageUrls');
 
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('receive_message', populatedMessage);
-    }
+    // (Socket emission removed in favor of polling)
 
     res.status(201).json(populatedMessage);
   } catch (error) {
@@ -128,6 +124,31 @@ export const deleteConversation = async (req, res, next) => {
     );
 
     res.status(200).json({ success: true, message: 'Conversation deleted from your view.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getNewMessages = async (req, res, next) => {
+  try {
+    const { since } = req.query;
+    if (!since) {
+      return next(errorHandler(400, 'Timestamp (since) is required'));
+    }
+
+    const messages = await Message.find({
+      $and: [
+        { $or: [{ sender: req.user.id }, { receiver: req.user.id }] },
+        { deletedBy: { $ne: req.user.id } },
+        { createdAt: { $gt: new Date(since) } }
+      ]
+    })
+    .populate('sender', 'username avatar email')
+    .populate('receiver', 'username avatar email')
+    .populate('listing', 'name imageUrls')
+    .sort({ createdAt: 1 }); // Sort oldest to newest (of the new messages)
+
+    res.status(200).json(messages);
   } catch (error) {
     next(error);
   }

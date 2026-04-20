@@ -1,7 +1,6 @@
 import Booking from '../models/booking.model.js';
 import Listing from '../models/listing.model.js';
 import { errorHandler } from '../utils/error.js';
-import { getReceiverSocketId, io } from '../socket.js';
 
 export const createBooking = async (req, res, next) => {
   try {
@@ -58,13 +57,7 @@ export const createBooking = async (req, res, next) => {
       .populate('user', 'username email avatar')
       .populate('listing', 'name imageUrls availableRooms rooms');
 
-    const receiverSocketId = getReceiverSocketId(listing.userRef);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('new_booking_request', {
-        message: `New booking request for ${listing.name}`,
-        booking: populatedBooking
-      });
-    }
+    // (Socket emission removed in favor of adaptive polling in the frontend)
 
     res.status(201).json(booking);
   } catch (error) {
@@ -122,13 +115,7 @@ export const approveBooking = async (req, res, next) => {
     await booking.save();
 
     // Notify client
-    const receiverSocketId = getReceiverSocketId(booking.user);
-    if (receiverSocketId) {
-        io.to(receiverSocketId).emit('booking_status_updated', {
-            message: `Your booking for property was approved!`,
-            booking
-        });
-    }
+    // Notify client (Socket emission removed)
 
     res.status(200).json(booking);
   } catch (error) {
@@ -153,13 +140,7 @@ export const rejectBooking = async (req, res, next) => {
     await booking.save();
 
     // Notify client
-    const receiverSocketId = getReceiverSocketId(booking.user);
-    if (receiverSocketId) {
-        io.to(receiverSocketId).emit('booking_status_updated', {
-            message: `Your booking request was rejected.`,
-            booking
-        });
-    }
+    // Notify client (Socket emission removed)
 
     res.status(200).json(booking);
   } catch (error) {

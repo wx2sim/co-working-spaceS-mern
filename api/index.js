@@ -1,5 +1,5 @@
-import { app, server, io } from './socket.js';
 import express from 'express';
+import http from 'http';
 import mongoose from 'mongoose';
 import userRouter from './routes/user.route.js'
 import authRouter from './routes/auth.route.js'
@@ -21,6 +21,9 @@ import cors from 'cors';
 import path from 'path';
 
 dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
 
 app.set('trust proxy', 1); // Trust Render's proxy
 
@@ -63,8 +66,9 @@ mongoose.connect(process.env.MONGO).then(() => {
 
 // Fast shutdown for development efficiency
 process.on('SIGUSR2', () => {
-  if (io) io.close();
-  process.exit(0);
+  server.close(() => {
+    process.exit(0);
+  });
 });
 
 

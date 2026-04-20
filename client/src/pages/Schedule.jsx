@@ -6,11 +6,10 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import TaskModal from '../components/TaskModal';
-import { useSocketContext } from '../context/SocketContext';
+import useAdaptivePolling from '../hooks/useAdaptivePolling';
 
 export default function Schedule() {
   const { currentUser } = useSelector((state) => state.user);
-  const { socket } = useSocketContext();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
@@ -46,23 +45,30 @@ export default function Schedule() {
     fetchTasks();
   }, []);
 
-  // Listen for incoming messages via socket
-  useEffect(() => {
-    if (socket) {
-      socket.on('receive_message', (newMessage) => {
-        // Prevent duplicate if we were the sender (we already updated state locally)
-        setMessages((prev) => {
-          const isDuplicate = prev.some(m => m._id === newMessage._id);
-          if (isDuplicate) return prev;
-          return [...prev, newMessage];
-        });
+  // Use Adaptive Polling for new messages
+  const handleNewMessages = (newMessages) => {
+    if (newMessages && newMessages.length > 0) {
+      setMessages((prev) => {
+        const existingIds = new Set(prev.map(m => m._id));
+        const actuallyNew = newMessages.filter(m => !existingIds.has(m._id));
+        
+        if (actuallyNew.length === 0) return prev; // no real new messages
+        
+        // Show a toast if any of these new messages are NOT from the current user
+        const newFromOthers = actuallyNew.filter(m => m.sender._id !== currentUser._id);
+        if (newFromOthers.length > 0) {
+            toast(`✉️ New message: ${newFromOthers[0].content.substring(0, 30)}...`, {
+                duration: 4000,
+                icon: '💬'
+            });
+        }
+        
+        return [...prev, ...actuallyNew];
       });
-
-      return () => {
-        socket.off('receive_message');
-      };
     }
-  }, [socket]);
+  };
+
+  const { resetPolling } = useAdaptivePolling(`${import.meta.env.VITE_API_BASE_URL}/api/message/new`, handleNewMessages, !!currentUser);
 
   // Scroll to bottom when thread changes or new message
   useEffect(() => {
@@ -121,8 +127,8 @@ export default function Schedule() {
       
       // Update local state immediately for a snappy feel
       setMessages((prev) => [...prev, data]);
-      // Also potentially fetch to ensure sync, but the local update handles the UI
-      // fetchMessages(); 
+      // Reset polling interval to check for immediate replies
+      resetPolling(); 
     } catch (error) {
       toast.error('Failed to send message');
     }

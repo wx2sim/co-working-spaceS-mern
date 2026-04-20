@@ -3,15 +3,10 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import AnimatedPage from '../../components/AnimatedPage';
-import {
-  FaSearch, FaMapMarkerAlt, FaCalendarCheck, FaArrowUp,
-  FaClock, FaHeart, FaCompass, FaRegBookmark
-} from 'react-icons/fa';
-import { useSocketContext } from '../../context/SocketContext';
+import { FaSearch, FaMapMarkerAlt, FaCalendarCheck, FaArrowUp, FaClock, FaHeart, FaCompass, FaRegBookmark } from 'react-icons/fa';
 
 export default function ClientDashboard() {
   const { currentUser } = useSelector((state) => state.user);
-  const { socket } = useSocketContext();
   const [recentListings, setRecentListings] = useState([]);
   const [bookedSpaces, setBookedSpaces] = useState([]);
   const [upgradeStatus, setUpgradeStatus] = useState('none');
@@ -56,24 +51,14 @@ export default function ClientDashboard() {
     fetchRecent();
     fetchBookings();
     checkUpgrade();
+
+    // Poll every 30 seconds for new booking statuses (mimicking socket behavior)
+    const interval = setInterval(() => {
+        fetchBookings();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [currentUser._id]);
-
-  // Real-time status updates
-  useEffect(() => {
-    if (socket) {
-      socket.on('booking_status_updated', (data) => {
-        setBookedSpaces((prev) => 
-          prev.map((booking) => 
-            booking._id === data.booking._id ? { ...booking, status: data.booking.status } : booking
-          )
-        );
-      });
-
-      return () => {
-        socket.off('booking_status_updated');
-      };
-    }
-  }, [socket]);
 
   const greeting = () => {
     const hour = new Date().getHours();
