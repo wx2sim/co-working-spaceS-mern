@@ -24,38 +24,9 @@ export const signup = async (req, res, next) => {
   try {
     await newUser.save();
 
-    // Send Verification Email
-    const emailOptions = {
-      email: newUser.email,
-      subject: 'CoSpace - Verify your Email',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-          <h2 style="color: #4F46E5; text-align: center;">Welcome to CoSpace!</h2>
-          <p>Thank you for signing up. Please use the verification code below to activate your account:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; background: #F3F4F6; padding: 10px 20px; border-radius: 5px; border: 1px dashed #4F46E5;">${otp}</span>
-          </div>
-          <p>This code will expire in <strong>10 minutes</strong>. If you did not request this, please ignore this email.</p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 CoSpace Application. All rights reserved.</p>
-        </div>
-      `,
-    };
-
-    let emailSent = true;
-    try {
-      await sendEmail(emailOptions);
-    } catch (emailError) {
-      console.error('Error sending signup verification email:', emailError);
-      emailSent = false;
-    }
-
     res.status(201).json({ 
       success: true, 
-      emailSent,
-      message: emailSent 
-        ? 'User created. Please verify your email!' 
-        : 'User created, but we could not send the verification email. Please try resending it from the verification page.'
+      message: 'User created successfully! Please sign in to verify your email.' 
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -73,6 +44,37 @@ export const signin = async (req, res, next) => {
     if (!validUser) return next(errorHandler(404, 'User not found!'));
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, 'Wrong credentials!'));
+
+    if (!validUser.isVerified) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      validUser.verificationOTP = otp;
+      validUser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+      await validUser.save();
+
+      const emailOptions = {
+        email: validUser.email,
+        subject: 'CoSpace - Verify your Email (New Login)',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <h2 style="color: #4F46E5; text-align: center;">Welcome back!</h2>
+            <p>Here is your new verification code to activate your account:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; background: #F3F4F6; padding: 10px 20px; border-radius: 5px; border: 1px dashed #4F46E5;">${otp}</span>
+            </div>
+            <p>This code will expire in <strong>10 minutes</strong>.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 CoSpace Application. All rights reserved.</p>
+          </div>
+        `,
+      };
+
+      try {
+        await sendEmail(emailOptions);
+      } catch (emailError) {
+        console.error('Error sending signin verification email:', emailError);
+      }
+    }
+
     const token = jwt.sign({ id: validUser._id  }, process.env.JWT_SECRET);
     const { password: pass, ...rest } = validUser._doc;
     res
