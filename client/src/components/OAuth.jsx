@@ -20,6 +20,7 @@ function OAuth() {
              name: result.user.displayName,
              email: result.user.email,
              photo: result.user.photoURL,
+             role: 'client'
             });
             if (data.success === false) {
                     dispatch(signInFailure(data.message));

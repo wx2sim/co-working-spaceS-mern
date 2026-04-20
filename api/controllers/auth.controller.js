@@ -92,6 +92,7 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     
     if (user) {
+      console.log(`[GoogleAuth] Existing user found: ${user.email}`);
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = user._doc;
       
@@ -104,6 +105,7 @@ export const google = async (req, res, next) => {
         .status(200)
         .json(rest);
     } else {
+      console.log(`[GoogleAuth] Creating new user for email: ${req.body.email}`);
       const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
       

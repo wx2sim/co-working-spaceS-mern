@@ -91,7 +91,7 @@ app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   
-  // Log the full error to the console for production debugging (viewable in Render logs)
+  // Log the full error to the console for easier debugging on production (Render/Vercel)
   console.error(`[Error] ${req.method} ${req.url}:`, err);
 
   return res.status(statusCode).json({
