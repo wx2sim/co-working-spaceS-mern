@@ -38,7 +38,7 @@ export default function Profile() {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [upgradeStatus, setUpgradeStatus] = useState('none'); // none, pending, approved, denied
   const [upgradeLoading, setUpgradeLoading] = useState(false);
-  const [upgradeForm, setUpgradeForm] = useState({ fullName: '', businessName: '', speciality: '', phoneNumber: '' });
+  const [upgradeForm, setUpgradeForm] = useState({ fullName: '', businessName: '', speciality: '', location: '', phoneNumber: '' });
   const [upgradeRequests, setUpgradeRequests] = useState([]);
   const [upgradeRequestsFetched, setUpgradeRequestsFetched] = useState(false);
 
@@ -213,8 +213,13 @@ export default function Profile() {
   };
 
   const handleUpgradeSubmit = async () => {
-    if (!upgradeForm.fullName || !upgradeForm.businessName || !upgradeForm.speciality || !upgradeForm.phoneNumber) {
+    if (!upgradeForm.fullName || !upgradeForm.businessName || !upgradeForm.speciality || !upgradeForm.location || !upgradeForm.phoneNumber) {
       return toast.error('Please fill in all fields.');
+    }
+
+    const phoneRegex = /^[567]\d{8}$/;
+    if (!phoneRegex.test(upgradeForm.phoneNumber)) {
+      return toast.error('Phone number must start with 5, 6, or 7 and be exactly 9 digits long.');
     }
     try {
       setUpgradeLoading(true);
@@ -226,7 +231,7 @@ export default function Profile() {
       setUpgradeStatus('pending');
       setIsUpgradeModalOpen(false);
       toast.success('Upgrade request sent successfully!');
-      setUpgradeForm({ fullName: '', businessName: '', speciality: '', phoneNumber: '' });
+      setUpgradeForm({ fullName: '', businessName: '', speciality: '', location: '', phoneNumber: '' });
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to send request.';
       toast.error(msg);
@@ -486,6 +491,10 @@ export default function Profile() {
                                 <span className='text-slate-400'>Speciality</span>
                                 <p className='font-semibold text-slate-700'>{req.speciality}</p>
                               </div>
+                              <div className='bg-slate-50 rounded-lg px-3 py-2'>
+                                <span className='text-slate-400'>Location</span>
+                                <p className='font-semibold text-slate-700'>{req.location}</p>
+                              </div>
                               <div className='bg-slate-50 rounded-lg px-3 py-2 col-span-2'>
                                 <span className='text-slate-400'>Phone</span>
                                 <p className='font-semibold text-slate-700'>{req.phoneNumber}</p>
@@ -702,6 +711,17 @@ export default function Profile() {
                       id='speciality'
                       placeholder='e.g. Co-working, Event Space, etc.'
                       value={upgradeForm.speciality}
+                      onChange={handleUpgradeFormChange}
+                      className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
+                    />
+                  </div>
+                  <div className='flex flex-col gap-1'>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>Location</label>
+                    <input
+                      type='text'
+                      id='location'
+                      placeholder='Business location or address'
+                      value={upgradeForm.location}
                       onChange={handleUpgradeFormChange}
                       className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
                     />

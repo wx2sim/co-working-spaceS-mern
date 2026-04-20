@@ -5,7 +5,13 @@ import { errorHandler } from "../utils/error.js";
 // Client creates an upgrade request
 export const createUpgradeRequest = async (req, res, next) => {
   try {
-    const { fullName, businessName, speciality, phoneNumber } = req.body;
+    const { fullName, businessName, speciality, location, phoneNumber } = req.body;
+
+    // Validate phone number (must be +213 followed by 5, 6, or 7, and 8 digits)
+    const phoneRegex = /^\+213[567]\d{8}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return next(errorHandler(400, "Phone number must be a valid Algerian mobile number (9 digits starting with 5, 6, or 7)."));
+    }
 
     // Check if user already has a pending request
     const existingRequest = await UpgradeRequest.findOne({
@@ -22,6 +28,7 @@ export const createUpgradeRequest = async (req, res, next) => {
       fullName,
       businessName,
       speciality,
+      location,
       phoneNumber,
     });
 
