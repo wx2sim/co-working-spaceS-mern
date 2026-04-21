@@ -24,9 +24,9 @@ export const signup = async (req, res, next) => {
   try {
     await newUser.save();
 
-    res.status(201).json({ 
-      success: true, 
-      message: 'User created successfully! Please sign in to verify your email.' 
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully! Please sign in to verify your email.'
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -75,10 +75,10 @@ export const signin = async (req, res, next) => {
       }
     }
 
-    const token = jwt.sign({ id: validUser._id  }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
     const { password: pass, ...rest } = validUser._doc;
     res
-      .cookie('access_token', token, { 
+      .cookie('access_token', token, {
         httpOnly: true,
         secure: true, // required for sameSite: 'none'
         sameSite: 'none'
@@ -92,14 +92,14 @@ export const signin = async (req, res, next) => {
 export const google = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    
+
     if (user) {
       console.log(`[GoogleAuth] Existing user found: ${user.email}`);
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = user._doc;
-      
+
       res
-        .cookie('access_token', token, { 
+        .cookie('access_token', token, {
           httpOnly: true,
           secure: true,
           sameSite: 'none'
@@ -110,7 +110,7 @@ export const google = async (req, res, next) => {
       console.log(`[GoogleAuth] Creating new user for email: ${req.body.email}`);
       const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
-      
+
       const newUser = new User({
         username: req.body.name.split(" ").join("").toLowerCase() + Math.random().toString(36).slice(-8),
         email: req.body.email,
@@ -119,13 +119,13 @@ export const google = async (req, res, next) => {
         role: req.body.role || 'client',
         isVerified: true // Auto-verify Google users
       });
-      
+
       await newUser.save();
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = newUser._doc;
-      
+
       res
-        .cookie('access_token', token, { 
+        .cookie('access_token', token, {
           httpOnly: true,
           secure: true,
           sameSite: 'none'
@@ -168,8 +168,8 @@ export const verifyEmail = async (req, res, next) => {
     await user.save();
 
     const { password: pass, ...rest } = user._doc;
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       message: 'Email verified successfully!',
       user: rest
     });
@@ -216,11 +216,11 @@ export const resendOTP = async (req, res, next) => {
       emailSent = false;
     }
 
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       emailSent,
-      message: emailSent 
-        ? 'OTP resent successfully!' 
+      message: emailSent
+        ? 'OTP resent successfully!'
         : 'OTP regeneration successful, but we could not send the email. Please try again later.'
     });
   } catch (error) {

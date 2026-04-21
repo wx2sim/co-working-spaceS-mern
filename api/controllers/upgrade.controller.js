@@ -105,3 +105,23 @@ export const denyRequest = async (req, res, next) => {
     next(error);
   }
 };
+
+// Client cancels their own pending upgrade request
+export const cancelUpgradeRequest = async (req, res, next) => {
+  try {
+    const request = await UpgradeRequest.findOne({
+      userId: req.user.id,
+      status: "pending",
+    });
+
+    if (!request) {
+      return next(errorHandler(404, "No pending upgrade request found to cancel."));
+    }
+
+    await UpgradeRequest.findByIdAndDelete(request._id);
+
+    res.status(200).json({ success: true, message: "Upgrade request cancelled successfully." });
+  } catch (error) {
+    next(error);
+  }
+};

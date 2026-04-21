@@ -240,6 +240,19 @@ export default function Profile() {
     }
   };
 
+  const handleCancelUpgrade = async () => {
+    try {
+      setUpgradeLoading(true);
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/cancel-request`);
+      setUpgradeStatus('none');
+      toast.success('Upgrade request cancelled successfully.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel request.');
+    } finally {
+      setUpgradeLoading(false);
+    }
+  };
+
   const handleShowUpgradeRequests = async () => {
     if (!currentUser.isVerified) {
       return toast.error('Please verify your email first!');
@@ -664,9 +677,20 @@ export default function Profile() {
                     {upgradeStatus === 'denied' ? 'Re-apply to Become a Seller' : 'Upgrade to Seller'}
                   </button>
                 ) : upgradeStatus === 'pending' ? (
-                  <div className='w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 font-medium py-3 rounded-xl text-sm cursor-default'>
-                    <FaClock className='text-xs' />
-                    Upgrade Request Pending
+                  <div className='flex flex-col gap-2'>
+                    <div className='w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 font-medium py-3 rounded-xl text-sm cursor-default'>
+                      <FaClock className='text-xs' />
+                      Upgrade Request Pending
+                    </div>
+                    <SmartModal
+                      triggerText="Cancel Request"
+                      triggerColorClass="w-full bg-white text-red-500 border border-red-200 font-medium py-2.5 rounded-xl hover:bg-red-50 transition-all text-xs flex items-center justify-center gap-2"
+                      modalTitle="Cancel Upgrade Request"
+                      modalContent="Are you sure you want to withdraw your upgrade request? You will need to fill out the form again if you change your mind."
+                      okText="Yes, Cancel"
+                      okColorClass="bg-red-600 !text-white hover:!bg-red-700"
+                      onOkAction={handleCancelUpgrade}
+                    />
                   </div>
                 ) : null}
               </div>

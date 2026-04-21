@@ -7,6 +7,7 @@ import {
   getPendingRequests,
   approveRequest,
   denyRequest,
+  cancelUpgradeRequest,
 } from "../controllers/upgrade.controller.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 // Client routes
 router.post("/request", verifyUserToken, checkVerification, createUpgradeRequest);
 router.get("/my-status", verifyUserToken, getMyUpgradeStatus);
+router.delete("/cancel-request", verifyUserToken, cancelUpgradeRequest);
 
 // Admin routes
 router.get("/pending", verifyUserToken, checkVerification, requireRole(["admin", "superadmin"]), getPendingRequests);
