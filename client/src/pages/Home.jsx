@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Autoplay, EffectFade } from 'swiper/modules';
+import { Navigation, Autoplay } from 'swiper/modules';
 import SwiperCore from 'swiper';
 import 'swiper/css/bundle';
 import { FaSearch, FaMapMarkerAlt, FaStar, FaArrowRight, FaCity, FaWifi, FaCoffee } from 'react-icons/fa';
 import AnimatedPage from '../components/AnimatedPage';
 import ListingItem from '../components/ListingItem';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import hero1 from '../assets/Hero/photo1.avif';
+import hero2 from '../assets/Hero/photo2.jpg';
+import hero3 from '../assets/Hero/photo3.avif';
+import hero4 from '../assets/Hero/photo4.avif';
 
 export default function Home() {
   useDocumentTitle('Co-Spaces');
-  SwiperCore.use([Navigation, Autoplay, EffectFade]);
+  SwiperCore.use([Navigation, Autoplay]);
   const [offerListings, setOfferListings] = useState([]);
   const [latestListings, setLatestListings] = useState([]);
   const [rentListings, setRentListings] = useState([]);
@@ -67,19 +71,19 @@ export default function Home() {
           {/* Background Images Swiper */}
           <div className='absolute inset-0 z-0'>
             <Swiper
-              modules={[Autoplay, EffectFade]}
-              effect='fade'
-              autoplay={{ delay: 5000, disableOnInteraction: false }}
+              modules={[Autoplay]}
+              autoplay={{ delay: 3000, disableOnInteraction: false }}
+              speed={1500}
               loop={true}
+              slidesPerView={1}
+              spaceBetween={0}
+              centeredSlides={true}
+              roundLengths={true}
               allowTouchMove={false}
               className='h-full w-full'
             >
-              {[
-                'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=2000&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2000&auto=format&fit=crop'
-              ].map((img, idx) => (
-                <SwiperSlide key={idx} className='h-full'>
+              {[hero1, hero2, hero3, hero4].map((img, idx) => (
+                <SwiperSlide key={idx} className='h-full w-full overflow-hidden'>
                   <img src={img} alt='Hero background' className='w-full h-full object-cover scale-105 transform origin-center animate-pulse-slow' />
                   <div className='absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/60 to-slate-900/90 mix-blend-multiply'></div>
                 </SwiperSlide>
