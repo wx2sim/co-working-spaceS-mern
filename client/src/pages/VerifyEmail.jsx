@@ -6,9 +6,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import AnimatedPage from '../components/AnimatedPage';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function VerifyEmail() {
-  useDocumentTitle('Verify Email | Co-Spaces');
+  const { t } = useLanguage();
+  useDocumentTitle(`${t('verify_email_title')} | Co-Spaces`);
   const { currentUser } = useSelector((state) => state.user);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ export default function VerifyEmail() {
   useEffect(() => {
     if (!email) {
       navigate('/signup');
-      toast.error('Please sign up first');
+      toast.error(t('please_signup_first'));
     }
   }, [email, navigate]);
 
@@ -56,7 +58,7 @@ export default function VerifyEmail() {
     e.preventDefault();
     const otpString = otp.join('');
     if (otpString.length !== 6) {
-      return toast.error('Please enter all 6 digits');
+      return toast.error(t('enter_6_digits'));
     }
 
     setLoading(true);
@@ -67,7 +69,7 @@ export default function VerifyEmail() {
       });
 
       if (data.success) {
-        toast.success('Email verified successfully!');
+        toast.success(t('email_verified_success'));
         
         // Use updated user data from response to unlock features instantly
         if (data.user) {
@@ -78,7 +80,7 @@ export default function VerifyEmail() {
         navigate('/');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Verification failed');
+      toast.error(error.response?.data?.message || t('verification_failed'));
     } finally {
       setLoading(false);
     }
@@ -93,14 +95,14 @@ export default function VerifyEmail() {
         if (data.emailSent === false) {
           toast.error(data.message || 'Failed to send email. Check server configuration.');
         } else {
-          toast.success('New OTP sent to your email');
+          toast.success(t('otp_sent_email'));
           setTimer(60);
           setOtp(['', '', '', '', '', '']);
           inputRefs.current[0].focus();
         }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to resend OTP');
+      toast.error(error.response?.data?.message || t('failed_resend_otp'));
     } finally {
       setResendLoading(false);
     }
@@ -111,9 +113,9 @@ export default function VerifyEmail() {
       <div className='min-h-screen pt-32 pb-10 px-4 flex items-center justify-center bg-slate-50'>
         <div className='max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-slate-100'>
           <div className='text-center mb-10'>
-            <h1 className='text-3xl font-black text-slate-900 mb-2'>Verify Your Email</h1>
+            <h1 className='text-3xl font-black text-slate-900 mb-2'>{t('verify_email_title')}</h1>
             <p className='text-slate-500 text-sm'>
-              We've sent a 6-digit code to <br />
+              {t('verify_sent_to')} <br />
               <span className='font-bold text-slate-900'>{email}</span>
             </p>
           </div>
@@ -136,16 +138,16 @@ export default function VerifyEmail() {
             </div>
 
             <button
-              type='submit'
-              disabled={loading}
-              className='w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-slate-800 transition-all shadow-lg active:scale-95 disabled:opacity-50'
-            >
-              {loading ? 'Verifying...' : 'Verify Email'}
-            </button>
+               type='submit'
+               disabled={loading}
+               className='w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-slate-800 transition-all shadow-lg active:scale-95 disabled:opacity-50'
+             >
+               {loading ? t('verifying') : t('verify_button')}
+             </button>
           </form>
 
           <div className='mt-8 text-center'>
-            <p className='text-slate-500 text-sm mb-4'>Didn't receive the code?</p>
+            <p className='text-slate-500 text-sm mb-4'>{t('didnt_receive_code')}</p>
             <button
               onClick={handleResend}
               disabled={timer > 0 || resendLoading}
@@ -153,7 +155,7 @@ export default function VerifyEmail() {
                 timer > 0 ? 'text-slate-400 cursor-not-allowed' : 'text-indigo-600 hover:text-indigo-700 hover:underline'
               }`}
             >
-              {resendLoading ? 'Sending...' : timer > 0 ? `Resend in ${timer}s` : 'Resend Code'}
+              {resendLoading ? t('sending') : timer > 0 ? `${t('resend_in')} ${timer}s` : t('resend_code')}
             </button>
           </div>
         </div>

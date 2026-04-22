@@ -9,12 +9,14 @@ import SmartButton from '../components/SmartButton';
 import axios from 'axios';
 // SocketContext removed in favor of polling
 import toast from 'react-hot-toast';
+import { useLanguage } from '../context/LanguageContext';
 
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
-// No socket context
   const dispatch = useDispatch();
+  const { language, t, changeLanguage } = useLanguage();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -44,28 +46,28 @@ function Header() {
 
       const fetchPending = async () => {
         if (currentUser.role === 'admin' || currentUser.role === 'user' || currentUser.role === 'superadmin') {
-            try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/pending-count`);
-                const newCount = data.count || 0;
-                setPendingBookingsCount(prev => {
-                    if (newCount > prev && prev !== 0) {
-                        toast.success('📅 New booking request arrived!', { duration: 5000, icon: '🏢' });
-                    }
-                    return newCount;
-                });
-            } catch (error) { console.log(error); }
+          try {
+            const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/pending-count`);
+            const newCount = data.count || 0;
+            setPendingBookingsCount(prev => {
+              if (newCount > prev && prev !== 0) {
+                toast.success('📅 New booking request arrived!', { duration: 5000, icon: '🏢' });
+              }
+              return newCount;
+            });
+          } catch (error) { console.log(error); }
         }
         if (currentUser.role === 'client') {
-            try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/unseen-status-count`);
-                const newCount = data.count || 0;
-                setUnseenStatusCount(prev => {
-                    if (newCount > prev && prev !== 0) {
-                        toast.success('📢 A booking status was updated!', { duration: 6000 });
-                    }
-                    return newCount;
-                });
-            } catch (error) { console.log(error); }
+          try {
+            const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/booking/unseen-status-count`);
+            const newCount = data.count || 0;
+            setUnseenStatusCount(prev => {
+              if (newCount > prev && prev !== 0) {
+                toast.success('📢 A booking status was updated!', { duration: 6000 });
+              }
+              return newCount;
+            });
+          } catch (error) { console.log(error); }
         }
       }
 
@@ -82,7 +84,6 @@ function Header() {
     }
   }, [currentUser]);
 
-  // Socket listeners removed
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams(window.location.search);
@@ -117,17 +118,16 @@ function Header() {
         <Link
           to={disabled ? '#' : to}
           onClick={handleDisabledClick}
-          className={`text-slate-600 text-base md:text-sm font-medium transition-colors duration-300 relative group whitespace-nowrap block ${
-            disabled ? 'opacity-50 cursor-not-allowed' : 'hover:text-slate-900 leading-relaxed'
-          }`}
+          className={`text-slate-600 text-base md:text-sm font-medium transition-colors duration-300 relative group whitespace-nowrap block ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:text-slate-900 leading-relaxed'
+            }`}
         >
           {text}
           {badge > 0 && (
-            <span className="absolute -top-1.5 -right-3 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+            <span className="absolute -top-1.5 -end-3 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
               {badge > 9 ? '9+' : badge}
             </span>
           )}
-          {!disabled && <span className='absolute left-0 -bottom-1 w-0 h-[2px] bg-slate-900 transition-all duration-300 group-hover:w-full'></span>}
+          {!disabled && <span className='absolute start-0 -bottom-1 w-0 h-[2px] bg-slate-900 transition-all duration-300 group-hover:w-full'></span>}
         </Link>
       </li>
     );
@@ -139,9 +139,9 @@ function Header() {
     if (currentUser?.role === 'admin') {
       return (
         <>
-          <NavLink to='/admin/users' text='Users' onClick={handleLinkClick} />
-          <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
-          <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} disabled={!currentUser.isVerified} />
+          <NavLink to='/admin/users' text={t('users')} onClick={handleLinkClick} />
+          <NavLink to='/schedule' text={t('messages')} onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
+          <NavLink to='/dashboard' text={t('dashboard')} onClick={handleLinkClick} disabled={!currentUser.isVerified} />
         </>
       );
     }
@@ -149,19 +149,19 @@ function Header() {
     if (currentUser?.role === 'user') {
       return (
         <>
-          <NavLink to='/' text='Home' onClick={handleLinkClick} />
-          <NavLink to='/about' text='About' onClick={handleLinkClick} />
-          <NavLink to='/schedule' text='Schedule' onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
+          <NavLink to='/' text={t('home')} onClick={handleLinkClick} />
+          <NavLink to='/about' text={t('about')} onClick={handleLinkClick} />
+          <NavLink to='/schedule' text={t('messages')} onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
           <li>
             <SmartButton
-              actionFunction={() => { 
+              actionFunction={() => {
                 if (!currentUser.isVerified) {
                   return toast.error('Please verify your email first!');
                 }
-                navigate('/dashboard'); handleLinkClick(); 
+                navigate('/dashboard'); handleLinkClick();
               }}
               colorClass={`!bg-slate-900 !text-white hover:!bg-slate-800 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all w-full md:w-auto ${!currentUser.isVerified ? 'opacity-50' : ''}`}
-              text="Dashboard"
+              text={t('dashboard')}
               showAlert={false}
               badge={unseenStatusCount}
             />
@@ -172,13 +172,13 @@ function Header() {
 
     return (
       <>
-        <NavLink to='/' text='Home' onClick={handleLinkClick} />
-        <NavLink to='/about' text='About' onClick={handleLinkClick} />
-        <NavLink to='/map' text='Map' onClick={handleLinkClick} />
+        <NavLink to='/' text={t('home')} onClick={handleLinkClick} />
+        <NavLink to='/about' text={t('about')} onClick={handleLinkClick} />
+        <NavLink to='/map' text={t('map')} onClick={handleLinkClick} />
         {currentUser && (
           <>
-            <NavLink to='/schedule' text='Messages' onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
-            <NavLink to='/dashboard' text='Dashboard' onClick={handleLinkClick} badge={pendingBookingsCount} disabled={!currentUser.isVerified} />
+            <NavLink to='/schedule' text={t('messages')} onClick={handleLinkClick} badge={unreadCount} disabled={!currentUser.isVerified} />
+            <NavLink to='/dashboard' text={t('dashboard')} onClick={handleLinkClick} badge={pendingBookingsCount} disabled={!currentUser.isVerified} />
           </>
         )}
       </>
@@ -190,10 +190,10 @@ function Header() {
       {currentUser && !currentUser.isVerified && (
         <div className='bg-red-600 text-white text-center py-2 px-4 flex items-center justify-center gap-3 animate-pulse'>
           <p className='text-xs sm:text-sm font-bold'>
-            ⚠️ Your email is not verified. Please check your inbox to unlock all features.
+            ⚠️ {t('not_verified')}
           </p>
           <Link to='/verify-email' state={{ email: currentUser.email }} className='bg-white text-red-600 px-3 py-1 rounded-full text-[10px] font-black uppercase hover:bg-slate-100 transition-colors'>
-            Verify Now
+            {t('verify_now')}
           </Link>
         </div>
       )}
@@ -217,17 +217,17 @@ function Header() {
           <form
             onSubmit={handleSubmit}
             className={`bg-slate-50 border border-slate-200 px-4 py-2 rounded-full items-center shadow-inner focus-within:ring-2 focus-within:ring-slate-300 focus-within:bg-white transition-all duration-300 mx-2 sm:mx-4 
-              ${isSearchExpanded ? 'flex flex-1' : 'hidden md:flex flex-1 max-w-md'}`
+                ${isSearchExpanded ? 'flex flex-1' : 'hidden md:flex flex-1 max-w-md'}`
             }
           >
             <input
               type='text'
-              placeholder='Search workspaces...'
+              placeholder={t('search_workspaces')}
               className='bg-transparent focus:outline-none w-full transition-all duration-300 text-sm text-slate-700 placeholder-slate-400'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button type='submit' className='flex items-center justify-center pl-2'>
+            <button type='submit' className='flex items-center justify-center ps-2'>
               <FaSearch className='text-slate-400 hover:text-slate-700 transition-colors duration-300' />
             </button>
           </form>
@@ -249,6 +249,39 @@ function Header() {
               </button>
             )}
 
+            {/* Language Selector */}
+            <div className='relative group/lang'>
+              <button className='w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 hover:shadow-md transition-all overflow-hidden border-2 border-transparent hover:border-slate-200'>
+                <img
+                  src={
+                    language === 'en' ? "https://flagcdn.com/w80/gb.png" :
+                      language === 'fr' ? "https://flagcdn.com/w80/fr.png" :
+                        language === 'ar' ? "https://flagcdn.com/w80/dz.png" :
+                          "https://flagcdn.com/w80/de.png"
+                  }
+                  alt={language}
+                  className='w-full h-full object-cover'
+                />
+              </button>
+              <div className='absolute end-0 top-full mt-2 w-14 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl py-2 opacity-0 invisible group-hover/lang:opacity-100 group-hover/lang:visible transition-all z-50 flex flex-col items-center gap-2'>
+                {[
+                  { code: 'en', flag: 'https://flagcdn.com/w80/gb.png' },
+                  { code: 'fr', flag: 'https://flagcdn.com/w80/fr.png' },
+                  { code: 'ar', flag: 'https://flagcdn.com/w80/dz.png' },
+                  { code: 'gr', flag: 'https://flagcdn.com/w80/de.png' }
+                ].map((item) => (
+                  <button
+                    key={item.code}
+                    onClick={() => changeLanguage(item.code)}
+                    className={`w-8 h-8 rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${language === item.code ? 'border-indigo-600 shadow-sm' : 'border-transparent'}`}
+                    title={item.code.toUpperCase()}
+                  >
+                    <img src={item.flag} alt={item.code} className='w-full h-full object-cover' />
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={() => dispatch(toggleTheme())}
               className='w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:shadow-md transition-all'
@@ -264,7 +297,7 @@ function Header() {
 
       <Drawer
         title={<span className="font-extrabold text-slate-900 text-xl">Menu</span>}
-        placement="left"
+        placement={language === 'ar' ? 'right' : 'left'}
         onClose={() => setIsDrawerOpen(false)}
         open={isDrawerOpen}
         size={260}

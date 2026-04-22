@@ -13,8 +13,10 @@ import toast from 'react-hot-toast';
 import StatCard from '../../components/StatCard';
 import AnalyticsChart from '../../components/AnalyticsChart';
 import { FaWallet, FaClipboardCheck, FaBuilding, FaClock } from 'react-icons/fa';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function UserDashboard() {
+  const { t } = useLanguage();
   const { currentUser } = useSelector((state) => state.user);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,9 +80,9 @@ export default function UserDashboard() {
 
   const greeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('good_morning');
+    if (hour < 18) return t('good_afternoon');
+    return t('good_evening');
   };
 
   const handleListingDelete = async (listingId) => {
@@ -90,10 +92,10 @@ export default function UserDashboard() {
 
       setListings((prev) => prev.filter((listing) => listing._id !== listingId));
 
-      toast.success('Listing deleted!');
+      toast.success(t('listing_deleted'));
     } catch (error) {
       console.log(error.message);
-      toast.error('Failed to delete listing');
+      toast.error(t('failed_delete_listing'));
     }
   };
 
@@ -110,9 +112,9 @@ export default function UserDashboard() {
       const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/owner`, { params: { range } });
       setOwnerStats(data);
       
-      toast.success('Booking approved!');
+      toast.success(t('booking_approved'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error approving booking');
+      toast.error(err.response?.data?.message || t('error_approving_booking'));
     }
   };
 
@@ -125,9 +127,9 @@ export default function UserDashboard() {
       const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/stats/owner`, { params: { range } });
       setOwnerStats(data);
       
-      toast.success('Booking rejected!');
+      toast.success(t('booking_rejected'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error rejecting booking');
+      toast.error(err.response?.data?.message || t('error_rejecting_booking'));
     }
   };
 
@@ -140,16 +142,16 @@ export default function UserDashboard() {
           <div>
             <p className='text-sm text-slate-400 font-medium uppercase tracking-wider mb-1'>{greeting()}</p>
             <h1 className='text-3xl font-extrabold text-slate-900'>
-              Seller Dashboard
+              {t('seller_dashboard')}
             </h1>
-            <p className='text-slate-500 font-light mt-1'>Manage your workspace listings.</p>
+            <p className='text-slate-500 font-light mt-1'>{t('manage_listings_desc')}</p>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className='flex items-center gap-2 bg-slate-900 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm self-start sm:self-auto'
           >
             <FaPlus className='text-xs' />
-            Create Listing
+            {t('create_listing')}
           </button>
         </div>
 
@@ -157,41 +159,41 @@ export default function UserDashboard() {
         <div className='mb-12'>
           <div className='flex items-center justify-between mb-6'>
             <h2 className='text-xl font-bold text-slate-900 flex items-center gap-2'>
-              <FaChartLine className='text-indigo-600' /> Financial Analytics
+              <FaChartLine className='text-indigo-600' /> {t('financial_analytics')}
             </h2>
             <select 
                value={range} 
                onChange={(e) => setRange(e.target.value)}
                className='text-xs font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer'
             >
-              <option value="today">Today</option>
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-              <option value="year">This Year</option>
+              <option value="today">{t('today')}</option>
+              <option value="week">{t('last_7_days')}</option>
+              <option value="month">{t('last_30_days')}</option>
+              <option value="year">{t('this_year')}</option>
             </select>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
              <StatCard 
-                title="Total Revenue" 
-                value={`${ownerStats?.totalIncome?.toLocaleString() || 0} DA`} 
+                title={t('total_revenue')} 
+                value={`${ownerStats?.totalIncome?.toLocaleString() || 0} ${t('currency')}`} 
                 icon={FaWallet} 
                 colorClass="bg-indigo-600"
              />
              <StatCard 
-                title="Active Listings" 
+                title={t('active_listings')} 
                 value={ownerStats?.inventoryStats?.reduce((acc, curr) => acc + curr.count, 0) || listings.length} 
                 icon={FaBuilding} 
                 colorClass="bg-slate-900" 
              />
              <StatCard 
-                title="Approved Bookings" 
+                title={t('approved_bookings')} 
                 value={ownerStats?.bookingStatusCounts?.find(s => s._id === 'approved')?.count || 0} 
                 icon={FaClipboardCheck} 
                 colorClass="bg-emerald-600" 
              />
              <StatCard 
-                title="Pending Requests" 
+                title={t('pending_requests')} 
                 value={ownerStats?.bookingStatusCounts?.find(s => s._id === 'pending')?.count || 0} 
                 icon={FaClock} 
                 colorClass="bg-amber-500" 
@@ -201,7 +203,7 @@ export default function UserDashboard() {
           <div className='grid grid-cols-1 lg:grid-cols-1 gap-6 h-[400px]'>
              <AnalyticsChart 
                 data={ownerStats?.revenueStats || []} 
-                title="Income Trend" 
+                title={t('income_trend')} 
                 dataKey="income" 
                 color="#4f46e5"
              />
@@ -211,11 +213,11 @@ export default function UserDashboard() {
         {/* Tabs */}
         <div className="flex border-b border-slate-200 mb-8 mt-4 gap-6">
           <button onClick={() => setActiveTab('listings')} className={`pb-3 font-semibold text-sm transition-all relative ${activeTab === 'listings' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
-            My Listings
+            {t('my_listings')}
             {activeTab === 'listings' && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-900"></span>}
           </button>
           <button onClick={() => setActiveTab('bookings')} className={`pb-3 font-semibold text-sm transition-all relative flex items-center gap-2 ${activeTab === 'bookings' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
-            Booking Requests
+            {t('booking_requests')}
             {bookings.filter(b => b.status === 'pending').length > 0 && (
               <span className="bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold px-1.5">{bookings.filter(b => b.status === 'pending').length}</span>
             )}
@@ -227,8 +229,8 @@ export default function UserDashboard() {
           <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden'>
             <div className='px-6 py-5 border-b border-slate-100 flex items-center justify-between'>
               <div>
-                <h2 className='text-lg font-bold text-slate-900'>My Listings</h2>
-                <p className='text-xs text-slate-400'>All your published workspaces</p>
+                <h2 className='text-lg font-bold text-slate-900'>{t('my_listings')}</h2>
+                <p className='text-xs text-slate-400'>{t('all_published_workspaces')}</p>
               </div>
             </div>
 
@@ -241,10 +243,10 @@ export default function UserDashboard() {
                 <div className='w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4'>
                   <FaDoorOpen className='text-slate-300 text-2xl' />
                 </div>
-                <p className='text-sm font-semibold text-slate-700 mb-1'>No listings yet</p>
-                <p className='text-xs text-slate-400 mb-4'>Create your first workspace listing to get started.</p>
+                <p className='text-sm font-semibold text-slate-700 mb-1'>{t('no_listings_yet')}</p>
+                <p className='text-xs text-slate-400 mb-4'>{t('create_first_listing_desc')}</p>
                 <button onClick={() => setIsCreateModalOpen(true)} className='text-xs bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors font-medium'>
-                  Create Now
+                  {t('create_now')}
                 </button>
               </div>
             ) : (
@@ -271,13 +273,13 @@ export default function UserDashboard() {
                     {/* Pricing / Type */}
                     <div className='hidden md:block text-right flex-shrink-0'>
                       <p className='text-sm font-bold text-slate-900'>
-                        {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')} DA
+                        {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')} {t('currency')}
                       </p>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                         listing.category === 'service' ? 'bg-amber-50 text-amber-600' :
                         listing.type === 'rent' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'
                       }`}>
-                        {listing.category === 'service' ? 'Service' : listing.type}
+                        {listing.category === 'service' ? t('service') : (listing.type === 'rent' ? t('rent') : t('sale'))}
                       </span>
                     </div>
 
@@ -290,19 +292,19 @@ export default function UserDashboard() {
                           setIsUpdateModalOpen(true);
                         }}
                         className='p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors'
-                        title='Edit Listing'
+                        title={t('edit_listing')}
                       >
                         <FaEdit />
                       </button>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          if (window.confirm("Are you sure you want to delete this listing?")) {
+                          if (window.confirm(t('delete_listing_confirm'))) {
                             handleListingDelete(listing._id);
                           }
                         }}
                         className='p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
-                        title='Delete Listing'
+                        title={t('delete_listing')}
                       >
                         <FaTrash />
                       </button>
@@ -316,14 +318,14 @@ export default function UserDashboard() {
           <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden'>
             <div className='px-6 py-5 border-b border-slate-100 flex items-center justify-between'>
               <div>
-                <h2 className='text-lg font-bold text-slate-900'>Client Bookings</h2>
-                <p className='text-xs text-slate-400'>Review and manage workspace requests</p>
+                <h2 className='text-lg font-bold text-slate-900'>{t('client_bookings')}</h2>
+                <p className='text-xs text-slate-400'>{t('review_manage_bookings')}</p>
               </div>
             </div>
             {bookingsLoading ? (
               <div className='flex items-center justify-center py-16'><div className='w-8 h-8 border-3 border-slate-200 border-t-slate-900 rounded-full animate-spin'></div></div>
             ) : bookings.length === 0 ? (
-              <div className='flex flex-col items-center justify-center py-16 text-center text-slate-400'><p>No bookings received yet.</p></div>
+              <div className='flex flex-col items-center justify-center py-16 text-center text-slate-400'><p>{t('no_bookings_yet')}</p></div>
             ) : (
               <div className='divide-y divide-slate-50'>
                 {bookings.map((booking) => (
@@ -339,7 +341,7 @@ export default function UserDashboard() {
                     <div className='md:w-1/3 flex flex-col justify-center'>
                       <Link to={`/listing/${booking.listing?._id}`} className='text-sm font-bold text-indigo-600 hover:underline truncate'>{booking.listing?.name}</Link>
                       <div className='mt-1 text-xs text-slate-500'>
-                        <p className="font-semibold text-slate-800">Total: {booking.finalPrice} DA</p>
+                        <p className="font-semibold text-slate-800">{t('total')}: {booking.finalPrice} {t('currency')}</p>
                         {booking.features?.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {booking.features.map((f, i) => <span key={i} className="bg-slate-100 text-slate-600 text-[9px] px-2 py-0.5 rounded-full">{f}</span>)}
@@ -350,12 +352,12 @@ export default function UserDashboard() {
                     <div className='md:w-1/3 flex items-center justify-between md:justify-end gap-3'>
                       {booking.status === 'pending' ? (
                         <div className="flex gap-2 w-full md:w-auto">
-                          <button onClick={() => handleApproveBooking(booking._id)} className="flex-1 md:flex-none bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-emerald-600">Approve</button>
-                          <button onClick={() => handleRejectBooking(booking._id)} className="flex-1 md:flex-none bg-white border border-red-200 text-red-500 text-xs font-bold px-4 py-2 rounded-lg hover:bg-red-50">Reject</button>
+                          <button onClick={() => handleApproveBooking(booking._id)} className="flex-1 md:flex-none bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-emerald-600">{t('approve')}</button>
+                          <button onClick={() => handleRejectBooking(booking._id)} className="flex-1 md:flex-none bg-white border border-red-200 text-red-500 text-xs font-bold px-4 py-2 rounded-lg hover:bg-red-50">{t('reject')}</button>
                         </div>
                       ) : (
                         <span className={`text-[11px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider ${booking.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                          {booking.status}
+                          {t(booking.status)}
                         </span>
                       )}
                     </div>

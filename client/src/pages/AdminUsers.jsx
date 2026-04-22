@@ -6,9 +6,11 @@ import AnimatedPage from '../components/AnimatedPage';
 import { FaUserShield, FaSearch, FaEnvelope, FaShieldAlt, FaTrash, FaSortAmountDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AdminUsers() {
-  useDocumentTitle('Admin Management | Co-Spaces');
+  const { t } = useLanguage();
+  useDocumentTitle(`${t('users')} | Co-Spaces`);
   const { currentUser } = useSelector((state) => state.user);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +52,7 @@ export default function AdminUsers() {
       setUsers(data.users || []);
       setTotalUsers(data.totalUsers || 0);
     } catch (err) {
-      toast.error('Error fetching users');
+      toast.error(t('error_fetching_users'));
       console.log('Error fetching admin users', err);
     } finally {
       setLoading(false);
@@ -62,13 +64,13 @@ export default function AdminUsers() {
   }, [fetchUsers]);
 
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm(t('delete_user_confirm'))) return;
     try {
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/delete/${userId}`);
-      toast.success('User deleted successfully');
+      toast.success(t('user_deleted_success'));
       fetchUsers();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error deleting user');
+      toast.error(err.response?.data?.message || t('error_deleting_user'));
     }
   };
 
@@ -91,11 +93,11 @@ export default function AdminUsers() {
               <div className='bg-indigo-600/10 p-2 rounded-lg'>
                 <FaUserShield className='text-indigo-600' />
               </div>
-              <span className='text-xs font-black uppercase tracking-[0.2em] text-indigo-600'>Management Console</span>
+              <span className='text-xs font-black uppercase tracking-[0.2em] text-indigo-600'>{t('mgmt_console')}</span>
             </div>
-            <h1 className='text-4xl font-black text-slate-900 mb-2 tracking-tight'>Users Directory</h1>
+            <h1 className='text-4xl font-black text-slate-900 mb-2 tracking-tight'>{t('users_directory')}</h1>
             <p className='text-slate-500 font-light max-w-md'>
-              Efficiently manage platform users, monitor their platform activity, and control access roles.
+              {t('mgmt_console_desc')}
             </p>
           </div>
           
@@ -106,7 +108,7 @@ export default function AdminUsers() {
               </div>
               <input 
                 type="text" 
-                placeholder="Search user ID, name or email..." 
+                placeholder={t('search_users_placeholder')} 
                 className='w-full pl-12 pr-4 py-4 bg-white/80 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all text-sm shadow-sm'
                 value={searchTerm}
                 onChange={(e) => {
@@ -129,10 +131,10 @@ export default function AdminUsers() {
                      setStartIndex(0);
                    }}
                 >
-                  <option value="activityScore_desc">Most Active First</option>
-                  <option value="createdAt_desc">Newest First</option>
-                  <option value="createdAt_asc">Oldest First</option>
-                  <option value="username_asc">Username (A-Z)</option>
+                  <option value="activityScore_desc">{t('most_active_first')}</option>
+                  <option value="createdAt_desc">{t('newest_first')}</option>
+                  <option value="createdAt_asc">{t('oldest_first')}</option>
+                  <option value="username_asc">{t('username_az')}</option>
                 </select>
               </div>
             </div>
@@ -144,13 +146,13 @@ export default function AdminUsers() {
           <button 
              onClick={() => { setActiveTab('client'); setStartIndex(0); }} 
              className={`pb-3 font-semibold text-sm transition-all relative ${activeTab === 'client' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>
-            Clients
+            {t('clients')}
             {activeTab === 'client' && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-indigo-600"></span>}
           </button>
           <button 
              onClick={() => { setActiveTab('user'); setStartIndex(0); }} 
              className={`pb-3 font-semibold text-sm transition-all relative ${activeTab === 'user' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>
-            Sellers
+            {t('sellers')}
             {activeTab === 'user' && <span className="absolute bottom-0 left-0 w-full h-[2px] bg-indigo-600"></span>}
           </button>
         </div>
@@ -159,11 +161,11 @@ export default function AdminUsers() {
         <div className='flex items-center justify-between mb-6 px-2'>
            <div className='flex items-center gap-4'>
               <span className='text-sm font-medium text-slate-500'>
-                Showing <span className='text-slate-900 font-bold'>{totalUsers === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + limit, totalUsers)}</span> of <span className='text-indigo-600 font-bold'>{totalUsers}</span> users
+                {t('showing')} <span className='text-slate-900 font-bold'>{totalUsers === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + limit, totalUsers)}</span> {t('of')} <span className='text-indigo-600 font-bold'>{totalUsers}</span> {t('users')}
               </span>
            </div>
            <Link to='/dashboard' className='text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest'>
-             ← Root Dash
+             ← {t('root_dash')}
            </Link>
         </div>
 
@@ -173,19 +175,19 @@ export default function AdminUsers() {
           {loading ? (
              <div className='flex flex-col items-center justify-center h-80 bg-white/30 rounded-3xl border border-white/50'>
                 <div className='w-16 h-16 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin'></div>
-               <p className='mt-6 text-slate-400 font-medium animate-pulse'>Fetching User records...</p>
+               <p className='mt-6 text-slate-400 font-medium animate-pulse'>{t('fetching_users')}</p>
              </div>
           ) : users.length === 0 ? (
              <div className='flex flex-col items-center justify-center h-80 text-center bg-white/50 backdrop-blur-sm rounded-3xl border border-white/40 shadow-inner'>
                 <div className='w-24 h-24 bg-slate-100/50 rounded-full flex items-center justify-center mb-6 border border-white'>
                   <FaUserShield className='text-slate-300 text-4xl' />
                 </div>
-                <h3 className='text-2xl font-black text-slate-800 mb-2'>No users found</h3>
+                <h3 className='text-2xl font-black text-slate-800 mb-2'>{t('no_users_found')}</h3>
                 <p className='text-slate-500 text-sm max-w-xs'>
-                  {searchTerm ? "No users matched your search criteria." : "There are currently no registered users on the platform."}
+                  {searchTerm ? t('no_users_matched') : t('no_users_platform')}
                 </p>
                 {searchTerm && (
-                  <button onClick={() => setSearchTerm('')} className='mt-6 text-indigo-600 font-bold text-xs uppercase tracking-widest hover:underline'>Clear Search</button>
+                  <button onClick={() => setSearchTerm('')} className='mt-6 text-indigo-600 font-bold text-xs uppercase tracking-widest hover:underline'>{t('clear_search')}</button>
                 )}
              </div>
           ) : (
@@ -220,10 +222,10 @@ export default function AdminUsers() {
                           user.role === 'client' ? 'bg-slate-100/80 text-slate-700 border border-slate-200' :
                           'bg-indigo-100/80 text-indigo-700 border border-indigo-200'
                         }`}>
-                          {user.role === 'user' ? 'Seller' : user.role}
+                          {user.role === 'user' ? t('seller_label') : user.role}
                         </span>
                         <div className='mt-3'>
-                           <p className='text-[10px] text-slate-400 font-bold uppercase tracking-widest'>Activity Score</p>
+                           <p className='text-[10px] text-slate-400 font-bold uppercase tracking-widest'>{t('activity_score')}</p>
                            <p className='text-lg font-black text-indigo-600'>{user.activityScore || 0}</p>
                         </div>
                       </div>
@@ -241,7 +243,7 @@ export default function AdminUsers() {
 
                     <div className='pt-6 border-t border-slate-50 flex items-center gap-3'>
                       <button className='flex-1 bg-slate-900 text-white font-bold text-[11px] py-3.5 rounded-xl hover:bg-indigo-600 transition-all shadow-lg shadow-slate-900/10 hover:shadow-indigo-600/20 active:scale-95 uppercase tracking-widest'>
-                         View Details
+                         {t('view_details')}
                       </button>
                       <button 
                         onClick={() => handleDeleteUser(user._id)}

@@ -5,12 +5,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { signInSuccess ,signInFailure } from '../redux/user/userSlice';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 
 
 function OAuth() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const handleGoogleClick = async() => {
         try {
             const provider = new GoogleAuthProvider();
@@ -37,7 +39,7 @@ function OAuth() {
     }
   return (
     <button onClick={handleGoogleClick} type='button' className='bg-red-700 text-white p-3 rounded-lg uppercase hover:opacity-80 disabled:opacity-85'>
-          Sign With Google
+          {t('continue_google')}
         </button>
   )
 }

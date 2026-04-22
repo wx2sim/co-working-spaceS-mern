@@ -2,8 +2,10 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Contact({ listing }) {
+  const { t } = useLanguage();
   const [landlord, setLandlord] = useState(null);
   const [message, setMessage] = useState('');
   const onChange = (e) => {
@@ -26,8 +28,8 @@ export default function Contact({ listing }) {
       {landlord && (
         <div className='flex flex-col gap-2'>
           <p>
-            Contact <span className='font-semibold'>{landlord.username}</span>{' '}
-            for{' '} <span className='font-semibold'>{listing.name.toLowerCase()}</span>
+            {t('contact_label')} <span className='font-semibold'>{landlord.username}</span>{' '}
+            {t('for_label')}{' '} <span className='font-semibold'>{listing.name.toLowerCase()}</span>
           </p>
           <textarea
             name='message'
@@ -35,7 +37,7 @@ export default function Contact({ listing }) {
             rows='4'
             value={message}
             onChange={onChange}
-            placeholder='Enter your message here...'
+            placeholder={t('enter_message_here')}
             className='w-full border p-3 rounded-lg text-sm'
           ></textarea>
           
@@ -45,7 +47,7 @@ export default function Contact({ listing }) {
               target="_blank"
               className='flex-1 bg-white border border-slate-300 text-slate-700 text-sm font-semibold text-center py-3 rounded-xl hover:bg-slate-50 transition-colors'
             >
-              Send Email
+              {t('send_email')}
             </a>
             <button
               onClick={async () => {
@@ -55,16 +57,16 @@ export default function Contact({ listing }) {
                     listingId: listing._id,
                     content: message
                   });
-                  toast.success('Direct message sent successfully!');
+                  toast.success(t('direct_msg_success'));
                   setMessage('');
                 } catch (error) {
-                  toast.error('Failed to send message');
+                  toast.error(t('failed_send_msg'));
                 }
               }}
               disabled={!message.trim()}
               className='flex-1 bg-slate-900 text-white text-sm font-semibold text-center py-3 rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              Direct Message
+              {t('direct_message_btn')}
             </button>
           </div>
         </div>

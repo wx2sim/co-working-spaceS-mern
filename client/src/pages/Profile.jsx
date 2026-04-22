@@ -16,9 +16,11 @@ import SmartModal from '../components/SmartModal.jsx';
 import { Modal } from 'antd';
 import { FaEnvelope, FaArrowUp, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Profile() {
-  useDocumentTitle('Profile | Co-Spaces');
+  const { t } = useLanguage();
+  useDocumentTitle(`${t('profile')} | Co-Spaces`);
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
 
@@ -100,7 +102,7 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser.isVerified) {
-      return toast.error('Please verify your email first!', { icon: '✉️' });
+      return toast.error(t('verify_email_first'), { icon: '✉️' });
     }
     try {
       dispatch(updateUserStart());
@@ -112,7 +114,7 @@ export default function Profile() {
       }
       dispatch(updateUserSuccess(data));
       setUpdateSuccess(true);
-      toast.success('Profile updated successfully!', { duration: 3000 });
+      toast.success(t('update_success'), { duration: 3000 });
     } catch (error) {
       const message = error.response?.data?.message || error.message;
       toast.error(message, { duration: 3000 });
@@ -122,7 +124,7 @@ export default function Profile() {
 
   const handleDeleteUser = async () => {
     if (!currentUser.isVerified) {
-      return toast.error('Please verify your email first!');
+      return toast.error(t('verify_email_first'));
     }
     try {
       dispatch(deleteUserStart());
@@ -133,7 +135,7 @@ export default function Profile() {
         return;
       }
       dispatch(deleteUserSuccess(data));
-      toast.success('Account deleted successfully!', { duration: 3000 });
+      toast.success(t('account_deleted_success'), { duration: 3000 });
     } catch (error) {
       const message = error.response?.data?.message || error.message;
       toast.error(message, { duration: 3000 });
@@ -151,7 +153,7 @@ export default function Profile() {
         return;
       }
       dispatch(signOutUserSuccess(data));
-      toast.success('Signed out successfully!', { duration: 3000 });
+      toast.success(t('signed_out_success'), { duration: 3000 });
       navigate('/signin');
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -162,7 +164,7 @@ export default function Profile() {
 
   const handleShowBookedSpaces = async () => {
     if (!currentUser.isVerified) {
-      return toast.error('Please verify your email first!');
+      return toast.error(t('verify_email_first'));
     }
     if (bookedSpacesFetched) {
       setBookedSpaces([]);
@@ -182,16 +184,16 @@ export default function Profile() {
   const handleCancelBooking = async (bookingId) => {
     try {
       const { data } = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/booking/cancel/${bookingId}`);
-      toast.success('Reservation cancelled successfully');
+      toast.success(t('booking_cancelled_success'));
       setBookedSpaces((prev) => prev.filter((b) => b._id !== bookingId));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to cancel booking');
+      toast.error(error.response?.data?.message || t('failed_cancel_booking'));
     }
   };
 
   const handleShowAdminUsers = async () => {
     if (!currentUser.isVerified) {
-      return toast.error('Please verify your email first!');
+      return toast.error(t('verify_email_first'));
     }
     if (adminUsersFetched) {
       setAdminUsers([]);
@@ -216,12 +218,12 @@ export default function Profile() {
 
   const handleUpgradeSubmit = async () => {
     if (!upgradeForm.fullName || !upgradeForm.businessName || !upgradeForm.speciality || !upgradeForm.location || !upgradeForm.phoneNumber) {
-      return toast.error('Please fill in all fields.');
+      return toast.error(t('fill_all_fields'));
     }
 
     const phoneRegex = /^[567]\d{8}$/;
     if (!phoneRegex.test(upgradeForm.phoneNumber)) {
-      return toast.error('Phone number must start with 5, 6, or 7 and be exactly 9 digits long.');
+      return toast.error(t('phone_error_format'));
     }
     try {
       setUpgradeLoading(true);
@@ -232,10 +234,10 @@ export default function Profile() {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/request`, payload);
       setUpgradeStatus('pending');
       setIsUpgradeModalOpen(false);
-      toast.success('Upgrade request sent successfully!');
+      toast.success(t('upgrade_request_sent'));
       setUpgradeForm({ fullName: '', businessName: '', speciality: '', location: '', phoneNumber: '' });
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to send request.';
+      const msg = err.response?.data?.message || t('failed_send_request');
       toast.error(msg);
     } finally {
       setUpgradeLoading(false);
@@ -247,9 +249,9 @@ export default function Profile() {
       setUpgradeLoading(true);
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/cancel-request`);
       setUpgradeStatus('none');
-      toast.success('Upgrade request cancelled successfully.');
+      toast.success(t('upgrade_request_cancelled'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to cancel request.');
+      toast.error(err.response?.data?.message || t('failed_cancel_request'));
     } finally {
       setUpgradeLoading(false);
     }
@@ -257,7 +259,7 @@ export default function Profile() {
 
   const handleShowUpgradeRequests = async () => {
     if (!currentUser.isVerified) {
-      return toast.error('Please verify your email first!');
+      return toast.error(t('verify_email_first'));
     }
     if (upgradeRequestsFetched) {
       setUpgradeRequests([]);
@@ -269,7 +271,7 @@ export default function Profile() {
       setUpgradeRequests(data);
       setUpgradeRequestsFetched(true);
     } catch (err) {
-      toast.error('Failed to fetch upgrade requests.');
+      toast.error(t('failed_fetch_upgrade'));
     }
   };
 
@@ -277,9 +279,9 @@ export default function Profile() {
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/approve/${requestId}`);
       setUpgradeRequests((prev) => prev.filter((r) => r._id !== requestId));
-      toast.success('Request approved! User upgraded to seller.');
+      toast.success(t('request_approved_seller'));
     } catch (err) {
-      toast.error('Failed to approve request.');
+      toast.error(t('failed_approve_request_admin'));
     }
   };
 
@@ -287,30 +289,30 @@ export default function Profile() {
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/deny/${requestId}`);
       setUpgradeRequests((prev) => prev.filter((r) => r._id !== requestId));
-      toast.success('Request denied.');
+      toast.success(t('request_denied'));
     } catch (err) {
-      toast.error('Failed to deny request.');
+      toast.error(t('failed_deny_request_admin'));
     }
   };
 
   const handleContactAdmin = async (e) => {
     e.preventDefault();
-    if (!contactMessage.trim()) return toast.error('Please enter a message');
+    if (!contactMessage.trim()) return toast.error(t('enter_message_error'));
     setSendingMessage(true);
     try {
       const { data: adminData } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/support-admin`);
-      if (!adminData || !adminData._id) throw new Error('No admin found');
+      if (!adminData || !adminData._id) throw new Error(t('no_admin_found'));
 
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/message/send`, {
         receiverId: adminData._id,
         content: contactMessage
       });
 
-      toast.success('Message sent to SuperAdmin successfully!');
+      toast.success(t('message_sent_superadmin'));
       setContactMessage('');
       navigate('/schedule'); // Redirect to inbox to see the thread
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send message to SuperAdmin');
+      toast.error(err.response?.data?.message || t('failed_send_admin'));
     } finally {
       setSendingMessage(false);
     }
@@ -324,7 +326,7 @@ export default function Profile() {
 
         <div className='w-full md:w-5/12 p-8 sm:p-10 flex flex-col'>
           <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>
-            {currentUser.role === 'admin' ? 'Account Details' : 'Profile Setup'}
+            {currentUser.role === 'admin' ? t('account_details') : t('profile_setup')}
           </h1>
 
           {currentUser.role === 'admin' ? (
@@ -336,40 +338,40 @@ export default function Profile() {
                   className='rounded-full h-24 w-24 object-cover border-4 border-slate-50 shadow-sm'
                 />
                 <span className={`mt-3 text-xs font-bold px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-wider ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}>
-                  Administrator
+                  {t('administrator')}
                 </span>
                 {!currentUser.isVerified && (
                   <span className='mt-2 text-[9px] font-black px-2 py-0.5 bg-red-100 text-red-600 rounded-full uppercase'>
-                    Unverified
+                    {t('unverified')}
                   </span>
                 )}
               </div>
 
               <div className='flex flex-col gap-1'>
-                <label className='text-xs font-medium text-slate-500 ml-1'>Username</label>
+                <label className='text-xs font-medium text-slate-500 ml-1'>{t('username')}</label>
                 <input type='text' disabled value={currentUser.username} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 cursor-not-allowed' />
               </div>
 
               <div className='flex flex-col gap-1'>
-                <label className='text-xs font-medium text-slate-500 ml-1'>Email</label>
+                <label className='text-xs font-medium text-slate-500 ml-1'>{t('email')}</label>
                 <input type='email' disabled value={currentUser.email} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 cursor-not-allowed' />
               </div>
 
               <div className='mt-auto p-4 bg-amber-50 border border-amber-100 rounded-xl text-center'>
                 <p className='text-xs text-amber-700 font-medium'>
-                  Your account details and password are strictly managed by the Super Admin.
+                  {t('admin_strict_manage')}
                 </p>
               </div>
 
               <div className='mt-2 pt-4 border-t border-slate-100'>
                 <h3 className='text-sm font-bold text-slate-900 mb-3 flex items-center gap-2'>
                   <FaEnvelope className='text-indigo-600' />
-                  Contact SuperAdmin Support
+                  {t('contact_superadmin')}
                 </h3>
                 <form onSubmit={handleContactAdmin} className='flex flex-col gap-2'>
                   <textarea
                     className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 resize-none h-20'
-                    placeholder='Inquire about an issue or request support...'
+                    placeholder={t('support_placeholder')}
                     value={contactMessage}
                     onChange={(e) => setContactMessage(e.target.value)}
                   />
@@ -378,13 +380,13 @@ export default function Profile() {
                     disabled={sendingMessage}
                     className='w-full bg-slate-900 text-white font-medium py-2 rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-70 text-xs mt-1'
                   >
-                    {sendingMessage ? 'Sending...' : 'Send Message to SuperAdmin'}
+                    {sendingMessage ? t('sending') : t('send_to_admin')}
                   </button>
                 </form>
               </div>
 
               <Link to='/schedule' className='mt-2 flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm'>
-                <FaEnvelope /> Direct Messages Inbox
+                <FaEnvelope /> {t('inbox')}
               </Link>
             </div>
           ) : (
@@ -394,34 +396,34 @@ export default function Profile() {
                 <div onClick={() => fileRef.current.click()} className='relative group cursor-pointer'>
                   <img src={formData.avatar || currentUser?.avatar} alt='profile' className='rounded-full h-24 w-24 object-cover border-4 border-slate-50 group-hover:opacity-80 transition-opacity shadow-sm' />
                   <div className='absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
-                    <span className='text-white text-xs font-semibold'>Edit</span>
+                    <span className='text-white text-xs font-semibold'>{t('update')}</span>
                   </div>
                 </div>
                 <p className='text-xs mt-3 text-center'>
                   {!currentUser.isVerified ? (
-                    <span className='text-red-600 font-bold bg-red-50 px-3 py-1 rounded-full border border-red-100 uppercase text-[10px]'>Unverified Account</span>
+                    <span className='text-red-600 font-bold bg-red-50 px-3 py-1 rounded-full border border-red-100 uppercase text-[10px]'>{t('not_verified')}</span>
                   ) : fileUploadError ? (
-                    <span className='text-red-500 font-medium'>Upload failed (Max 2MB)</span>
+                    <span className='text-red-500 font-medium'>{t('avatar_upload_error')}</span>
                   ) : filePerc > 0 && filePerc < 100 ? (
-                    <span className='text-slate-500'>Uploading {filePerc}%</span>
+                    <span className='text-slate-500'>{t('loading')} {filePerc}%</span>
                   ) : filePerc === 100 ? (
-                    <span className='text-green-500 font-medium'>Upload complete!</span>
+                    <span className='text-green-500 font-medium'>{t('avatar_upload_success')}</span>
                   ) : (
-                    <span className='text-slate-400'>Click image to change</span>
+                    <span className='text-slate-400'>{t('click_to_change')}</span>
                   )}
                 </p>
               </div>
 
-              <input type='text' placeholder='Username' id='username' defaultValue={currentUser.username} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
-              <input type='email' placeholder='Email' id='email' defaultValue={currentUser.email} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
-              <input type='password' placeholder='New Password (Optional)' id='password' onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              <input type='text' placeholder={t('username')} id='username' defaultValue={currentUser.username} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              <input type='email' placeholder={t('email')} id='email' defaultValue={currentUser.email} onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              <input type='password' placeholder={t('password_placeholder')} id='password' onChange={handleChange} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
 
               <div className='pt-2 flex flex-col gap-3'>
-                <button 
-                  disabled={loading} 
+                <button
+                  disabled={loading}
                   className={`w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all text-sm ${!currentUser.isVerified ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {loading ? 'Saving...' : 'Save Changes'}
+                  {loading ? t('saving') : t('save_changes')}
                 </button>
               </div>
             </form>
@@ -430,13 +432,13 @@ export default function Profile() {
           <div className={`flex items-center mt-6 pt-4 border-t border-slate-100 ${currentUser.role === 'admin' ? 'justify-end' : 'justify-between'}`}>
             {currentUser.role !== 'admin' && (
               <SmartModal
-                triggerText="Delete Account" triggerColorClass="!bg-transparent !text-red-500 hover:!bg-red-50 !font-semibold text-sm px-4 py-2 rounded-lg transition-colors"
-                modalTitle="Delete Account" modalContent="Are you absolutely sure? This action cannot be undone."
-                cancelColorClass="!bg-white text-slate-700 hover:!bg-slate-100" okText="Yes, Delete" okColorClass="bg-red-600 !text-white hover:!bg-red-700" onOkAction={handleDeleteUser}
+                triggerText={t('delete_account')} triggerColorClass="!bg-transparent !text-red-500 hover:!bg-red-50 !font-semibold text-sm px-4 py-2 rounded-lg transition-colors"
+                modalTitle={t('delete_account')} modalContent={t('delete_account_confirm')}
+                cancelColorClass="!bg-white text-slate-700 hover:!bg-slate-100" okText={t('yes_delete')} okColorClass="bg-red-600 !text-white hover:!bg-red-700" onOkAction={handleDeleteUser}
               />
             )}
             <button onClick={handleSignOut} className='text-slate-500 hover:text-slate-800 font-semibold text-sm px-4 py-2 transition-colors'>
-              Sign Out
+              {t('sign_out')}
             </button>
           </div>
 
@@ -451,21 +453,21 @@ export default function Profile() {
               {/* Tab Headers for Admin */}
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
                 <div>
-                  <h2 className='text-2xl font-bold text-slate-900'>My Team</h2>
-                  <p className='text-sm text-slate-500'>Manage your assigned users</p>
+                  <h2 className='text-2xl font-bold text-slate-900'>{t('my_team')}</h2>
+                  <p className='text-sm text-slate-500'>{t('manage_assigned_users')}</p>
                 </div>
 
                 <div className='flex items-center gap-3'>
                   <SmartButton
                     actionFunction={handleShowUpgradeRequests}
                     colorClass={`!bg-gradient-to-r !from-indigo-600 !to-violet-600 !text-white hover:!from-indigo-700 hover:!to-violet-700 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}
-                    text={upgradeRequestsFetched ? 'Hide Requests' : 'Upgrade Requests'}
+                    text={upgradeRequestsFetched ? t('hide_requests') : t('upgrade_requests')}
                     showAlert={false}
                   />
                   <SmartButton
                     actionFunction={handleShowAdminUsers}
                     colorClass={`!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}
-                    text={adminUsersFetched ? "Hide Users" : "Show Users"}
+                    text={adminUsersFetched ? t('hide_users') : t('show_users')}
                     showAlert={false}
                   />
                 </div>
@@ -477,11 +479,11 @@ export default function Profile() {
                   <div className='mb-6'>
                     <h3 className='text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-2'>
                       <FaArrowUp className='text-indigo-600 text-xs' />
-                      Pending Upgrade Requests
+                      {t('pending_upgrade_requests')}
                     </h3>
                     {upgradeRequests.length === 0 ? (
                       <div className='bg-slate-50 border border-slate-100 rounded-2xl p-6 text-center'>
-                        <p className='text-sm text-slate-500'>No pending upgrade requests.</p>
+                        <p className='text-sm text-slate-500'>{t('no_pending_requests')}</p>
                       </div>
                     ) : (
                       <div className='flex flex-col gap-3'>
@@ -495,23 +497,23 @@ export default function Profile() {
                                   <p className='text-xs text-slate-500'>{req.userId?.email}</p>
                                 </div>
                               </div>
-                              <span className='text-[10px] font-bold px-2 py-1 bg-amber-100 text-amber-700 rounded-full uppercase tracking-wider'>Pending</span>
+                              <span className='text-[10px] font-bold px-2 py-1 bg-amber-100 text-amber-700 rounded-full uppercase tracking-wider'>{t('pending')}</span>
                             </div>
                             <div className='mt-3 grid grid-cols-2 gap-2 text-xs'>
                               <div className='bg-slate-50 rounded-lg px-3 py-2'>
-                                <span className='text-slate-400'>Business</span>
+                                <span className='text-slate-400'>{t('business')}</span>
                                 <p className='font-semibold text-slate-700'>{req.businessName}</p>
                               </div>
                               <div className='bg-slate-50 rounded-lg px-3 py-2'>
-                                <span className='text-slate-400'>Speciality</span>
+                                <span className='text-slate-400'>{t('speciality')}</span>
                                 <p className='font-semibold text-slate-700'>{req.speciality}</p>
                               </div>
                               <div className='bg-slate-50 rounded-lg px-3 py-2'>
-                                <span className='text-slate-400'>Location</span>
+                                <span className='text-slate-400'>{t('location')}</span>
                                 <p className='font-semibold text-slate-700'>{req.location}</p>
                               </div>
                               <div className='bg-slate-50 rounded-lg px-3 py-2 col-span-2'>
-                                <span className='text-slate-400'>Phone</span>
+                                <span className='text-slate-400'>{t('phone')}</span>
                                 <p className='font-semibold text-slate-700'>{req.phoneNumber}</p>
                               </div>
                             </div>
@@ -520,13 +522,13 @@ export default function Profile() {
                                 onClick={() => handleApproveRequest(req._id)}
                                 className='flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-emerald-700 transition-colors'
                               >
-                                <FaCheck className='text-[10px]' /> Approve
+                                <FaCheck className='text-[10px]' /> {t('approve')}
                               </button>
                               <button
                                 onClick={() => handleDenyRequest(req._id)}
                                 className='flex-1 flex items-center justify-center gap-1.5 bg-white text-red-600 border border-red-200 text-xs font-medium py-2 rounded-lg hover:bg-red-50 transition-colors'
                               >
-                                <FaTimes className='text-[10px]' /> Deny
+                                <FaTimes className='text-[10px]' /> {t('deny')}
                               </button>
                             </div>
                           </div>
@@ -536,13 +538,13 @@ export default function Profile() {
                   </div>
                 )}
 
-                {showAdminUsersError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching users!</p>}
+                {showAdminUsersError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>{t('error_fetching_users')}</p>}
 
                 {adminUsersFetched && adminUsers.length === 0 && !showAdminUsersError && (
                   <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
                     <img src="https://cdn-icons-png.flaticon.com/512/6124/6124997.png" alt="No users" className="w-24 h-24 mb-4 opacity-30 grayscale" />
-                    <p className='text-lg font-semibold text-slate-700'>No users assigned</p>
-                    <p className='text-sm text-slate-500'>You currently don't have any users to manage.</p>
+                    <p className='text-lg font-semibold text-slate-700'>{t('no_users_assigned')}</p>
+                    <p className='text-sm text-slate-500'>{t('no_users_to_manage')}</p>
                   </div>
                 )}
 
@@ -558,7 +560,7 @@ export default function Profile() {
                           </div>
                         </div>
                         <button className='text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg font-medium text-sm transition-colors'>
-                          Manage
+                          {t('manage')}
                         </button>
                       </div>
                     ))}
@@ -567,7 +569,7 @@ export default function Profile() {
 
                 {!adminUsersFetched && !upgradeRequestsFetched && (
                   <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
-                    <p className='text-sm text-slate-500'>Click "Show Users" to view your team members.</p>
+                    <p className='text-sm text-slate-500'>{t('click_show_users')}</p>
                   </div>
                 )}
               </div>
@@ -576,30 +578,29 @@ export default function Profile() {
             <>
               <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8'>
                 <div>
-                  <h2 className='text-2xl font-bold text-slate-900'>My Booked Spaces</h2>
-                  <p className='text-sm text-slate-500'>Check your reserved workspaces</p>
+                  <h2 className='text-2xl font-bold text-slate-900'>{t('booked_spaces')}</h2>
+                  <p className='text-sm text-slate-500'>{t('check_reserved_workspaces')}</p>
                 </div>
-
                 <div className='flex items-center gap-3'>
                   <SmartButton
                     actionFunction={handleShowBookedSpaces}
                     colorClass={`!bg-white !text-slate-700 border border-slate-200 hover:!bg-slate-100 !px-5 !py-2 !rounded-full shadow-sm text-sm font-medium transition-all ${!currentUser.isVerified ? 'opacity-50 grayscale' : ''}`}
-                    text={bookedSpacesFetched ? "Hide Bookings" : "Check Bookings"}
+                    text={bookedSpacesFetched ? t('hide_booked') : t('show_booked')}
                     showAlert={false}
                   />
                 </div>
               </div>
 
               <div className='flex-grow overflow-y-auto pr-2 custom-scrollbar'>
-                {showBookedSpacesError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>Error fetching booked spaces!</p>}
+                {showBookedSpacesError && <p className='text-red-500 text-sm p-4 bg-red-50 rounded-xl text-center'>{t('error_fetching_bookings')}</p>}
 
                 {bookedSpacesFetched && bookedSpaces.length === 0 && !showBookedSpacesError && (
                   <div className='flex flex-col items-center justify-center h-full text-center opacity-70 py-10'>
                     <img src="/images/empty-calendar.svg" alt="No booked spaces" className="w-32 h-32 mb-4 opacity-50" onError={(e) => e.target.style.display = 'none'} />
-                    <p className='text-lg font-semibold text-slate-700'>No spaces booked yet</p>
-                    <p className='text-sm text-slate-500 mb-4'>You haven't reserved any workspaces.</p>
+                    <p className='text-lg font-semibold text-slate-700'>{t('no_booked_spaces')}</p>
+                    <p className='text-sm text-slate-500 mb-4'>{t('no_spaces_reserved')}</p>
                     <Link to='/search' className='text-slate-900 font-semibold hover:underline text-sm'>
-                      Explore Workspaces
+                      {t('explore_workspaces')}
                     </Link>
                   </div>
                 )}
@@ -618,19 +619,19 @@ export default function Profile() {
                               <Link to={`/listing/${space.listing?._id}`} className='font-bold text-slate-800 hover:text-indigo-600 truncate'>{space.listing?.name || 'Workspace'}</Link>
                               <p className='text-xs text-slate-500 mb-1'>{space.listing?.address}</p>
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${space.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : space.status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
-                                {space.status === 'pending' ? 'Waiting to be confirmed' : space.status}
+                                {space.status === 'pending' ? t('waiting_confirm') : t(space.status)}
                               </span>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className='text-sm text-slate-400'>Total Price</p>
-                            <p className='text-lg font-extrabold text-slate-900'>{space.finalPrice} DA</p>
+                            <p className='text-sm text-slate-400'>{t('total_price')}</p>
+                            <p className='text-lg font-extrabold text-slate-900'>{space.finalPrice} {t('currency')}</p>
                           </div>
                         </div>
 
                         {(space.features && space.features.length > 0) && (
                           <div className='pt-3 border-t border-slate-50'>
-                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1.5">Activated Features</p>
+                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1.5">{t('activated_features')}</p>
                             <div className="flex flex-wrap gap-1.5">
                               {space.features.map(f => (
                                 <span key={f} className="text-xs bg-slate-50 text-slate-600 border border-slate-100 px-2.5 py-1 rounded-md">{f}</span>
@@ -644,11 +645,11 @@ export default function Profile() {
                           </p>
 
                           <SmartModal
-                            triggerText="Cancel"
+                            triggerText={t('cancel')}
                             triggerColorClass="text-[10px] font-bold text-red-500 hover:text-red-700 uppercase tracking-widest transition-colors"
-                            modalTitle="Cancel Reservation"
-                            modalContent="Are you sure you want to cancel this booking? This will remove your reservation."
-                            okText="Yes, Cancel"
+                            modalTitle={t('cancel_booking')}
+                            modalContent={t('cancel_booking_confirm')}
+                            okText={t('yes_cancel')}
                             okColorClass="bg-red-600 !text-white hover:!bg-red-700"
                             onOkAction={() => handleCancelBooking(space._id)}
                           />
@@ -660,7 +661,7 @@ export default function Profile() {
 
                 {!bookedSpacesFetched && (
                   <div className='flex items-center justify-center h-full text-center opacity-50 py-10'>
-                    <p className='text-sm text-slate-500'>Click "Check Bookings" to view your reserved spaces.</p>
+                    <p className='text-sm text-slate-500'>{t('click_check_bookings')}</p>
                   </div>
                 )}
               </div>
@@ -670,26 +671,26 @@ export default function Profile() {
                 {upgradeStatus === 'none' || upgradeStatus === 'denied' ? (
                   <button
                     onClick={() => {
-                        if (!currentUser.isVerified) return toast.error('Please verify your email first!');
-                        setIsUpgradeModalOpen(true);
+                      if (!currentUser.isVerified) return toast.error(t('verify_email_first'));
+                      setIsUpgradeModalOpen(true);
                     }}
                     className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium py-3 rounded-xl transition-all duration-300 text-sm shadow-sm ${!currentUser.isVerified ? 'opacity-50 grayscale' : 'hover:from-indigo-700 hover:to-violet-700'}`}
                   >
                     <FaArrowUp className='text-xs' />
-                    {upgradeStatus === 'denied' ? 'Re-apply to Become a Seller' : 'Upgrade to Seller'}
+                    {upgradeStatus === 'denied' ? t('reapply_seller') : t('upgrade_seller')}
                   </button>
                 ) : upgradeStatus === 'pending' ? (
                   <div className='flex flex-col gap-2'>
                     <div className='w-full flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 font-medium py-3 rounded-xl text-sm cursor-default'>
                       <FaClock className='text-xs' />
-                      Upgrade Request Pending
+                      {t('upgrade_pending')}
                     </div>
                     <SmartModal
-                      triggerText="Cancel Request"
+                      triggerText={t('withdraw_request')}
                       triggerColorClass="w-full bg-white text-red-500 border border-red-200 font-medium py-2.5 rounded-xl hover:bg-red-50 transition-all text-xs flex items-center justify-center gap-2"
-                      modalTitle="Cancel Upgrade Request"
-                      modalContent="Are you sure you want to withdraw your upgrade request? You will need to fill out the form again if you change your mind."
-                      okText="Yes, Cancel"
+                      modalTitle={t('cancel_upgrade_title')}
+                      modalContent={t('cancel_upgrade_content')}
+                      okText={t('yes_cancel')}
                       okColorClass="bg-red-600 !text-white hover:!bg-red-700"
                       onOkAction={handleCancelUpgrade}
                     />
@@ -699,61 +700,61 @@ export default function Profile() {
 
               {/* Upgrade Request Modal */}
               <Modal
-                title={<span className='text-lg font-bold text-slate-900'>Upgrade to Seller</span>}
+                title={<span className='text-lg font-bold text-slate-900'>{t('upgrade_seller')}</span>}
                 open={isUpgradeModalOpen}
                 onCancel={() => setIsUpgradeModalOpen(false)}
                 footer={null}
                 centered
                 destroyOnClose
               >
-                <p className='text-sm text-slate-500 mb-5'>Fill in your business details to request a seller account.</p>
+                <p className='text-sm text-slate-500 mb-5'>{t('business_details_p')}</p>
                 <div className='flex flex-col gap-3'>
                   <div className='flex flex-col gap-1'>
-                    <label className='text-xs font-medium text-slate-500 ml-1'>Full Name</label>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>{t('full_name')}</label>
                     <input
                       type='text'
                       id='fullName'
-                      placeholder='Your full name'
+                      placeholder={t('your_full_name')}
                       value={upgradeForm.fullName}
                       onChange={handleUpgradeFormChange}
                       className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
-                    <label className='text-xs font-medium text-slate-500 ml-1'>Business Name</label>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>{t('business_name')}</label>
                     <input
                       type='text'
                       id='businessName'
-                      placeholder='Your company or business name'
+                      placeholder={t('your_company_name')}
                       value={upgradeForm.businessName}
                       onChange={handleUpgradeFormChange}
                       className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
-                    <label className='text-xs font-medium text-slate-500 ml-1'>Speciality</label>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>{t('speciality')}</label>
                     <input
                       type='text'
                       id='speciality'
-                      placeholder='e.g. Co-working, Event Space, etc.'
+                      placeholder={t('speciality_eg')}
                       value={upgradeForm.speciality}
                       onChange={handleUpgradeFormChange}
                       className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
-                    <label className='text-xs font-medium text-slate-500 ml-1'>Location</label>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>{t('location')}</label>
                     <input
                       type='text'
                       id='location'
-                      placeholder='Business location or address'
+                      placeholder={t('business_address')}
                       value={upgradeForm.location}
                       onChange={handleUpgradeFormChange}
                       className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm'
                     />
                   </div>
                   <div className='flex flex-col gap-1'>
-                    <label className='text-xs font-medium text-slate-500 ml-1'>Phone Number</label>
+                    <label className='text-xs font-medium text-slate-500 ml-1'>{t('phone_number')}</label>
                     <div className='flex items-center gap-2'>
                       <span className='bg-slate-100 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-600 font-medium whitespace-nowrap'>+213</span>
                       <input
@@ -771,7 +772,7 @@ export default function Profile() {
                     disabled={upgradeLoading}
                     className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all duration-300 disabled:opacity-70 text-sm mt-2'
                   >
-                    {upgradeLoading ? 'Submitting...' : 'Submit Request'}
+                    {upgradeLoading ? t('submitting') : t('submit_request')}
                   </button>
                 </div>
               </Modal>
@@ -779,12 +780,12 @@ export default function Profile() {
           ) : (
             <div className='flex flex-col items-center justify-center text-center h-full opacity-70'>
               <img src="https://cdn-icons-png.flaticon.com/512/9908/9908191.png" alt="Dashboard" className="w-24 h-24 mb-6 opacity-40 grayscale" onError={(e) => e.target.style.display = 'none'} />
-              <h2 className='text-3xl font-bold text-slate-800 mb-2'>Workspace Management Moved</h2>
+              <h2 className='text-3xl font-bold text-slate-800 mb-2'>{t('mgmt_moved')}</h2>
               <p className='text-sm text-slate-500 mb-8 max-w-sm mx-auto'>
-                All your listings, creation tools, and workspace management are now centralized in your dedicated Seller Dashboard.
+                {t('mgmt_moved_p')}
               </p>
               <Link to='/dashboard' className='bg-indigo-600 text-white px-8 py-3.5 rounded-xl hover:bg-indigo-700 transition-colors font-semibold shadow-md inline-flex items-center gap-2 tracking-wide'>
-                Go to Dashboard
+                {t('go_to_dashboard')}
               </Link>
             </div>
           )}

@@ -5,9 +5,11 @@ import toast from 'react-hot-toast';
 import OAuth from '../components/OAuth';
 import AnimatedPage from '../components/AnimatedPage';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SignUp() {
-  useDocumentTitle('Sign Up | Co-Spaces');
+  const { t } = useLanguage();
+  useDocumentTitle(`${t('sign_up')} | Co-Spaces`);
   const [formData, setFormData] = useState({});
   const [error, setError] = useState({
     username: '',
@@ -22,7 +24,7 @@ export default function SignUp() {
     let isValid = true;
 
     if (!formData.password || formData.password.length < 6) { 
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = t('password_must_6');
       isValid = false;
     }
     setError(newErrors);
@@ -44,7 +46,7 @@ export default function SignUp() {
       setLoading(true);
       const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, formData);
       setLoading(false);
-      toast.success('Account created! Please sign in to verify your email.');
+      toast.success(t('account_created_signin'));
       navigate('/signin', { state: { email: formData.email } });
 
     } catch (error) {
@@ -52,9 +54,9 @@ export default function SignUp() {
       const message = error.response?.data?.message  || ''; 
 
       if (message.toLowerCase().includes('email')) {
-        setError(prev => ({ ...prev, email: 'Email is already in use' }));
+        setError(prev => ({ ...prev, email: t('email_in_use') }));
       } else if (message.toLowerCase().includes('username')) {
-        setError(prev => ({ ...prev, username: 'Username is already taken' }));
+        setError(prev => ({ ...prev, username: t('username_taken') }));
       }
     }
   };
@@ -69,8 +71,8 @@ export default function SignUp() {
           
           {/* Header Text */}
           <div className='text-center mb-4'>
-            <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>Create Account</h1>
-            <p className='text-slate-500 font-light'>Join CoSpace today.</p>
+            <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>{t('create_account')}</h1>
+            <p className='text-slate-500 font-light'>{t('join_community')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className='flex flex-col gap-1'>
@@ -79,49 +81,49 @@ export default function SignUp() {
               <input 
                 type="text" 
                 autoComplete="off" 
-                placeholder='Username' 
+                placeholder={t('username')} 
                 className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 focus:bg-white transition-all duration-300' 
                 id='username' 
                 onChange={handleChange} 
               />
-              {error.username && <span className='text-red-500 text-xs mt-1 ml-1'>{error.username}</span>} 
+              {error.username && <span className='text-red-500 text-xs mt-1 ms-1'>{error.username}</span>} 
             </div>
 
             <div>
               <input 
                 type="email" 
                 autoComplete="off" 
-                placeholder='Email' 
+                placeholder={t('email')} 
                 className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 focus:bg-white transition-all duration-300' 
                 id='email' 
                 onChange={handleChange} 
               />
-              {error.email && <span className='text-red-500 text-xs mt-1 ml-1'>{error.email}</span>}
+              {error.email && <span className='text-red-500 text-xs mt-1 ms-1'>{error.email}</span>}
             </div>
 
             <div>
               <input 
                 type="password" 
                 autoComplete="new-password" 
-                placeholder='Password' 
+                placeholder={t('password')} 
                 className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 focus:bg-white transition-all duration-300' 
                 id='password' 
                 onChange={handleChange} 
               />
-              {error.password && <span className='text-red-500 text-xs mt-1 ml-1'>{error.password}</span>}
+              {error.password && <span className='text-red-500 text-xs mt-1 ms-1'>{error.password}</span>}
             </div>
 
             <button 
               disabled={loading} 
               className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all duration-300 disabled:opacity-70 mt-2'
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? t('creating_account') : t('sign_up')}
             </button>
 
             {/* Classy Divider */}
             <div className='relative flex items-center py-2'>
               <div className='flex-grow border-t border-slate-200'></div>
-              <span className='flex-shrink-0 mx-4 text-slate-400 text-sm'>or continue with</span>
+              <span className='flex-shrink-0 mx-4 text-slate-400 text-sm'>{t('or_continue')}</span>
               <div className='flex-grow border-t border-slate-200'></div>
             </div>
 
@@ -130,9 +132,9 @@ export default function SignUp() {
 
           {/* Footer Link */}
           <div className='flex justify-center gap-2 mt-4 text-slate-600'>
-            <p>Already have an account?</p>
+            <p>{t('have_account')}</p>
             <Link to="/signin" className='text-slate-900 font-semibold hover:underline transition-all'>
-              Sign in
+              {t('sign_in')}
             </Link>
           </div>
 

@@ -28,11 +28,15 @@ axios.interceptors.response.use(
   }
 );
 
+import { LanguageProvider } from './context/LanguageContext.jsx'
+
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <Toaster position='top-center ' />
-      <App />
+      <LanguageProvider>
+        <Toaster position='top-center ' />
+        <App />
+      </LanguageProvider>
     </PersistGate>
   </Provider>,
 ) 

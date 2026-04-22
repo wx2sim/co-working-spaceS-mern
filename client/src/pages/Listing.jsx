@@ -25,10 +25,12 @@ import {
 import Contact from '../components/Contact';
 import AnimatedPage from '../components/AnimatedPage';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Listing() {
   SwiperCore.use([Navigation, Pagination]);
   const [listing, setListing] = useState(null);
+  const { t } = useLanguage();
   useDocumentTitle(`${listing?.name || 'Loading...'} | Co-Spaces`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -69,7 +71,7 @@ export default function Listing() {
       return;
     }
     if (!currentUser.isVerified) {
-      return toast.error('Please verify your email first!', { icon: '✉️' });
+      return toast.error(t('verify_email_first'), { icon: '✉️' });
     }
     setShowBookingModal(true);
   };
@@ -78,9 +80,9 @@ export default function Listing() {
     try {
       setBookingLoading(true);
       const selectedFeatures = [];
-      if (bookingFeatures.catering) selectedFeatures.push("Catering (+50 DA)");
-      if (bookingFeatures.projector) selectedFeatures.push("Projector (+20 DA)");
-      if (bookingFeatures.extraChairs) selectedFeatures.push("Extra Chairs (+10 DA)");
+      if (bookingFeatures.catering) selectedFeatures.push(`Catering (+50 ${t('currency')})`);
+      if (bookingFeatures.projector) selectedFeatures.push(`Projector (+20 ${t('currency')})`);
+      if (bookingFeatures.extraChairs) selectedFeatures.push(`Extra Chairs (+10 ${t('currency')})`);
 
       const payload = {
         listingId: listing._id,
@@ -171,7 +173,7 @@ export default function Listing() {
         {loading && (
           <div className='flex flex-col items-center justify-center py-32'>
             <div className='w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-4'></div>
-            <p className='text-slate-500 font-light text-lg'>Loading workspace details...</p>
+            <p className='text-slate-500 font-light text-lg'>{t('loading_workspace')}</p>
           </div>
         )}
 
@@ -179,9 +181,9 @@ export default function Listing() {
         {/* Error State - fallback for data.success === false */}
         {error && (
           <div className='flex flex-col items-center justify-center py-32'>
-            <p className='text-slate-500 font-light text-lg'>Could not load this listing.</p>
+            <p className='text-slate-500 font-light text-lg'>{t('no_listings')}</p>
             <Link to='/search' className='mt-4 text-sm text-slate-900 font-semibold hover:underline'>
-              Back to Search
+              {t('back_to_workspaces')}
             </Link>
           </div>
         )}
@@ -196,14 +198,14 @@ export default function Listing() {
                 className='flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium text-sm transition-colors duration-300 group'
               >
                 <FaArrowLeft className='text-xs group-hover:-translate-x-1 transition-transform duration-300' />
-                Back to Workspaces
+                {t('back_to_workspaces')}
               </Link>
               <button
                 onClick={handleCopyLink}
                 className='flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium text-xs transition-colors duration-300 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm hover:shadow-md'
               >
                 <FaRegCopy className='text-xs' />
-                {copied ? 'Copied!' : 'Share'}
+                {copied ? t('link_copied') : t('copy_link')}
               </button>
             </div>
 
@@ -242,11 +244,11 @@ export default function Listing() {
                     listing.category === 'service' ? 'bg-amber-500 text-white' :
                     listing.type === 'rent' ? 'bg-indigo-600 text-white' : 'bg-emerald-600 text-white'
                   }`}>
-                    {listing.category === 'service' ? 'Service' : (listing.type === 'rent' ? 'For Rent' : 'For Sale')}
+                    {listing.category === 'service' ? t('service_label') : (listing.type === 'rent' ? t('rent') : t('sale'))}
                   </span>
                   {isFullyBooked && (
                     <span className='text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg bg-red-600 text-white'>
-                      Fully Booked
+                      {t('fully_booked')}
                     </span>
                   )}
                 </div>
@@ -256,7 +258,7 @@ export default function Listing() {
                   <div className='absolute top-3 right-3 z-10'>
                     <span className='text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-500 text-white uppercase tracking-wider shadow-lg flex items-center gap-1'>
                       <FaTag className='text-[9px]' />
-                      {(+listing.regularPrice - +listing.discountPrice).toLocaleString('en-US')} DA OFF
+                      {(+listing.regularPrice - +listing.discountPrice).toLocaleString('en-US')} {t('da_off')}
                     </span>
                   </div>
                 )}
@@ -277,17 +279,17 @@ export default function Listing() {
                     <span className='text-2xl font-extrabold text-slate-900'>
                       {listing.offer
                         ? listing.discountPrice.toLocaleString('en-US')
-                        : listing.regularPrice.toLocaleString('en-US')} DA
+                        : listing.regularPrice.toLocaleString('en-US')} {t('currency')}
                     </span>
                     {listing.category === 'property' && listing.type === 'rent' && (
-                      <span className='text-xs text-slate-400 font-medium'>/ month</span>
+                      <span className='text-xs text-slate-400 font-medium'>{t('per_month_short')}</span>
                     )}
                     {listing.category === 'service' && (
-                      <span className='text-xs text-slate-400 font-medium'>/ Total Service</span>
+                      <span className='text-xs text-slate-400 font-medium'>{t('total_service')}</span>
                     )}
                     {listing.offer && (
                       <span className='text-xs text-slate-400 line-through font-medium'>
-                        {listing.regularPrice.toLocaleString('en-US')} DA
+                        {listing.regularPrice.toLocaleString('en-US')} {t('currency')}
                       </span>
                     )}
                   </div>
@@ -300,7 +302,7 @@ export default function Listing() {
                     <div className='flex items-center gap-1 text-amber-500'>
                       <FaStar className='text-[10px]' />
                       <span className='text-xs font-bold'>
-                        {listing.ratingCount > 0 ? listing.averageRating : 'N/A'}
+                        {listing.ratingCount > 0 ? listing.averageRating : t('na')}
                       </span>
                       <span className='text-[10px] text-slate-400 font-medium ml-0.5'>
                         ({listing.ratingCount || 0})
@@ -312,7 +314,7 @@ export default function Listing() {
                 {/* Rating Input for Logged In Users */}
                 {currentUser && (
                   <div className='mb-4 p-3.5 bg-slate-50 border border-slate-100 rounded-2xl'>
-                    <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2'>Rate your experience</p>
+                    <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2'>{t('rate_experience')}</p>
                     <div className='flex items-center gap-2'>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -327,15 +329,15 @@ export default function Listing() {
                         </button>
                       ))}
                       {userRating > 0 && (
-                        <span className='text-[10px] font-bold text-emerald-600 ml-2'>You rated {userRating}/5</span>
+                        <span className='text-[10px] font-bold text-emerald-600 ml-2'>{t('you_rated')} {userRating}/5</span>
                       )}
                     </div>
                   </div>
                 )}
                 {!currentUser && (
                   <div className='mb-4 p-3.5 bg-slate-50 border border-slate-100 rounded-2xl'>
-                    <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1'>Experience this space?</p>
-                    <Link to='/signup' className='text-xs font-bold text-indigo-600 hover:underline'>Sign in to leave a rating</Link>
+                    <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1'>{t('rate_experience')}?</p>
+                    <Link to='/signup' className='text-xs font-bold text-indigo-600 hover:underline'>{t('sign_in_to_rate')}</Link>
                   </div>
                 )}
 
@@ -345,7 +347,7 @@ export default function Listing() {
                 {/* Description */}
                 <div className='my-3'>
                   <h2 className='text-xs font-bold text-slate-900 uppercase tracking-wider mb-1.5'>
-                    About this Space
+                    {t('about_space')}
                   </h2>
                   <p className='text-slate-600 text-xs leading-relaxed font-light line-clamp-3'>
                     {listing.description}
@@ -359,39 +361,39 @@ export default function Listing() {
                 {listing.category === 'property' && (
                   <div className='my-3'>
                     <h2 className='text-xs font-bold text-slate-900 uppercase tracking-wider mb-2'>
-                      Amenities
+                      {t('facilities')}
                     </h2>
                     <div className='grid grid-cols-3 gap-2'>
                       <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
                         <FaDoorOpen className='text-slate-500 text-xs flex-shrink-0' />
                         <div className='min-w-0'>
-                          <p className='text-[10px] text-slate-400 leading-tight'>Rooms</p>
+                          <p className='text-[10px] text-slate-400 leading-tight'>{t('rooms_label')}</p>
                           <p className='text-xs font-bold text-slate-800'>{listing.rooms}</p>
                         </div>
                       </div>
                       <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
                         <FaUsers className='text-slate-500 text-xs flex-shrink-0' />
                         <div className='min-w-0'>
-                          <p className='text-[10px] text-slate-400 leading-tight'>Conference</p>
+                          <p className='text-[10px] text-slate-400 leading-tight'>{t('conference')}</p>
                           <p className='text-xs font-bold text-slate-800'>{listing.confirencerooms}</p>
                         </div>
                       </div>
                       <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
                         <FaBath className='text-slate-500 text-xs flex-shrink-0' />
                         <div className='min-w-0'>
-                          <p className='text-[10px] text-slate-400 leading-tight'>Baths</p>
+                          <p className='text-[10px] text-slate-400 leading-tight'>{t('baths_label')}</p>
                           <p className='text-xs font-bold text-slate-800'>{listing.bathrooms}</p>
                         </div>
                       </div>
                       <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2'>
                         <FaParking className='text-slate-500 text-xs flex-shrink-0' />
                         <div className='min-w-0'>
-                          <p className='text-[10px] text-slate-400 leading-tight'>Parking</p>
+                          <p className='text-[10px] text-slate-400 leading-tight'>{t('amenity_parking')}</p>
                           <p className='text-xs font-bold text-slate-800 flex items-center gap-0.5'>
                             {listing.parking ? (
-                              <><FaCheckCircle className='text-emerald-500 text-[10px]' /> Yes</>
+                              <><FaCheckCircle className='text-emerald-500 text-[10px]' /> {t('yes') || 'Yes'}</>
                             ) : (
-                              <><FaTimesCircle className='text-red-400 text-[10px]' /> No</>
+                              <><FaTimesCircle className='text-red-400 text-[10px]' /> {t('no') || 'No'}</>
                             )}
                           </p>
                         </div>
@@ -399,12 +401,12 @@ export default function Listing() {
                       <div className='flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-2 col-span-2'>
                         <FaChair className='text-slate-500 text-xs flex-shrink-0' />
                         <div className='min-w-0'>
-                          <p className='text-[10px] text-slate-400 leading-tight'>Furnishing</p>
+                          <p className='text-[10px] text-slate-400 leading-tight'>{t('furnishing')}</p>
                           <p className='text-xs font-bold text-slate-800 flex items-center gap-0.5'>
                             {listing.furnished ? (
-                              <><FaCheckCircle className='text-emerald-500 text-[10px]' /> Furnished</>
+                              <><FaCheckCircle className='text-emerald-500 text-[10px]' /> {t('amenity_furnished')}</>
                             ) : (
-                              <><FaTimesCircle className='text-red-400 text-[10px]' /> Unfurnished</>
+                              <><FaTimesCircle className='text-red-400 text-[10px]' /> {t('unfurnished')}</>
                             )}
                           </p>
                         </div>
@@ -415,16 +417,16 @@ export default function Listing() {
                 {listing.category === 'service' && (
                   <div className='my-3'>
                     <h2 className='text-xs font-bold text-slate-900 uppercase tracking-wider mb-2'>
-                      Service Features
+                      {t('service_features')}
                     </h2>
                     <div className='grid grid-cols-1 gap-2'>
                       <div className='flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3'>
                         <FaCheckCircle className='text-indigo-500 text-sm' />
-                        <p className='text-sm font-semibold text-slate-700'>Professional Service Offered</p>
+                        <p className='text-sm font-semibold text-slate-700'>{t('prof_service_offered')}</p>
                       </div>
                       <div className='flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3'>
                         <FaCheckCircle className='text-indigo-500 text-sm' />
-                        <p className='text-sm font-semibold text-slate-700'>Co-working Integrated Solution</p>
+                        <p className='text-sm font-semibold text-slate-700'>{t('coworking_integrated')}</p>
                       </div>
                     </div>
                   </div>
@@ -438,12 +440,12 @@ export default function Listing() {
                   {currentUser && listing.userRef !== currentUser._id && !contact && (
                     <button
                       onClick={() => {
-                        if (!currentUser.isVerified) return toast.error('Please verify your email first!');
+                        if (!currentUser.isVerified) return toast.error(t('verify_email_first'));
                         setContact(true);
                       }}
                       className={`flex-1 min-w-[140px] bg-white border-[1.5px] border-slate-900 text-slate-900 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${!currentUser.isVerified ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50'}`}
                     >
-                      Message Owner
+                      {t('message_owner')}
                     </button>
                   )}
                   {(!currentUser || listing.userRef !== currentUser._id) && !contact && (
@@ -452,7 +454,7 @@ export default function Listing() {
                       disabled={listing.category === 'property' && isFullyBooked}
                       className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${listing.category === 'property' && isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : ( !currentUser?.isVerified ? 'bg-slate-900 text-white opacity-50 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md')}`}
                     >
-                      {listing.category === 'property' && isFullyBooked ? 'Fully Booked' : (listing.category === 'service' ? 'Order Service' : 'Book Space')}
+                      {listing.category === 'property' && isFullyBooked ? t('fully_booked') : (listing.category === 'service' ? t('order_service') : t('book_space'))}
                     </button>
                   )}
 
@@ -473,8 +475,8 @@ export default function Listing() {
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
-                <h3 className="font-extrabold text-slate-900 text-lg">Book Workspace</h3>
-                <p className="text-xs text-slate-500">Customize your reservation</p>
+                <h3 className="font-extrabold text-slate-900 text-lg">{t('book_workspace')}</h3>
+                <p className="text-xs text-slate-500">{t('customize_reservation')}</p>
               </div>
               <button disabled={bookingSuccess} onClick={() => setShowBookingModal(false)} className="text-slate-400 hover:text-red-500 bg-slate-100 p-2 rounded-full transition-colors">
                 <FaTimesCircle size={20} />
@@ -485,16 +487,16 @@ export default function Listing() {
                   {bookingSuccess ? (
                     <div className="flex flex-col items-center justify-center text-center py-6">
                       <FaCheckCircle className="text-emerald-500 text-6xl mb-4 animate-bounce" />
-                      <h4 className="text-xl font-bold text-slate-900 mb-2">{listing.category === 'service' ? 'Order Placed!' : 'Booking Validated!'}</h4>
-                      <p className="text-sm text-slate-500 px-4">{listing.category === 'service' ? 'The service provider will contact you shortly to complete the process.' : 'The space owner will contact you shortly to complete the remaining process.'}</p>
+                      <h4 className="text-xl font-bold text-slate-900 mb-2">{listing.category === 'service' ? t('order_placed') : t('booking_validated')}</h4>
+                      <p className="text-sm text-slate-500 px-4">{listing.category === 'service' ? t('service_provider_contact') : t('space_owner_contact')}</p>
                       <button onClick={() => setShowBookingModal(false)} className="mt-8 w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">
-                        Done
+                        {t('done')}
                       </button>
                     </div>
                   ) : (
                     <>
                        <div className="mb-6">
-                         <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">Select Date</label>
+                         <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">{t('select_date')}</label>
                          <input 
                             type="date"
                             min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]}
@@ -506,41 +508,41 @@ export default function Listing() {
 
                        {listing.category === 'property' ? (
                           <div className="mb-4">
-                            <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Optional Features</h4>
+                            <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">{t('optional_features')}</h4>
                             <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                              <span className="text-sm font-semibold text-slate-700">Catering Service (+50 DA)</span>
+                              <span className="text-sm font-semibold text-slate-700">{t('catering_service')} (+50 {t('currency')})</span>
                               <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.catering} onChange={(e) => setBookingFeatures({...bookingFeatures, catering: e.target.checked})} />
                             </label>
                             <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                              <span className="text-sm font-semibold text-slate-700">Projector Setup (+20 DA)</span>
+                              <span className="text-sm font-semibold text-slate-700">{t('projector_setup')} (+20 {t('currency')})</span>
                               <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.projector} onChange={(e) => setBookingFeatures({...bookingFeatures, projector: e.target.checked})} />
                             </label>
                             <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                              <span className="text-sm font-semibold text-slate-700">Extra Chairs (+10 DA)</span>
+                              <span className="text-sm font-semibold text-slate-700">{t('extra_chairs')} (+10 {t('currency')})</span>
                               <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.extraChairs} onChange={(e) => setBookingFeatures({...bookingFeatures, extraChairs: e.target.checked})} />
                             </label>
                           </div>
                        ) : (
                           <div className="mb-4 text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                             <p className="text-sm text-slate-500 italic">No additional options for this service.</p>
+                             <p className="text-sm text-slate-500 italic">{t('no_additional_options')}</p>
                           </div>
                        )}
-                   
-                   <div className="flex justify-between items-center py-5 border-t border-slate-100 mb-4 bg-slate-50 -mx-6 px-6 shadow-inner">
-                     <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Final Total</span>
-                     <span className="text-3xl font-extrabold text-slate-900">{calculateFinalPrice()} DA</span>
-                   </div>
-                   
-                   <div className="flex flex-col gap-3">
-                      <button disabled={bookingLoading} onClick={handleValidateBooking} className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
-                        {bookingLoading ? 'Processing...' : (listing.category === 'service' ? 'Confirm Order' : 'Validate Booking (Cash)')}
+                    
+                    <div className="flex justify-between items-center py-5 border-t border-slate-100 mb-4 bg-slate-50 -mx-6 px-6 shadow-inner">
+                      <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">{t('final_total')}</span>
+                      <span className="text-3xl font-extrabold text-slate-900">{calculateFinalPrice()} {t('currency')}</span>
+                    </div>
+                    
+                    <div className="flex flex-col gap-3">
+                       <button disabled={bookingLoading} onClick={handleValidateBooking} className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+                         {bookingLoading ? t('processing') : (listing.category === 'service' ? t('confirm_order') : t('validate_booking_cash'))}
+                       </button>
+                      <button disabled className="w-full flex items-center justify-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-400 font-bold py-3.5 rounded-xl cursor-not-allowed">
+                        {t('pay_with_stripe')} <span className="text-[10px] bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-widest text-indigo-500">{t('coming_soon')}</span>
                       </button>
-                     <button disabled className="w-full flex items-center justify-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-400 font-bold py-3.5 rounded-xl cursor-not-allowed">
-                       Pay with Stripe <span className="text-[10px] bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-widest text-indigo-500">Coming Soon</span>
-                     </button>
-                   </div>
-                </>
-              )}
+                    </div>
+                 </>
+               )}
             </div>
           </div>
         </div>

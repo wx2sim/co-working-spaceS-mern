@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaStar, FaDoorOpen, FaBath } from 'react-icons/fa';
 import HoverCard from './HoverCard';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ListingItem({ listing }) {
+  const { t } = useLanguage();
   return (
     <HoverCard className="h-full">
       <Link 
@@ -20,7 +22,7 @@ export default function ListingItem({ listing }) {
               listing.category === 'service' ? 'bg-amber-500/80 text-white' :
               listing.type === 'rent' ? 'bg-indigo-500/80 text-white' : 'bg-emerald-500/80 text-white'
             }`}>
-              {listing.category === 'service' ? 'Service' : listing.type}
+              {listing.category === 'service' ? t('service_label') : listing.type === 'rent' ? t('rent') : t('sale')}
             </span>
           </div>
         </div>
@@ -40,16 +42,16 @@ export default function ListingItem({ listing }) {
               <>
                 <div className='flex items-center gap-1.5'>
                   <FaDoorOpen className='text-[10px]' />
-                  <span className='text-[11px] font-medium tracking-tight'>{listing.rooms || 1} Rooms</span>
+                  <span className='text-[11px] font-medium tracking-tight'>{listing.rooms || 1} {t('rooms_label')}</span>
                 </div>
                 <div className='flex items-center gap-1.5'>
                   <FaBath className='text-[10px]' />
-                  <span className='text-[11px] font-medium tracking-tight'>{listing.bathrooms || 1} Baths</span>
+                  <span className='text-[11px] font-medium tracking-tight'>{listing.bathrooms || 1} {t('baths_label')}</span>
                 </div>
               </>
             ) : (
               <div className='flex items-center gap-1.5'>
-                <span className='text-[11px] font-medium tracking-tight uppercase opacity-60'>Expert Service Delivery</span>
+                <span className='text-[11px] font-medium tracking-tight uppercase opacity-60'>{t('expert_service')}</span>
               </div>
             )}
           </div>
@@ -58,14 +60,14 @@ export default function ListingItem({ listing }) {
             <div className='flex flex-col'>
               <p className='text-xl font-bold text-gray-600 dark:text-gray-300 tracking-tighter leading-none'>
                 {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')}
-                <span className='ml-1 text-sm'>DA</span>
-                {listing.category === 'property' && listing.type === 'rent' && <span className='text-[10px] font-medium opacity-40 ml-0.5'>/mo</span>}
+                <span className='ml-1 text-sm'>{t('currency')}</span>
+                {listing.category === 'property' && listing.type === 'rent' && <span className='text-[10px] font-medium opacity-40 ml-0.5'>{t('per_month_short')}</span>}
               </p>
             </div>
             <div className='flex items-center gap-1 text-amber-500/80'>
               <FaStar className='text-[10px]' />
               <span className='text-[11px] font-bold'>
-                {listing.ratingCount > 0 ? listing.averageRating : 'N/A'}
+                {listing.ratingCount > 0 ? listing.averageRating : t('na')}
               </span>
             </div>
           </div>

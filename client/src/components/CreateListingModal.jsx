@@ -4,8 +4,10 @@ import { app } from '../firebase';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function CreateListingModal({ isOpen, onClose }) {
+  const { t } = useLanguage();
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
@@ -40,7 +42,7 @@ export default function CreateListingModal({ isOpen, onClose }) {
 
     const oversizedFiles = selectedFiles.filter(file => file.size > 2 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      setImageUploadError('One or more images exceed the 2MB limit!');
+      setImageUploadError(t('image_size_error'));
       return;
     }
 
@@ -63,11 +65,11 @@ export default function CreateListingModal({ isOpen, onClose }) {
           setUploading(false);
         })
         .catch((err) => {
-          setImageUploadError(`Upload failed: ${err.message}`);
+          setImageUploadError(`${t('upload_failed')}: ${err.message}`);
           setUploading(false);
         });
     } else {
-      setImageUploadError('You can only upload up to 6 images per listing');
+      setImageUploadError(t('max_images_error'));
     }
   };
 
@@ -115,8 +117,8 @@ export default function CreateListingModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (formData.imageUrls.length < 1) return setError('You must upload at least one image');
-      if (+formData.regularPrice < +formData.discountPrice) return setError('Discount price must be lower than regular price');
+      if (formData.imageUrls.length < 1) return setError(t('at_least_one_image'));
+      if (+formData.regularPrice < +formData.discountPrice) return setError(t('discount_price_error'));
       
       setLoading(true);
       setError(false);
@@ -147,8 +149,8 @@ export default function CreateListingModal({ isOpen, onClose }) {
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50">
           <div>
-            <h2 className="text-2xl font-extrabold text-slate-900">Create a Listing</h2>
-            <p className="text-sm text-slate-500 font-light">Publish your workspace to the world.</p>
+            <h2 className="text-2xl font-extrabold text-slate-900">{t('create_listing')}</h2>
+            <p className="text-sm text-slate-500 font-light">{t('publish_listing_desc')}</p>
           </div>
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 hover:bg-red-100 hover:text-red-600 transition-colors">
             &#10005;
@@ -158,26 +160,26 @@ export default function CreateListingModal({ isOpen, onClose }) {
         <div className="p-6 overflow-y-auto custom-scrollbar flex-grow">
           <form onSubmit={handleSubmit} className='flex flex-col md:flex-row gap-8'>
             <div className='flex flex-col gap-4 flex-1'>
-              <input type='text' placeholder='Name' id='name' maxLength='62' minLength='10' required onChange={handleChange} value={formData.name} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
-              <textarea placeholder='Description' id='description' required onChange={handleChange} value={formData.description} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm min-h-[100px]' />
-              <input type='text' placeholder='Address' id='address' required onChange={handleChange} value={formData.address} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              <input type='text' placeholder={t('listing_name')} id='name' maxLength='62' minLength='10' required onChange={handleChange} value={formData.name} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
+              <textarea placeholder={t('listing_desc')} id='description' required onChange={handleChange} value={formData.description} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm min-h-[100px]' />
+              <input type='text' placeholder={t('listing_address')} id='address' required onChange={handleChange} value={formData.address} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
               
               <div className='flex flex-col gap-2 mt-2'>
-                <label className='text-xs font-bold text-slate-500 uppercase tracking-wider ml-1'>Listing Category</label>
+                <label className='text-xs font-bold text-slate-500 uppercase tracking-wider ml-1'>{t('listing_category')}</label>
                 <div className='flex gap-4 p-1 bg-slate-100 rounded-2xl w-fit'>
                   <button 
                     type='button' 
                     onClick={() => setFormData({...formData, category: 'property'})}
                     className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.category === 'property' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                   >
-                    Property
+                    {t('property')}
                   </button>
                   <button 
                     type='button' 
                     onClick={() => setFormData({...formData, category: 'service'})}
                     className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.category === 'service' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                   >
-                    Service
+                    {t('service')}
                   </button>
                 </div>
               </div>
@@ -186,23 +188,23 @@ export default function CreateListingModal({ isOpen, onClose }) {
                 <div className='flex gap-4 flex-wrap mt-2'>
                   <div className='flex gap-2 items-center'>
                     <input type='checkbox' id='sale' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.type === 'sale'} />
-                    <label htmlFor='sale' className='text-sm text-slate-700'>Sell</label>
+                    <label htmlFor='sale' className='text-sm text-slate-700'>{t('sell')}</label>
                   </div>
                   <div className='flex gap-2 items-center'>
                     <input type='checkbox' id='rent' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.type === 'rent'} />
-                    <label htmlFor='rent' className='text-sm text-slate-700'>Rent</label>
+                    <label htmlFor='rent' className='text-sm text-slate-700'>{t('rent')}</label>
                   </div>
                   <div className='flex gap-2 items-center'>
                     <input type='checkbox' id='parking' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.parking} />
-                    <label htmlFor='parking' className='text-sm text-slate-700'>Parking spot</label>
+                    <label htmlFor='parking' className='text-sm text-slate-700'>{t('parking_spot')}</label>
                   </div>
                   <div className='flex gap-2 items-center'>
                     <input type='checkbox' id='furnished' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.furnished} />
-                    <label htmlFor='furnished' className='text-sm text-slate-700'>Furnished</label>
+                    <label htmlFor='furnished' className='text-sm text-slate-700'>{t('furnished')}</label>
                   </div>
                   <div className='flex gap-2 items-center'>
                     <input type='checkbox' id='offer' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.offer} />
-                    <label htmlFor='offer' className='text-sm text-slate-700'>Offer</label>
+                    <label htmlFor='offer' className='text-sm text-slate-700'>{t('offer')}</label>
                   </div>
                 </div>
               )}
@@ -211,7 +213,7 @@ export default function CreateListingModal({ isOpen, onClose }) {
                 <div className='flex gap-4 flex-wrap mt-2'>
                   <div className='flex gap-2 items-center'>
                     <input type='checkbox' id='offer' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.offer} />
-                    <label htmlFor='offer' className='text-sm text-slate-700'>Special Offer</label>
+                    <label htmlFor='offer' className='text-sm text-slate-700'>{t('special_offer')}</label>
                   </div>
                 </div>
               )}
@@ -221,19 +223,19 @@ export default function CreateListingModal({ isOpen, onClose }) {
                   <>
                     <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                       <input type='number' id='rooms' min='1' max='50' required onChange={handleChange} value={formData.rooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                      <span className='text-sm text-slate-700 font-medium'>Rooms</span>
+                      <span className='text-sm text-slate-700 font-medium'>{t('rooms')}</span>
                     </div>
                     <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                       <input type='number' id='availableRooms' min='1' max='50' required onChange={handleChange} value={formData.availableRooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                      <span className='text-sm text-slate-700 font-medium'>Available</span>
+                      <span className='text-sm text-slate-700 font-medium'>{t('available')}</span>
                     </div>
                     <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                       <input type='number' id='confirencerooms' min='0' max='20' required onChange={handleChange} value={formData.confirencerooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                      <span className='text-sm text-slate-700 font-medium'>Conf. Rooms</span>
+                      <span className='text-sm text-slate-700 font-medium'>{t('conf_rooms')}</span>
                     </div>
                     <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                       <input type='number' id='bathrooms' min='1' max='20' required onChange={handleChange} value={formData.bathrooms} className='w-16 p-2 border border-slate-300 rounded-lg outline-none' />
-                      <span className='text-sm text-slate-700 font-medium'>Baths</span>
+                      <span className='text-sm text-slate-700 font-medium'>{t('baths')}</span>
                     </div>
                   </>
                 )}
@@ -241,17 +243,17 @@ export default function CreateListingModal({ isOpen, onClose }) {
                 <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                   <input type='number' id='regularPrice' min='50' max='10000000' required onChange={handleChange} value={formData.regularPrice} className='w-24 p-2 border border-slate-300 rounded-lg outline-none' />
                   <div className='flex flex-col'>
-                    <span className='text-sm text-slate-700 font-medium'>{formData.category === 'property' ? 'Regular price' : 'Service Price'}</span>
-                    {formData.category === 'property' && formData.type === 'rent' && <span className='text-xs text-slate-500'>(DA / month)</span>}
-                    {formData.category === 'service' && <span className='text-xs text-slate-500'>(Total DA)</span>}
+                    <span className='text-sm text-slate-700 font-medium'>{formData.category === 'property' ? t('regular_price') : t('service_price')}</span>
+                    {formData.category === 'property' && formData.type === 'rent' && <span className='text-xs text-slate-500'>({t('da_month')})</span>}
+                    {formData.category === 'service' && <span className='text-xs text-slate-500'>({t('total_da')})</span>}
                   </div>
                 </div>
                 {formData.offer && (
                   <div className='flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200'>
                     <input type='number' id='discountPrice' min='0' max='10000000' required onChange={handleChange} value={formData.discountPrice} className='w-24 p-2 border border-slate-300 rounded-lg outline-none' />
                     <div className='flex flex-col'>
-                      <span className='text-sm text-slate-700 font-medium'>Discounted price</span>
-                      {formData.type === 'rent' && <span className='text-xs text-slate-500'>(DA / month)</span>}
+                      <span className='text-sm text-slate-700 font-medium'>{t('discounted_price')}</span>
+                      {formData.type === 'rent' && <span className='text-xs text-slate-500'>({t('da_month')})</span>}
                     </div>
                   </div>
                 )}
@@ -260,9 +262,9 @@ export default function CreateListingModal({ isOpen, onClose }) {
 
             <div className='flex flex-col flex-1 gap-4'>
               <p className='font-semibold text-slate-800'>
-                Images:
+                {t('images')}:
                 <span className='font-normal text-slate-500 text-sm ml-2'>
-                  The first image will be the cover (max 6)
+                  {t('cover_image_desc')}
                 </span>
               </p>
               
@@ -275,7 +277,7 @@ export default function CreateListingModal({ isOpen, onClose }) {
                 />
                 {uploading && (
                   <p className='text-green-600 text-sm font-medium animate-pulse'>
-                    Uploading images, please wait...
+                    {t('uploading_wait')}
                   </p>
                 )}
               </div>
@@ -306,7 +308,7 @@ export default function CreateListingModal({ isOpen, onClose }) {
                 disabled={loading || uploading}
                 className='mt-auto w-full py-4 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-all disabled:opacity-70 shadow-sm'
               >
-                {loading ? 'Creating Listing...' : 'Publish Listing'}
+                {loading ? t('creating_listing') : t('publish_listing')}
               </button>
               
               {error && <p className='text-red-500 text-sm font-medium text-center p-3 bg-red-50 rounded-xl'>{error}</p>}

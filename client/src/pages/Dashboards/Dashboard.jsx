@@ -5,9 +5,11 @@ import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
 import SuperAdminDashboard from './SuperAdminDashboard';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function Dashboard() {
-  useDocumentTitle('Dashboard | Co-Spaces');
+  const { t } = useLanguage();
+  useDocumentTitle(`${t('dashboard_title')} | Co-Spaces`);
   const { currentUser } = useSelector((state) => state.user);
 
   if (!currentUser) return <Navigate to='/error/401' />;
@@ -17,7 +19,7 @@ export default function Dashboard() {
       <div className='min-h-screen flex items-center justify-center bg-slate-50'>
         <div className='flex flex-col items-center gap-4'>
           <div className='w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin'></div>
-          <p className='text-sm text-slate-500 font-medium'>Securing session...</p>
+          <p className='text-sm text-slate-500 font-medium'>{t('securing_session')}</p>
         </div>
       </div>
     );

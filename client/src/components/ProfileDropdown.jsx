@@ -11,7 +11,10 @@ import {
   signOutUserFailure 
 } from '../redux/user/userSlice';
 
+import { useLanguage } from '../context/LanguageContext';
+
 export default function ProfileDropdown({ currentUser }) {
+  const { t } = useLanguage();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,7 +30,7 @@ export default function ProfileDropdown({ currentUser }) {
           return;
         }
         dispatch(signOutUserSuccess(data));
-        toast.success('User Signed out successfully!', { duration: 3000 });
+        toast.success(t('sign_out_success'), { duration: 3000 });
         navigate('/signin');
       } catch (error) {
         const message = error.response?.data?.message || error.message;
@@ -40,18 +43,18 @@ export default function ProfileDropdown({ currentUser }) {
   const loggedInItems = [
     {
       key: '1',
-      label: <Link to="/profile">Profile</Link>,
+      label: <Link to="/profile">{t('profile')}</Link>,
       icon: <UserOutlined />,
     },
     {
       key: '2',
-      label: <Link to="/settings">Settings</Link>,
+      label: <Link to="/settings">{t('settings')}</Link>,
       icon: <SettingOutlined />,
     },
     { type: 'divider' },
     {
       key: '3',
-      label: <span onClick={handleSignOut}>Sign Out</span>,
+      label: <span onClick={handleSignOut}>{t('sign_out')}</span>,
       icon: <LogoutOutlined />,
       danger: true,
     },
@@ -60,7 +63,7 @@ export default function ProfileDropdown({ currentUser }) {
   const loggedOutItems = [
     {
       key: '1',
-      label: <Link to="/signin">Sign in / Sign up</Link>,
+      label: <Link to="/signin">{t('sign_in')} / {t('sign_up')}</Link>,
       icon: <LoginOutlined />,
     },
   ];

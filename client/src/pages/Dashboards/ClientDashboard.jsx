@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import AnimatedPage from '../../components/AnimatedPage';
 import { FaSearch, FaMapMarkerAlt, FaCalendarCheck, FaArrowUp, FaClock, FaHeart, FaCompass, FaRegBookmark } from 'react-icons/fa';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function ClientDashboard() {
+  const { t } = useLanguage();
   const { currentUser } = useSelector((state) => state.user);
   const [recentListings, setRecentListings] = useState([]);
   const [bookedSpaces, setBookedSpaces] = useState([]);
@@ -62,9 +64,9 @@ export default function ClientDashboard() {
 
   const greeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('good_morning');
+    if (hour < 18) return t('good_afternoon');
+    return t('good_evening');
   };
 
   return (
@@ -75,9 +77,9 @@ export default function ClientDashboard() {
         <div className='mb-8'>
           <p className='text-sm text-slate-400 font-medium uppercase tracking-wider mb-1'>{greeting()}</p>
           <h1 className='text-3xl font-extrabold text-slate-900'>
-            Welcome back, <span className='text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500'>{currentUser.username}</span>
+            {t('welcome_back_user')}, <span className='text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500'>{currentUser.username}</span>
           </h1>
-          <p className='text-slate-500 font-light mt-1'>Find your perfect workspace today.</p>
+          <p className='text-slate-500 font-light mt-1'>{t('find_workspace_desc')}</p>
         </div>
 
         {/* Quick Actions */}
@@ -86,29 +88,29 @@ export default function ClientDashboard() {
             <div className='w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300'>
               <FaSearch className='text-white text-sm' />
             </div>
-            <p className='text-sm font-semibold text-slate-800'>Explore</p>
-            <p className='text-[11px] text-slate-400'>Search workspaces</p>
+            <p className='text-sm font-semibold text-slate-800'>{t('explore')}</p>
+            <p className='text-[11px] text-slate-400'>{t('search_workspaces')}</p>
           </Link>
           <Link to='/profile' className='bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all duration-300 group text-center'>
             <div className='w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300'>
               <FaCalendarCheck className='text-white text-sm' />
             </div>
-            <p className='text-sm font-semibold text-slate-800'>Bookings</p>
-            <p className='text-[11px] text-slate-400'>My reservations</p>
+            <p className='text-sm font-semibold text-slate-800'>{t('booking_requests')}</p>
+            <p className='text-[11px] text-slate-400'>{t('my_reservations')}</p>
           </Link>
           <Link to='/about' className='bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all duration-300 group text-center'>
             <div className='w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300'>
               <FaCompass className='text-white text-sm' />
             </div>
-            <p className='text-sm font-semibold text-slate-800'>About</p>
-            <p className='text-[11px] text-slate-400'>Learn more</p>
+            <p className='text-sm font-semibold text-slate-800'>{t('about')}</p>
+            <p className='text-[11px] text-slate-400'>{t('learn_more')}</p>
           </Link>
           <Link to='/profile' className='bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all duration-300 group text-center'>
             <div className='w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300'>
               <FaRegBookmark className='text-white text-sm' />
             </div>
-            <p className='text-sm font-semibold text-slate-800'>Profile</p>
-            <p className='text-[11px] text-slate-400'>Account settings</p>
+            <p className='text-sm font-semibold text-slate-800'>{t('profile')}</p>
+            <p className='text-[11px] text-slate-400'>{t('account_settings')}</p>
           </Link>
         </div>
 
@@ -118,11 +120,11 @@ export default function ClientDashboard() {
           <div className='lg:col-span-2 bg-white border border-slate-100 rounded-2xl p-6'>
             <div className='flex items-center justify-between mb-5'>
               <div>
-                <h2 className='text-lg font-bold text-slate-900'>Latest Workspaces</h2>
-                <p className='text-xs text-slate-400'>Recently added spaces</p>
+                <h2 className='text-lg font-bold text-slate-900'>{t('latest_workspaces')}</h2>
+                <p className='text-xs text-slate-400'>{t('recently_added')}</p>
               </div>
               <Link to='/search' className='text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors'>
-                View All →
+                {t('view_all')} →
               </Link>
             </div>
 
@@ -131,7 +133,7 @@ export default function ClientDashboard() {
                 <div className='w-8 h-8 border-3 border-slate-200 border-t-slate-900 rounded-full animate-spin'></div>
               </div>
             ) : recentListings.length === 0 ? (
-              <p className='text-sm text-slate-400 text-center py-10'>No workspaces available yet.</p>
+              <p className='text-sm text-slate-400 text-center py-10'>{t('no_workspaces_available')}</p>
             ) : (
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 {recentListings.map((listing) => (
@@ -144,7 +146,7 @@ export default function ClientDashboard() {
                           className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500'
                         />
                         <span className='absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-sm text-slate-700 uppercase tracking-wider'>
-                          {listing.type === 'rent' ? 'Rent' : 'Sale'}
+                          {listing.type === 'rent' ? t('rent') : t('sale')}
                         </span>
                       </div>
                       <div className='p-3'>
@@ -154,8 +156,8 @@ export default function ClientDashboard() {
                           <p className='text-[11px] text-slate-400 truncate'>{listing.address}</p>
                         </div>
                         <p className='text-sm font-bold text-slate-900 mt-2'>
-                          {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')} DA
-                          {listing.type === 'rent' && <span className='text-[10px] text-slate-400 font-normal'> /mo</span>}
+                          {listing.offer ? listing.discountPrice?.toLocaleString('en-US') : listing.regularPrice?.toLocaleString('en-US')} {t('currency')}
+                          {listing.type === 'rent' && <span className='text-[10px] text-slate-400 font-normal'> {t('per_month_short')}</span>}
                         </p>
                       </div>
                     </div>
@@ -171,9 +173,9 @@ export default function ClientDashboard() {
             {/* My Bookings Summary */}
             <div className='bg-white border border-slate-100 rounded-2xl p-6'>
               <div className='flex items-center justify-between mb-4'>
-                <h2 className='text-lg font-bold text-slate-900'>My Bookings</h2>
+                <h2 className='text-lg font-bold text-slate-900'>{t('my_bookings')}</h2>
                 <Link to='/profile' className='text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors'>
-                  See All →
+                  {t('view_all')} →
                 </Link>
               </div>
 
@@ -184,8 +186,8 @@ export default function ClientDashboard() {
               ) : bookedSpaces.length === 0 ? (
                 <div className='text-center py-6'>
                   <FaCalendarCheck className='text-3xl text-slate-200 mx-auto mb-2' />
-                  <p className='text-xs text-slate-400'>No bookings yet</p>
-                  <Link to='/search' className='text-xs text-indigo-600 font-semibold hover:underline mt-1 inline-block'>Find a workspace</Link>
+                  <p className='text-xs text-slate-400'>{t('no_bookings_yet')}</p>
+                  <Link to='/search' className='text-xs text-indigo-600 font-semibold hover:underline mt-1 inline-block'>{t('find_a_workspace')}</Link>
                 </div>
               ) : (
                 <div className='flex flex-col gap-3'>
@@ -206,7 +208,7 @@ export default function ClientDashboard() {
                         space.status === 'rejected' ? 'bg-red-100 text-red-700' : 
                         'bg-amber-100 text-amber-700'
                       }`}>
-                        {space.status || 'Pending'}
+                        {space.status ? t(space.status.toLowerCase()) : t('pending')}
                       </span>
                     </div>
                   ))}
@@ -224,17 +226,17 @@ export default function ClientDashboard() {
                     <FaArrowUp className='text-indigo-200' />
                   )}
                   <h3 className='font-bold text-sm'>
-                    {upgradeStatus === 'pending' ? 'Upgrade Pending' : 'Become a Seller'}
+                    {upgradeStatus === 'pending' ? t('upgrade_pending') : t('become_seller')}
                   </h3>
                 </div>
                 <p className='text-indigo-100 text-xs leading-relaxed mb-4'>
                   {upgradeStatus === 'pending'
-                    ? 'Your upgrade request is being reviewed by our team.'
-                    : 'List your own workspaces and start earning. Upgrade your account to become a seller.'}
+                    ? t('upgrade_review_desc')
+                    : t('become_seller_desc')}
                 </p>
                 {upgradeStatus !== 'pending' && (
                   <Link to='/profile' className='inline-block bg-white text-indigo-700 font-semibold text-xs px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors'>
-                    Apply Now
+                    {t('apply_now')}
                   </Link>
                 )}
               </div>

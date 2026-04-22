@@ -12,9 +12,11 @@ import {
 import OAuth from '../components/OAuth';
 import AnimatedPage from '../components/AnimatedPage';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SignIn() {
-  useDocumentTitle('Sign In | Co-Spaces');
+  const { t } = useLanguage();
+  useDocumentTitle(`${t('sign_in')} | Co-Spaces`);
   const location = useLocation();
   const [formData, setFormData] = useState({
     email: location.state?.email || '',
@@ -79,15 +81,15 @@ export default function SignIn() {
           
           {/* Header Text */}
           <div className='text-center mb-8'>
-            <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>Welcome Back</h1>
-            <p className='text-slate-500 font-light'>Please enter your details to sign in.</p>
+            <h1 className='text-3xl font-extrabold text-slate-900 mb-2'>{t('welcome_back')}</h1>
+            <p className='text-slate-500 font-light'>{t('signin_p')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className='flex flex-col gap-1'>
             <div>
               <input
                 type='email'
-                placeholder='Email'
+                placeholder={t('email')}
                 className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 focus:bg-white transition-all duration-300'
                 id='email'
                 value={formData.email}
@@ -98,7 +100,7 @@ export default function SignIn() {
             <div>
               <input
                 type='password'
-                placeholder='Password'
+                placeholder={t('password')}
                 className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 focus:bg-white transition-all duration-300'
                 id='password'
                 ref={passwordRef}
@@ -111,13 +113,13 @@ export default function SignIn() {
               disabled={loading}
               className='w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition-all duration-300 disabled:opacity-70 mt-2'
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('signing_in') : t('sign_in')}
             </button>
 
             {/* Classy Divider */}
             <div className='relative flex items-center py-2'>
               <div className='flex-grow border-t border-slate-200'></div>
-              <span className='flex-shrink-0 mx-4 text-slate-400 text-sm'>or continue with</span>
+              <span className='flex-shrink-0 mx-4 text-slate-400 text-sm'>{t('or_continue')}</span>
               <div className='flex-grow border-t border-slate-200'></div>
             </div>
 
@@ -131,18 +133,18 @@ export default function SignIn() {
             showCancel={false}  
             isOpen={!!error}   
             onClose={() => dispatch(clearError())} 
-            modalTitle="Authentication Failed"
+            modalTitle={t('auth_failed')}
             modalContent={<span className="text-red-500 font-medium">{error}</span>}
-            okText="Got it"
+            okText={t('got_it')}
             okColorClass="bg-red-600 hover:bg-red-700 text-white"
           />
           )}
 
         
           <div className='flex justify-center gap-2 mt-4 text-slate-600'>
-            <p>Don't have an account?</p>
+            <p>{t('no_account')}</p>
             <Link to='/signup' className='text-slate-900 font-semibold hover:underline transition-all'>
-              Sign up
+              {t('sign_up')}
             </Link>
           </div>
 

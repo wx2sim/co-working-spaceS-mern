@@ -13,8 +13,10 @@ import AddReviewModal from '../../components/AddReviewModal';
 import StatCard from '../../components/StatCard';
 import AnalyticsChart from '../../components/AnalyticsChart';
 import { FaWallet, FaChartLine, FaClipboardCheck, FaBuilding } from 'react-icons/fa';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function AdminDashboard() {
+  const { t } = useLanguage();
   const { currentUser } = useSelector((state) => state.user);
   const [users, setUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -102,9 +104,9 @@ export default function AdminDashboard() {
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/approve/${id}`);
       setUpgradeRequests(prev => prev.filter(r => r._id !== id));
-      toast.success('Request approved! User upgraded to seller.');
+      toast.success(t('request_approved_upgraded'));
     } catch (err) {
-      toast.error('Failed to approve request.');
+      toast.error(t('failed_approve_request'));
     }
   };
 
@@ -112,9 +114,9 @@ export default function AdminDashboard() {
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/deny/${id}`);
       setUpgradeRequests(prev => prev.filter(r => r._id !== id));
-      toast.success('Request denied.');
+      toast.success(t('request_denied'));
     } catch (err) {
-      toast.error('Failed to deny request.');
+      toast.error(t('failed_deny_request'));
     }
   };
 
@@ -127,13 +129,13 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    if (!window.confirm(t('delete_task_confirm'))) return;
     try {
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/task/delete/${taskId}`);
       setTasks(tasks.filter(t => t._id !== taskId));
-      toast.success('Task deleted successfully');
+      toast.success(t('task_deleted_success'));
     } catch (error) {
-      toast.error('Failed to delete task');
+      toast.error(t('failed_delete_task'));
     }
   };
 
@@ -151,12 +153,12 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteReview = async (id) => {
-    if (!window.confirm('Delete this testimonial?')) return;
+    if (!window.confirm(t('delete_testimonial_confirm'))) return;
     try {
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/review/delete/${id}`);
       setReviews(reviews.filter(r => r._id !== id));
-      toast.success('Review deleted');
-    } catch (err) { toast.error('Failed to delete'); }
+      toast.success(t('review_deleted_success'));
+    } catch (err) { toast.error(t('failed_delete_review')); }
   };
 
   const handleEditReview = (review) => {
@@ -173,29 +175,29 @@ export default function AdminDashboard() {
           <div>
             <div className='flex items-center gap-2 mb-1'>
               <FaUserShield className='text-indigo-600' />
-              <p className='text-sm text-indigo-600 font-bold uppercase tracking-wider'>Admin Panel</p>
+              <p className='text-sm text-indigo-600 font-bold uppercase tracking-wider'>{t('admin_panel')}</p>
             </div>
-            <h1 className='text-3xl font-extrabold text-slate-900'>Admin Dashboard</h1>
-            <p className='text-slate-500 font-light mt-1'>Manage users and upgrade requests.</p>
+            <h1 className='text-3xl font-extrabold text-slate-900'>{t('admin_dashboard')}</h1>
+            <p className='text-slate-500 font-light mt-1'>{t('manage_users_desc')}</p>
           </div>
           <div className='flex items-center gap-3 self-start sm:self-auto'>
             <button 
               onClick={() => setIsTaskModalOpen(true)}
               className='text-xs font-bold bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-sm'
             >
-              <FaClock size={12} /> Create Task
+              <FaClock size={12} /> {t('create_task')}
             </button>
             <button 
               onClick={() => setIsReviewModalOpen(true)}
               className='text-xs font-bold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-sm'
             >
-              <FaArrowUp size={12} /> Add Review
+              <FaArrowUp size={12} /> {t('add_review')}
             </button>
             <Link
               to='/profile'
               className='text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1'
             >
-              Account Settings <FaChevronRight className='text-[10px]' />
+              {t('settings')} <FaChevronRight className='text-[10px]' />
             </Link>
           </div>
         </div>
@@ -224,41 +226,41 @@ export default function AdminDashboard() {
         <div className='mb-12'>
           <div className='flex items-center justify-between mb-6'>
             <h2 className='text-xl font-bold text-slate-900 flex items-center gap-2'>
-              <FaChartLine className='text-indigo-600' /> Financial Analytics
+              <FaChartLine className='text-indigo-600' /> {t('financial_analytics')}
             </h2>
             <select 
                value={range} 
                onChange={(e) => setRange(e.target.value)}
                className='text-xs font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer'
             >
-              <option value="today">Today</option>
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-              <option value="year">This Year</option>
+              <option value="today">{t('today')}</option>
+              <option value="week">{t('last_7_days')}</option>
+              <option value="month">{t('last_30_days')}</option>
+              <option value="year">{t('this_year')}</option>
             </select>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
              <StatCard 
-                title="Global Revenue" 
-                value={`${stats?.totalIncome?.toLocaleString() || 0} DA`} 
+                title={t('global_revenue')} 
+                value={`${stats?.totalIncome?.toLocaleString() || 0} ${t('currency')}`} 
                 icon={FaWallet} 
                 colorClass="bg-indigo-600"
              />
              <StatCard 
-                title="Platform Listings" 
+                title={t('platform_listings')} 
                 value={stats?.inventoryStats?.reduce((acc, curr) => acc + curr.count, 0) || 0} 
                 icon={FaBuilding} 
                 colorClass="bg-slate-900" 
              />
              <StatCard 
-                title="Approved Bookings" 
+                title={t('approved_bookings')} 
                 value={stats?.bookingStatusCounts?.find(s => s._id === 'approved')?.count || 0} 
                 icon={FaClipboardCheck} 
                 colorClass="bg-emerald-600" 
              />
              <StatCard 
-                title="Pending Requests" 
+                title={t('pending_requests')} 
                 value={stats?.bookingStatusCounts?.find(s => s._id === 'pending')?.count || 0} 
                 icon={FaClock} 
                 colorClass="bg-amber-500" 
@@ -268,7 +270,7 @@ export default function AdminDashboard() {
           <div className='grid grid-cols-1 lg:grid-cols-1 gap-6 h-[400px]'>
              <AnalyticsChart 
                 data={stats?.revenueStats || []} 
-                title="Income Trend" 
+                title={t('income_trend')} 
                 dataKey="income" 
                 color="#4f46e5"
              />
@@ -277,7 +279,7 @@ export default function AdminDashboard() {
 
         {/* System Management Summary */}
         <div className='mb-6'>
-           <h2 className='text-sm font-bold text-slate-400 uppercase tracking-widest mb-4'>System Management</h2>
+           <h2 className='text-sm font-bold text-slate-400 uppercase tracking-widest mb-4'>{t('system_management')}</h2>
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-5 gap-6'>
@@ -287,9 +289,9 @@ export default function AdminDashboard() {
             <div className='px-6 py-5 border-b border-slate-100'>
               <div className='flex items-center gap-2'>
                 <FaArrowUp className='text-indigo-600 text-sm' />
-                <h2 className='text-lg font-bold text-slate-900'>Upgrade Requests</h2>
+                <h2 className='text-lg font-bold text-slate-900'>{t('upgrade_requests')}</h2>
               </div>
-              <p className='text-xs text-slate-400 mt-0.5'>Clients requesting seller accounts</p>
+              <p className='text-xs text-slate-400 mt-0.5'>{t('upgrade_requests_desc')}</p>
             </div>
 
             {loadingRequests ? (
@@ -301,8 +303,8 @@ export default function AdminDashboard() {
                 <div className='w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mb-3'>
                   <FaCheck className='text-emerald-500' />
                 </div>
-                <p className='text-sm font-semibold text-slate-700'>All clear!</p>
-                <p className='text-xs text-slate-400'>No pending requests right now.</p>
+                <p className='text-sm font-semibold text-slate-700'>{t('all_clear')}</p>
+                <p className='text-xs text-slate-400'>{t('no_pending_requests')}</p>
               </div>
             ) : (
               <div className='divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar'>
@@ -321,20 +323,20 @@ export default function AdminDashboard() {
                     </div>
                     <div className='grid grid-cols-2 gap-2 text-[11px] mb-3'>
                       <div className='bg-slate-50 rounded-lg px-2.5 py-1.5'>
-                        <span className='text-slate-400'>Business</span>
+                        <span className='text-slate-400'>{t('business')}</span>
                         <p className='font-semibold text-slate-700 truncate'>{req.businessName}</p>
                       </div>
                       <div className='bg-slate-50 rounded-lg px-2.5 py-1.5'>
-                        <span className='text-slate-400'>Speciality</span>
+                        <span className='text-slate-400'>{t('speciality')}</span>
                         <p className='font-semibold text-slate-700 truncate'>{req.speciality}</p>
                       </div>
                     </div>
                     <div className='flex gap-2'>
                       <button onClick={() => handleApprove(req._id)} className='flex-1 flex items-center justify-center gap-1 bg-emerald-600 text-white text-[11px] font-medium py-2 rounded-lg hover:bg-emerald-700 transition-colors'>
-                        <FaCheck className='text-[9px]' /> Approve
+                        <FaCheck className='text-[9px]' /> {t('approve')}
                       </button>
                       <button onClick={() => handleDeny(req._id)} className='flex-1 flex items-center justify-center gap-1 bg-white text-red-600 border border-red-200 text-[11px] font-medium py-2 rounded-lg hover:bg-red-50 transition-colors'>
-                        <FaTimes className='text-[9px]' /> Deny
+                        <FaTimes className='text-[9px]' /> {t('deny')}
                       </button>
                     </div>
                   </div>
@@ -347,14 +349,14 @@ export default function AdminDashboard() {
           <div className='lg:col-span-3 bg-white border border-slate-100 rounded-2xl overflow-hidden'>
             <div className='px-6 py-5 border-b border-slate-100 flex items-center justify-between'>
               <div>
-                <h2 className='text-lg font-bold text-slate-900'>Team Members</h2>
+                <h2 className='text-lg font-bold text-slate-900'>{t('team_members')}</h2>
                 <div className="flex gap-4 mt-2">
-                  <button onClick={() => setTeamTab('user')} className={`text-xs font-bold ${teamTab === 'user' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400'}`}>Sellers</button>
-                  <button onClick={() => setTeamTab('client')} className={`text-xs font-bold ${teamTab === 'client' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400'}`}>Clients</button>
+                  <button onClick={() => setTeamTab('user')} className={`text-xs font-bold ${teamTab === 'user' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400'}`}>{t('sellers')}</button>
+                  <button onClick={() => setTeamTab('client')} className={`text-xs font-bold ${teamTab === 'client' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400'}`}>{t('clients')}</button>
                 </div>
               </div>
               <Link to='/admin/users' className='text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors'>
-                Manage All Users →
+                {t('manage_all_users')} →
               </Link>
             </div>
 
@@ -367,8 +369,8 @@ export default function AdminDashboard() {
                 <div className='w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center mb-3'>
                   <FaUsers className='text-slate-300 text-xl' />
                 </div>
-                <p className='text-sm font-semibold text-slate-700'>No team members</p>
-                <p className='text-xs text-slate-400'>You don't have any users assigned yet.</p>
+                <p className='text-sm font-semibold text-slate-700'>{t('no_team_members')}</p>
+                <p className='text-xs text-slate-400'>{t('no_users_assigned')}</p>
               </div>
             ) : (
               <div className='divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar'>
@@ -392,9 +394,9 @@ export default function AdminDashboard() {
                         user.role === 'client' ? 'bg-slate-100 text-slate-500' :
                         'bg-indigo-50 text-indigo-600'
                       }`}>
-                        {user.role === 'user' ? 'Seller' : user.role}
+                        {user.role === 'user' ? t('seller_label') : t(user.role)}
                       </span>
-                      <p className='text-[9px] text-slate-400 font-bold'>Score: {user.activityScore || 0}</p>
+                      <p className='text-[9px] text-slate-400 font-bold'>{t('score')}: {user.activityScore || 0}</p>
                     </div>
                   </div>
                 ))}
@@ -407,9 +409,9 @@ export default function AdminDashboard() {
             <div className='px-6 py-5 border-b border-slate-100'>
               <div className='flex items-center gap-2'>
                 <FaClock className='text-indigo-600 text-sm' />
-                <h2 className='text-lg font-bold text-slate-900'>My Tasks</h2>
+                <h2 className='text-lg font-bold text-slate-900'>{t('my_tasks')}</h2>
               </div>
-              <p className='text-xs text-slate-400 mt-0.5'>Edit or remove system assignments</p>
+              <p className='text-xs text-slate-400 mt-0.5'>{t('task_assignments_desc')}</p>
             </div>
 
             {loadingTasks ? (
@@ -418,7 +420,7 @@ export default function AdminDashboard() {
               </div>
             ) : tasks.length === 0 ? (
               <div className='py-12 text-center px-6'>
-                <p className='text-sm text-slate-400'>No tasks made yet.</p>
+                <p className='text-sm text-slate-400'>{t('no_tasks_yet')}</p>
               </div>
             ) : (
               <div className='divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar'>
@@ -432,14 +434,14 @@ export default function AdminDashboard() {
                       <button 
                           onClick={() => handleEditTask(task)}
                           className='p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-900 hover:text-white transition-all'
-                          title='Edit Task'
+                          title={t('edit_task')}
                       >
                           <FaCheck className='text-[10px]' />
                       </button>
                       <button 
                           onClick={() => handleDeleteTask(task._id)}
                           className='p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all'
-                          title='Delete Task'
+                          title={t('delete_task_title')}
                       >
                           <FaTimes className='text-[10px]' />
                       </button>
@@ -455,9 +457,9 @@ export default function AdminDashboard() {
             <div className='px-6 py-5 border-b border-slate-100'>
               <div className='flex items-center gap-2'>
                 <FaStar className='text-emerald-600 text-sm' />
-                <h2 className='text-lg font-bold text-slate-900'>Manage Testimonials</h2>
+                <h2 className='text-lg font-bold text-slate-900'>{t('manage_testimonials')}</h2>
               </div>
-              <p className='text-xs text-slate-400 mt-0.5'>Edit or remove community reviews</p>
+              <p className='text-xs text-slate-400 mt-0.5'>{t('review_community_desc')}</p>
             </div>
 
             {loadingReviews ? (
@@ -466,7 +468,7 @@ export default function AdminDashboard() {
               </div>
             ) : reviews.length === 0 ? (
               <div className='py-12 text-center px-6'>
-                <p className='text-sm text-slate-400'>No reviews found.</p>
+                <p className='text-sm text-slate-400'>{t('no_reviews_found')}</p>
               </div>
             ) : (
               <div className='divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar'>
@@ -487,14 +489,14 @@ export default function AdminDashboard() {
                         <button 
                             onClick={() => handleEditReview(review)}
                             className='p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-900 hover:text-white transition-all'
-                            title='Edit Review'
+                            title={t('edit_review')}
                         >
                             <FaEdit className='text-[10px]' />
                         </button>
                         <button 
                             onClick={() => handleDeleteReview(review._id)}
                             className='p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all'
-                            title='Delete Review'
+                            title={t('delete_review_title')}
                         >
                             <FaTrash className='text-[10px]' />
                         </button>

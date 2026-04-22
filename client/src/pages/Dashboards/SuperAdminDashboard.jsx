@@ -13,8 +13,10 @@ import AddReviewModal from '../../components/AddReviewModal';
 import StatCard from '../../components/StatCard';
 import AnalyticsChart from '../../components/AnalyticsChart';
 import { FaWallet, FaChartLine, FaClipboardCheck, FaBuilding, FaGlobe } from 'react-icons/fa';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SuperAdminDashboard() {
+  const { t } = useLanguage();
   const { currentUser } = useSelector((state) => state.user);
   const [allUsers, setAllUsers] = useState([]);
   const [allListings, setAllListings] = useState([]);
@@ -109,25 +111,25 @@ export default function SuperAdminDashboard() {
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/approve/${id}`);
       setUpgradeRequests(prev => prev.filter(r => r._id !== id));
-      toast.success('Upgrade approved!');
-    } catch (err) { toast.error('Failed.'); }
+      toast.success(t('request_approved'));
+    } catch (err) { toast.error(t('failed_approve_request')); }
   };
 
   const handleDeny = async (id) => {
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/upgrade/deny/${id}`);
       setUpgradeRequests(prev => prev.filter(r => r._id !== id));
-      toast.success('Request denied.');
-    } catch (err) { toast.error('Failed.'); }
+      toast.success(t('request_denied'));
+    } catch (err) { toast.error(t('failed_deny_request')); }
   };
 
   const handleRoleChange = async (userId, newRole) => {
     try {
       await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/role/${userId}`, { role: newRole });
       setAllUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
-      toast.success(`User role updated to ${newRole === 'user' ? 'seller' : newRole}`);
+      toast.success(`${t('user_role_updated')} ${newRole === 'user' ? t('seller_label') : t(newRole)}`);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update role');
+      toast.error(error.response?.data?.message || t('failed_update_role'));
     }
   };
 
@@ -144,11 +146,11 @@ export default function SuperAdminDashboard() {
     setCreatingAdmin(true);
     try {
       const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/create-admin`, newAdmin);
-      toast.success('Admin created successfully!');
+      toast.success(t('admin_created_success'));
       setAllUsers([data, ...allUsers]);
       setNewAdmin({ username: '', email: '', password: '' });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create admin');
+      toast.error(error.response?.data?.message || t('failed_create_admin'));
     } finally {
       setCreatingAdmin(false);
     }
@@ -163,13 +165,13 @@ export default function SuperAdminDashboard() {
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    if (!window.confirm(t('delete_task_confirm'))) return;
     try {
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/task/delete/${taskId}`);
       setTasks(tasks.filter(t => t._id !== taskId));
-      toast.success('Task deleted successfully');
+      toast.success(t('task_deleted_success'));
     } catch (error) {
-      toast.error('Failed to delete task');
+      toast.error(t('failed_delete_task'));
     }
   };
 
@@ -187,12 +189,12 @@ export default function SuperAdminDashboard() {
   };
 
   const handleDeleteReview = async (id) => {
-    if (!window.confirm('Delete this testimonial?')) return;
+    if (!window.confirm(t('delete_testimonial_confirm'))) return;
     try {
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/review/delete/${id}`);
       setReviews(reviews.filter(r => r._id !== id));
-      toast.success('Review deleted');
-    } catch (err) { toast.error('Failed to delete'); }
+      toast.success(t('review_deleted_success'));
+    } catch (err) { toast.error(t('failed_delete_review')); }
   };
 
   const handleEditReview = (review) => {
@@ -209,29 +211,29 @@ export default function SuperAdminDashboard() {
           <div>
             <div className='flex items-center gap-2 mb-1'>
               <FaCrown className='text-amber-500' />
-              <p className='text-sm text-amber-600 font-bold uppercase tracking-wider'>Super Admin</p>
+              <p className='text-sm text-amber-600 font-bold uppercase tracking-wider'>{t('super_admin')}</p>
             </div>
-            <h1 className='text-3xl font-extrabold text-slate-900'>System Overview</h1>
-            <p className='text-slate-500 font-light mt-1'>Full control over the platform.</p>
+            <h1 className='text-3xl font-extrabold text-slate-900'>{t('system_overview')}</h1>
+            <p className='text-slate-500 font-light mt-1'>{t('full_control_desc')}</p>
           </div>
           <div className='flex items-center gap-3 self-start sm:self-auto'>
             <button 
               onClick={() => setIsTaskModalOpen(true)}
               className='text-xs font-bold bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition-all flex items-center gap-2 shadow-sm'
             >
-              <FaClock size={12} /> Create Task
+              <FaClock size={12} /> {t('create_task')}
             </button>
             <button 
               onClick={() => setIsReviewModalOpen(true)}
               className='text-xs font-bold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-sm'
             >
-              <FaArrowUp size={12} /> Add Review
+              <FaArrowUp size={12} /> {t('add_review')}
             </button>
             <Link
               to='/profile'
               className='text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1'
             >
-              Settings <FaChevronRight className='text-[10px]' />
+              {t('settings')} <FaChevronRight className='text-[10px]' />
             </Link>
           </div>
         </div>
@@ -259,7 +261,7 @@ export default function SuperAdminDashboard() {
         <div className='mb-12'>
           <div className='flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4'>
             <h2 className='text-xl font-bold text-slate-900 flex items-center gap-2'>
-              <FaGlobe className='text-indigo-600' /> {selectedSeller === 'all' ? 'Platform Analytics' : 'Seller Analytics'}
+              <FaGlobe className='text-indigo-600' /> {selectedSeller === 'all' ? t('platform_analytics') : t('seller_analytics')}
             </h2>
             <div className='flex items-center gap-3'>
               <select 
@@ -267,7 +269,7 @@ export default function SuperAdminDashboard() {
                 onChange={(e) => setSelectedSeller(e.target.value)}
                 className='text-[10px] font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer tracking-wider uppercase'
               >
-                <option value="all">Global (All Sellers)</option>
+                <option value="all">{t('global_all_sellers')}</option>
                 {allUsers.filter(u => u.role === 'user').map(seller => (
                   <option key={seller._id} value={seller._id}>{seller.username}</option>
                 ))}
@@ -277,34 +279,34 @@ export default function SuperAdminDashboard() {
                 onChange={(e) => setDays(e.target.value)}
                 className='text-[10px] font-bold bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none cursor-pointer tracking-wider uppercase'
               >
-                <option value={7}>7 Days</option>
-                <option value={30}>30 Days</option>
-                <option value={90}>90 Days</option>
+                <option value={7}>{t('seven_days')}</option>
+                <option value={30}>{t('thirty_days')}</option>
+                <option value={90}>{t('ninety_days')}</option>
               </select>
             </div>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-4 gap-4 mb-6'>
              <StatCard 
-                title={selectedSeller === 'all' ? "Global Revenue" : "Seller Revenue"}
-                value={`${stats?.totalIncome?.toLocaleString() || 0} DA`} 
+                title={selectedSeller === 'all' ? t('global_revenue') : t('seller_revenue')}
+                value={`${stats?.totalIncome?.toLocaleString() || 0} ${t('currency')}`} 
                 icon={FaWallet} 
                 colorClass="bg-indigo-600"
              />
              <StatCard 
-                title="Total Listings" 
+                title={t('total_listings')} 
                 value={selectedSeller === 'all' ? allListings.length : (stats?.inventoryStats?.reduce((acc, curr) => acc + curr.count, 0) || 0)} 
                 icon={FaBuilding} 
                 colorClass="bg-slate-900" 
              />
              <StatCard 
-                title={selectedSeller === 'all' ? "Active Sellers" : "Approved Bookings"} 
+                title={selectedSeller === 'all' ? t('active_sellers') : t('approved_bookings')} 
                 value={selectedSeller === 'all' ? roleCount('user') : (stats?.bookingStatusCounts?.find(s => s._id === 'approved')?.count || 0)} 
                 icon={selectedSeller === 'all' ? FaUserShield : FaClipboardCheck} 
                 colorClass={selectedSeller === 'all' ? "bg-amber-500" : "bg-emerald-600"} 
              />
              <StatCard 
-                title={selectedSeller === 'all' ? "Total Users" : "Pending Requests"} 
+                title={selectedSeller === 'all' ? t('total_users') : t('pending_requests')} 
                 value={selectedSeller === 'all' ? allUsers.length : (stats?.bookingStatusCounts?.find(s => s._id === 'pending')?.count || 0)} 
                 icon={selectedSeller === 'all' ? FaUsers : FaClock} 
                 colorClass={selectedSeller === 'all' ? "bg-emerald-600" : "bg-amber-500"} 
@@ -315,7 +317,7 @@ export default function SuperAdminDashboard() {
              <div className='h-[350px]'>
                <AnalyticsChart 
                   data={stats?.revenueStats || []} 
-                  title={selectedSeller === 'all' ? "Platform Income Growth" : "Seller Income Growth"} 
+                  title={selectedSeller === 'all' ? t('platform_income_growth') : t('seller_income_growth')} 
                   dataKey="income" 
                   color="#4f46e5"
                />
@@ -325,7 +327,7 @@ export default function SuperAdminDashboard() {
                  <AnalyticsChart 
                     data={stats?.userGrowth || []} 
                     type="bar" 
-                    title="New User Registration" 
+                    title={t('new_user_registration')} 
                     dataKey="count" 
                     color="#10b981"
                  />
@@ -335,7 +337,7 @@ export default function SuperAdminDashboard() {
         </div>
 
         <div className='mb-6'>
-           <h2 className='text-sm font-bold text-slate-400 uppercase tracking-widest mb-4'>System Assets & Management</h2>
+           <h2 className='text-sm font-bold text-slate-400 uppercase tracking-widest mb-4'>{t('system_assets_mgmt')}</h2>
         </div>
 
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
@@ -344,15 +346,15 @@ export default function SuperAdminDashboard() {
           <div className='lg:col-span-2 bg-white border border-slate-100 rounded-2xl overflow-hidden'>
             <div className='px-6 py-4 border-b border-slate-100'>
               <div className='flex items-center justify-between mb-3'>
-                <h2 className='text-lg font-bold text-slate-900'>All Users</h2>
-                <span className='text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full'>{filteredUsers.length} total</span>
+                <h2 className='text-lg font-bold text-slate-900'>{t('all_users')}</h2>
+                <span className='text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full'>{filteredUsers.length} {t('total')}</span>
               </div>
               <div className='flex flex-col sm:flex-row gap-2'>
                 <div className='flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2'>
                   <FaSearch className='text-slate-400 text-xs' />
                   <input
                     type='text'
-                    placeholder='Search users...'
+                    placeholder={t('search_users_placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className='bg-transparent text-sm w-full focus:outline-none text-slate-700 placeholder-slate-400'
@@ -363,10 +365,10 @@ export default function SuperAdminDashboard() {
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >
-                  <option value="all">All Roles</option>
-                  <option value="admin">Admins</option>
-                  <option value="user">Sellers</option>
-                  <option value="client">Clients</option>
+                  <option value="all">{t('all_roles')}</option>
+                  <option value="admin">{t('admins')}</option>
+                  <option value="user">{t('sellers')}</option>
+                  <option value="client">{t('clients')}</option>
                 </select>
               </div>
             </div>
@@ -378,7 +380,7 @@ export default function SuperAdminDashboard() {
             ) : filteredUsers.length === 0 ? (
               <div className='flex flex-col items-center justify-center py-12 text-center'>
                 <FaUsers className='text-3xl text-slate-200 mb-2' />
-                <p className='text-sm text-slate-400'>{searchTerm ? 'No users match your search.' : 'No users found.'}</p>
+                <p className='text-sm text-slate-400'>{searchTerm ? t('no_users_match') : t('no_users_found')}</p>
               </div>
             ) : (
               <div className='divide-y divide-slate-50 max-h-[420px] overflow-y-auto custom-scrollbar'>
@@ -398,7 +400,7 @@ export default function SuperAdminDashboard() {
                     </div>
                     {user.role === 'superadmin' ? (
                       <span className='bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0'>
-                        superadmin
+                        {t('superadmin')}
                       </span>
                     ) : (
                       <select 
@@ -409,11 +411,11 @@ export default function SuperAdminDashboard() {
                           user.role === 'user' ? 'bg-emerald-50 text-emerald-600' :
                           'bg-slate-100 text-slate-500'
                         }`}
-                        title="Change user role"
+                        title={t('change_user_role')}
                       >
-                        <option value="client" className="bg-white text-slate-700 font-bold uppercase">Client</option>
-                        <option value="user" className="bg-white text-slate-700 font-bold uppercase">Seller</option>
-                        <option value="admin" className="bg-white text-slate-700 font-bold uppercase">Admin</option>
+                        <option value="client" className="bg-white text-slate-700 font-bold uppercase">{t('client')}</option>
+                        <option value="user" className="bg-white text-slate-700 font-bold uppercase">{t('seller')}</option>
+                        <option value="admin" className="bg-white text-slate-700 font-bold uppercase">{t('admin')}</option>
                       </select>
                     )}
                   </div>
@@ -430,13 +432,13 @@ export default function SuperAdminDashboard() {
               <div className='px-5 py-4 border-b border-indigo-500/50'>
                 <div className='flex items-center gap-2'>
                   <FaUserShield className='text-indigo-200 text-xs' />
-                  <h3 className='text-sm font-bold'>Add New Admin</h3>
+                  <h3 className='text-sm font-bold'>{t('add_new_admin')}</h3>
                 </div>
               </div>
               <form onSubmit={handleCreateAdmin} className='p-5 flex flex-col gap-3 relative'>
                 <input 
                   type='text' 
-                  placeholder='Admin Name' 
+                  placeholder={t('admin_name')} 
                   required
                   value={newAdmin.username}
                   onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}
@@ -444,7 +446,7 @@ export default function SuperAdminDashboard() {
                 />
                 <input 
                   type='email' 
-                  placeholder='Email Address' 
+                  placeholder={t('email_address')} 
                   required
                   value={newAdmin.email}
                   onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
@@ -452,7 +454,7 @@ export default function SuperAdminDashboard() {
                 />
                 <input 
                   type='password' 
-                  placeholder='Password' 
+                  placeholder={t('password')} 
                   required
                   value={newAdmin.password}
                   onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
@@ -463,7 +465,7 @@ export default function SuperAdminDashboard() {
                   disabled={creatingAdmin}
                   className='bg-white text-indigo-700 font-bold text-xs py-2.5 rounded-lg hover:bg-slate-100 transition-colors mt-1 disabled:opacity-70 flex items-center justify-center'
                 >
-                  {creatingAdmin ? 'Creating...' : 'Register Admin Account'}
+                  {creatingAdmin ? t('creating') : t('register_admin')}
                 </button>
               </form>
             </div>
@@ -473,7 +475,7 @@ export default function SuperAdminDashboard() {
               <div className='px-5 py-4 border-b border-slate-100'>
                 <div className='flex items-center gap-2'>
                   <FaArrowUp className='text-indigo-600 text-xs' />
-                  <h3 className='text-sm font-bold text-slate-900'>Pending Upgrades</h3>
+                  <h3 className='text-sm font-bold text-slate-900'>{t('pending_upgrades')}</h3>
                 </div>
               </div>
 
@@ -484,7 +486,7 @@ export default function SuperAdminDashboard() {
               ) : upgradeRequests.length === 0 ? (
                 <div className='flex flex-col items-center py-8 text-center px-4'>
                   <FaCheck className='text-emerald-400 text-xl mb-2' />
-                  <p className='text-xs text-slate-400'>No pending requests</p>
+                  <p className='text-xs text-slate-400'>{t('no_pending_requests')}</p>
                 </div>
               ) : (
                 <div className='divide-y divide-slate-50 max-h-[250px] overflow-y-auto custom-scrollbar'>
@@ -499,10 +501,10 @@ export default function SuperAdminDashboard() {
                       </div>
                       <div className='flex gap-2'>
                         <button onClick={() => handleApprove(req._id)} className='flex-1 text-[10px] font-medium py-1.5 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors'>
-                          Approve
+                          {t('approve')}
                         </button>
                         <button onClick={() => handleDeny(req._id)} className='flex-1 text-[10px] font-medium py-1.5 rounded-md bg-white text-red-500 border border-red-200 hover:bg-red-50 transition-colors'>
-                          Deny
+                          {t('deny')}
                         </button>
                       </div>
                     </div>
@@ -514,8 +516,8 @@ export default function SuperAdminDashboard() {
             {/* Recent Listings */}
             <div className='bg-white border border-slate-100 rounded-2xl overflow-hidden'>
               <div className='px-5 py-4 border-b border-slate-100 flex items-center justify-between'>
-                <h3 className='text-sm font-bold text-slate-900'>Recent Listings</h3>
-                <Link to='/search' className='text-[11px] font-semibold text-slate-400 hover:text-slate-900 transition-colors'>All →</Link>
+                <h3 className='text-sm font-bold text-slate-900'>{t('recent_listings')}</h3>
+                <Link to='/search' className='text-[11px] font-semibold text-slate-400 hover:text-slate-900 transition-colors'>{t('all')} →</Link>
               </div>
               {loadingListings ? (
                 <div className='flex items-center justify-center py-8'>
@@ -523,7 +525,7 @@ export default function SuperAdminDashboard() {
                 </div>
               ) : allListings.length === 0 ? (
                 <div className='py-8 text-center'>
-                  <p className='text-xs text-slate-400'>No listings yet.</p>
+                  <p className='text-xs text-slate-400'>{t('no_listings_yet')}</p>
                 </div>
               ) : (
                 <div className='divide-y divide-slate-50 max-h-[200px] overflow-y-auto custom-scrollbar'>
@@ -535,7 +537,7 @@ export default function SuperAdminDashboard() {
                         <p className='text-[10px] text-slate-400 truncate'>{listing.address}</p>
                       </div>
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${listing.type === 'rent' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                        {listing.type}
+                        {t(listing.type)}
                       </span>
                     </Link>
                   ))}
@@ -549,7 +551,7 @@ export default function SuperAdminDashboard() {
             <div className='px-5 py-4 border-b border-slate-100'>
               <div className='flex items-center gap-2'>
                 <FaClock className='text-indigo-600 text-xs' />
-                <h3 className='text-sm font-bold text-slate-900'>System Tasks</h3>
+                <h3 className='text-sm font-bold text-slate-900'>{t('system_tasks')}</h3>
               </div>
             </div>
             {loadingTasks ? (
@@ -558,7 +560,7 @@ export default function SuperAdminDashboard() {
               </div>
             ) : tasks.length === 0 ? (
               <div className='py-8 text-center px-4'>
-                <p className='text-xs text-slate-400'>No tasks created yet.</p>
+                <p className='text-xs text-slate-400'>{t('no_tasks_created')}</p>
               </div>
             ) : (
               <div className='divide-y divide-slate-50 max-h-[300px] overflow-y-auto custom-scrollbar'>
@@ -572,14 +574,14 @@ export default function SuperAdminDashboard() {
                       <button 
                           onClick={() => handleEditTask(task)}
                           className='w-7 h-7 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all'
-                          title='Edit Task'
+                          title={t('edit_task')}
                       >
                           <FaCheck className='text-[10px]' /> 
                       </button>
                       <button 
                           onClick={() => handleDeleteTask(task._id)}
                           className='w-7 h-7 bg-red-50 text-red-600 rounded-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition-all'
-                          title='Delete Task'
+                          title={t('delete_task_title')}
                       >
                           <FaTimes className='text-[10px]' />
                       </button>
@@ -595,7 +597,7 @@ export default function SuperAdminDashboard() {
             <div className='px-5 py-4 border-b border-slate-100'>
               <div className='flex items-center gap-2'>
                 <FaStar className='text-emerald-600 text-xs' />
-                <h3 className='text-sm font-bold text-slate-900'>Manage Testimonials</h3>
+                <h3 className='text-sm font-bold text-slate-900'>{t('manage_testimonials')}</h3>
               </div>
             </div>
 
@@ -605,7 +607,7 @@ export default function SuperAdminDashboard() {
               </div>
             ) : reviews.length === 0 ? (
               <div className='py-8 text-center px-4'>
-                <p className='text-xs text-slate-400'>No reviews found.</p>
+                <p className='text-xs text-slate-400'>{t('no_reviews_found')}</p>
               </div>
             ) : (
               <div className='divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar'>
@@ -622,14 +624,14 @@ export default function SuperAdminDashboard() {
                       <button 
                           onClick={() => handleEditReview(review)}
                           className='w-7 h-7 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all'
-                          title='Edit Review'
+                          title={t('edit_review')}
                       >
                           <FaEdit className='text-[10px]' /> 
                       </button>
                       <button 
                           onClick={() => handleDeleteReview(review._id)}
                           className='w-7 h-7 bg-red-50 text-red-600 rounded-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition-all'
-                          title='Delete Review'
+                          title={t('delete_review_title')}
                       >
                           <FaTrash className='text-[10px]' />
                       </button>

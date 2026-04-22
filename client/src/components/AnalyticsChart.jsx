@@ -11,12 +11,14 @@ import {
   Bar,
   Cell
 } from 'recharts';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * A premium analytics chart component using Recharts.
  * Supports both Area (AreaChart) and Bar (BarChart) types.
  */
 export default function AnalyticsChart({ data, type = 'area', dataKey = 'income', color = '#4f46e5', title }) {
+  const { t } = useLanguage();
   
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -24,9 +26,9 @@ export default function AnalyticsChart({ data, type = 'area', dataKey = 'income'
         <div className="bg-white border border-slate-100 p-4 rounded-xl shadow-xl">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
           <p className="text-sm font-extrabold text-slate-900">
-            {dataKey === 'income' ? `${payload[0].value.toLocaleString()} DA` : payload[0].value}
+            {dataKey === 'income' ? `${payload[0].value.toLocaleString()} ${t('currency')}` : payload[0].value}
             <span className="text-[10px] font-medium text-slate-400 ml-1">
-              {dataKey === 'income' ? 'Revenue' : 'New Users'}
+              {dataKey === 'income' ? t('revenue') : t('new_users')}
             </span>
           </p>
         </div>
