@@ -4,8 +4,10 @@ import ClientDashboard from './ClientDashboard';
 import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
 import SuperAdminDashboard from './SuperAdminDashboard';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 export default function Dashboard() {
+  useDocumentTitle('Dashboard | Co-Spaces');
   const { currentUser } = useSelector((state) => state.user);
 
   if (!currentUser) return <Navigate to='/error/401' />;

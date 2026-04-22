@@ -4,8 +4,10 @@ import { setTheme } from '../redux/theme/themeSlice';
 import AnimatedPage from '../components/AnimatedPage';
 import { FaBell, FaShieldAlt, FaPalette, FaGlobe, FaCheck } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Settings() {
+  useDocumentTitle('Settings | Co-Spaces');
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
   const dispatch = useDispatch();

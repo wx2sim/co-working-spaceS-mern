@@ -15,8 +15,10 @@ import SmartButton from '../components/SmartButton.jsx';
 import SmartModal from '../components/SmartModal.jsx';
 import { Modal } from 'antd';
 import { FaEnvelope, FaArrowUp, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Profile() {
+  useDocumentTitle('Profile | Co-Spaces');
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
 

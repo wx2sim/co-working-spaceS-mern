@@ -7,8 +7,10 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import TaskModal from '../components/TaskModal';
 import useAdaptivePolling from '../hooks/useAdaptivePolling';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Schedule() {
+  useDocumentTitle('Schedule | Co-Spaces');
   const { currentUser } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -4,8 +4,10 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import OAuth from '../components/OAuth';
 import AnimatedPage from '../components/AnimatedPage';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function SignUp() {
+  useDocumentTitle('Sign Up | Co-Spaces');
   const [formData, setFormData] = useState({});
   const [error, setError] = useState({
     username: '',

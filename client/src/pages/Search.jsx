@@ -3,8 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import ListingItem from '../components/ListingItem';
 import AnimatedPage from '../components/AnimatedPage';
 import { FaSearch, FaFilter, FaCompass } from 'react-icons/fa';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Search() {
+  useDocumentTitle('Search | Co-Spaces');
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebardata, setSidebardata] = useState({

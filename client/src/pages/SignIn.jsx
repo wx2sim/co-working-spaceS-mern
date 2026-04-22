@@ -11,8 +11,10 @@ import {
 } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
 import AnimatedPage from '../components/AnimatedPage';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function SignIn() {
+  useDocumentTitle('Sign In | Co-Spaces');
   const location = useLocation();
   const [formData, setFormData] = useState({
     email: location.state?.email || '',

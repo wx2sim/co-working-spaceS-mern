@@ -8,8 +8,10 @@ import 'swiper/css/bundle';
 import { FaSearch, FaMapMarkerAlt, FaStar, FaArrowRight, FaCity, FaWifi, FaCoffee } from 'react-icons/fa';
 import AnimatedPage from '../components/AnimatedPage';
 import ListingItem from '../components/ListingItem';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Home() {
+  useDocumentTitle('Co-Spaces');
   SwiperCore.use([Navigation, Autoplay, EffectFade]);
   const [offerListings, setOfferListings] = useState([]);
   const [latestListings, setLatestListings] = useState([]);
@@ -86,7 +88,7 @@ export default function Home() {
           </div>
 
           {/* Hero Content */}
-          <div className='relative z-10 w-full max-w-5xl mx-auto px-4 text-center pb-20'>
+          <div className='relative z-10 w-full max-w-5xl mx-auto px-4 text-center pt-24 md:pt-0 pb-20'>
             <span className='inline-block py-1 px-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold tracking-wider uppercase mb-6'>
               Inspiring Workspaces
             </span>
@@ -289,10 +291,10 @@ export default function Home() {
                 {providers.map((provider) => (
                   <div key={provider._id} className='bg-white border border-slate-100 rounded-3xl p-6 text-center hover:shadow-xl hover:shadow-indigo-500/10 transition-all group'>
                     <div className='relative inline-block mb-4'>
-                      <img 
-                        src={provider.avatar} 
-                        alt={provider.username} 
-                        className='w-20 h-20 rounded-2xl object-cover border-4 border-slate-50 group-hover:border-indigo-100 transition-colors mx-auto shadow-md' 
+                      <img
+                        src={provider.avatar}
+                        alt={provider.username}
+                        className='w-20 h-20 rounded-2xl object-cover border-4 border-slate-50 group-hover:border-indigo-100 transition-colors mx-auto shadow-md'
                       />
                       <div className='absolute -bottom-2 -right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white shadow-sm'>
                         TOP
@@ -300,7 +302,7 @@ export default function Home() {
                     </div>
                     <h4 className='text-sm font-bold text-slate-800 mb-1 truncate'>{provider.username}</h4>
                     <p className='text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-3'>Space Provider</p>
-                    
+
                     <div className='flex items-center justify-center gap-3 pt-3 border-t border-slate-50'>
                       <div className='text-center'>
                         <p className='text-[10px] font-bold text-slate-700'>{provider.listingCount}</p>
@@ -323,9 +325,9 @@ export default function Home() {
         <div className='bg-slate-950 py-24 relative overflow-hidden'>
           <div className='absolute inset-0 opacity-20'>
             <div className='absolute top-0 -left-1/4 w-1/2 h-[500px] bg-indigo-600 rounded-full mix-blend-screen filter blur-[150px] animate-pulse-slow'></div>
-            <div className='absolute bottom-0 -right-1/4 w-1/2 h-[500px] bg-cyan-600 rounded-full mix-blend-screen filter blur-[150px] animate-pulse-slow' style={{animationDelay: '2s'}}></div>
+            <div className='absolute bottom-0 -right-1/4 w-1/2 h-[500px] bg-cyan-600 rounded-full mix-blend-screen filter blur-[150px] animate-pulse-slow' style={{ animationDelay: '2s' }}></div>
           </div>
-          
+
           <div className='max-w-6xl mx-auto px-4 relative z-10'>
             <div className='text-center mb-16'>
               <h2 className='text-3xl md:text-5xl font-extrabold text-white mb-4'>Why our community loves us</h2>
@@ -378,10 +380,10 @@ export default function Home() {
                           "{review.content}"
                         </p>
                         <div className='flex items-center gap-4'>
-                          <img 
-                            src={review.authorAvatar} 
-                            alt={review.authorName} 
-                            className='w-12 h-12 rounded-full object-cover border border-slate-700 shadow-lg' 
+                          <img
+                            src={review.authorAvatar}
+                            alt={review.authorName}
+                            className='w-12 h-12 rounded-full object-cover border border-slate-700 shadow-lg'
                           />
                           <div>
                             <h4 className='text-white font-bold text-sm'>{review.authorName}</h4>

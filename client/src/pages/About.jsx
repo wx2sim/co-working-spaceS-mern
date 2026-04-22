@@ -1,8 +1,10 @@
 import React from 'react';
 import AnimatedPage from '../components/AnimatedPage';
 import { Link } from 'react-router-dom';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function About() {
+  useDocumentTitle('About | Co-Spaces');
   return (
     <AnimatedPage>
       <div className='min-h-screen pt-28 pb-20 px-4 max-w-6xl mx-auto'>

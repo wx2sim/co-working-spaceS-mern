@@ -5,8 +5,10 @@ import axios from 'axios';
 import AnimatedPage from '../components/AnimatedPage';
 import { FaUserShield, FaSearch, FaEnvelope, FaShieldAlt, FaTrash, FaSortAmountDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function AdminUsers() {
+  useDocumentTitle('Admin Management | Co-Spaces');
   const { currentUser } = useSelector((state) => state.user);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -24,10 +24,12 @@ import {
 } from 'react-icons/fa';
 import Contact from '../components/Contact';
 import AnimatedPage from '../components/AnimatedPage';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Listing() {
   SwiperCore.use([Navigation, Pagination]);
   const [listing, setListing] = useState(null);
+  useDocumentTitle(`${listing?.name || 'Loading...'} | Co-Spaces`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);

@@ -5,8 +5,10 @@ import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import AnimatedPage from '../components/AnimatedPage';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function VerifyEmail() {
+  useDocumentTitle('Verify Email | Co-Spaces');
   const { currentUser } = useSelector((state) => state.user);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);

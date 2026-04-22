@@ -11,7 +11,14 @@ export const verifyUserToken = (req, res, next) => {
     
     try {
       const user = await User.findById(decoded.id).select('-password');
-      if (!user) return next(errorHandler(404, 'User not found'));
+      if (!user) {
+        res.clearCookie('access_token', {
+          httpOnly: true,
+          secure: req.get('host').indexOf('localhost') === -1,
+          sameSite: req.get('host').indexOf('localhost') === -1 ? 'none' : 'lax'
+        });
+        return next(errorHandler(404, 'User not found'));
+      }
       
       // Ensure req.user has a stable string ID and the full user document
       req.user = user;
