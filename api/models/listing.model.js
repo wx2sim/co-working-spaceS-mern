@@ -63,9 +63,21 @@ const listingSchema = new mongoose.Schema(
       type: Array,
       required: true,
     },
+    latitude: {
+      type: Number,
+      required: false,
+    },
+    longitude: {
+      type: Number,
+      required: false,
+    },
     userRef: {
       type: String,
       required: true,
+    },
+    speciality: {
+      type: String,
+      required: false,
     },
     averageRating: {
       type: Number,

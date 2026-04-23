@@ -5,6 +5,30 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default Leaflet marker icons in React
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+function LocationMarker({ position, setPosition }) {
+  useMapEvents({
+    click(e) {
+      setPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
+    },
+  });
+  return position.lat === null ? null : (
+    <Marker position={[position.lat, position.lng]}></Marker>
+  );
+}
 
 export default function CreateListingModal({ isOpen, onClose }) {
   const { t } = useLanguage();
@@ -27,6 +51,9 @@ export default function CreateListingModal({ isOpen, onClose }) {
     offer: false,
     parking: false,
     furnished: false,
+    latitude: 36.7538,
+    longitude: 3.0588,
+    speciality: '',
   });
 
   const [imageUploadError, setImageUploadError] = useState(false);
@@ -165,6 +192,23 @@ export default function CreateListingModal({ isOpen, onClose }) {
               <input type='text' placeholder={t('listing_address')} id='address' required onChange={handleChange} value={formData.address} className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
               
               <div className='flex flex-col gap-2 mt-2'>
+                <label className='text-xs font-bold text-slate-500 uppercase tracking-wider ml-1'>Select Location on Map</label>
+                <div className='h-[200px] w-full rounded-xl overflow-hidden border border-slate-200 z-0'>
+                  <MapContainer center={[formData.latitude, formData.longitude]} zoom={13} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 0 }}>
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <LocationMarker 
+                      position={{ lat: formData.latitude, lng: formData.longitude }} 
+                      setPosition={(pos) => setFormData({ ...formData, latitude: pos.lat, longitude: pos.lng })} 
+                    />
+                  </MapContainer>
+                </div>
+                <p className='text-[10px] text-slate-400'>Click on the map to set the exact location of the workspace.</p>
+              </div>
+              
+              <div className='flex flex-col gap-2 mt-2'>
                 <label className='text-xs font-bold text-slate-500 uppercase tracking-wider ml-1'>{t('listing_category')}</label>
                 <div className='flex gap-4 p-1 bg-slate-100 rounded-2xl w-fit'>
                   <button 
@@ -210,10 +254,14 @@ export default function CreateListingModal({ isOpen, onClose }) {
               )}
 
               {formData.category === 'service' && (
-                <div className='flex gap-4 flex-wrap mt-2'>
+                <div className='flex flex-col gap-4 mt-2'>
                   <div className='flex gap-2 items-center'>
                     <input type='checkbox' id='offer' className='w-5 h-5 accent-slate-900' onChange={handleChange} checked={formData.offer} />
                     <label htmlFor='offer' className='text-sm text-slate-700'>{t('special_offer')}</label>
+                  </div>
+                  <div className='flex flex-col gap-1'>
+                    <label className='text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1'>{t('speciality')}</label>
+                    <input type='text' placeholder={t('speciality_eg')} id='speciality' onChange={handleChange} value={formData.speciality} className='w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all text-sm' />
                   </div>
                 </div>
               )}

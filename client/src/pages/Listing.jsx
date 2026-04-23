@@ -26,6 +26,19 @@ import Contact from '../components/Contact';
 import AnimatedPage from '../components/AnimatedPage';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useLanguage } from '../context/LanguageContext';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default Leaflet marker icons in React
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function Listing() {
   SwiperCore.use([Navigation, Pagination]);
@@ -91,13 +104,13 @@ export default function Listing() {
         paymentMethod: 'cash',
         bookingDate
       };
-      
+
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/booking/create`, payload);
       setBookingSuccess(true);
       setBookingLoading(false);
-      
+
       if (listing.availableRooms !== undefined) {
-         setListing({...listing, availableRooms: listing.availableRooms - 1});
+        setListing({ ...listing, availableRooms: listing.availableRooms - 1 });
       }
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to process booking';
@@ -240,10 +253,9 @@ export default function Listing() {
 
                 {/* Type Badge */}
                 <div className='absolute top-3 left-3 z-10 flex gap-2'>
-                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg ${
-                    listing.category === 'service' ? 'bg-amber-500 text-white' :
+                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg ${listing.category === 'service' ? 'bg-amber-500 text-white' :
                     listing.type === 'rent' ? 'bg-indigo-600 text-white' : 'bg-emerald-600 text-white'
-                  }`}>
+                    }`}>
                     {listing.category === 'service' ? t('service_label') : (listing.type === 'rent' ? t('rent') : t('sale'))}
                   </span>
                   {isFullyBooked && (
@@ -323,8 +335,8 @@ export default function Listing() {
                           disabled={ratingLoading}
                           className='transition-all duration-200 hover:scale-110 disabled:opacity-50'
                         >
-                          <FaStar 
-                            className={`text-lg ${star <= userRating ? 'text-amber-500' : 'text-slate-200'}`} 
+                          <FaStar
+                            className={`text-lg ${star <= userRating ? 'text-amber-500' : 'text-slate-200'}`}
                           />
                         </button>
                       ))}
@@ -432,6 +444,39 @@ export default function Listing() {
                   </div>
                 )}
 
+                {/* Location Map Section */}
+                <div className='my-3'>
+                  <h2 className='text-xs font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-2'>
+                    {t('location') || 'Location'}
+                  </h2>
+                  <div className='h-[200px] w-full rounded-2xl overflow-hidden border border-slate-100 shadow-sm z-0'>
+                    {listing && listing.latitude && listing.longitude ? (
+                      <MapContainer
+                        center={[listing.latitude, listing.longitude]}
+                        zoom={15}
+                        scrollWheelZoom={false}
+                        style={{ height: '100%', width: '100%', zIndex: 0 }}
+                      >
+                        <TileLayer
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        />
+                        <Marker position={[listing.latitude, listing.longitude]}>
+                          <Popup>
+                            <div className="text-xs font-bold text-indigo-600">{listing.name}</div>
+                            <div className="text-[10px] text-slate-500">{listing.address}</div>
+                          </Popup>
+                        </Marker>
+                      </MapContainer>
+                    ) : (
+                      <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-400 text-xs italic">
+                        {t('no_location_data') || 'Location coordinates not available'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+
                 {/* Spacer */}
                 <div className='flex-grow'></div>
 
@@ -452,7 +497,7 @@ export default function Listing() {
                     <button
                       onClick={handleBookSpaceClick}
                       disabled={listing.category === 'property' && isFullyBooked}
-                      className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${listing.category === 'property' && isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : ( !currentUser?.isVerified ? 'bg-slate-900 text-white opacity-50 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md')}`}
+                      className={`flex-1 min-w-[140px] font-bold py-2.5 px-4 rounded-xl transition-all duration-300 text-sm ${listing.category === 'property' && isFullyBooked ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-inner' : (!currentUser?.isVerified ? 'bg-slate-900 text-white opacity-50 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-md')}`}
                     >
                       {listing.category === 'property' && isFullyBooked ? t('fully_booked') : (listing.category === 'service' ? t('order_service') : t('book_space'))}
                     </button>
@@ -482,67 +527,67 @@ export default function Listing() {
                 <FaTimesCircle size={20} />
               </button>
             </div>
-            
+
             <div className="p-6">
-                  {bookingSuccess ? (
-                    <div className="flex flex-col items-center justify-center text-center py-6">
-                      <FaCheckCircle className="text-emerald-500 text-6xl mb-4 animate-bounce" />
-                      <h4 className="text-xl font-bold text-slate-900 mb-2">{listing.category === 'service' ? t('order_placed') : t('booking_validated')}</h4>
-                      <p className="text-sm text-slate-500 px-4">{listing.category === 'service' ? t('service_provider_contact') : t('space_owner_contact')}</p>
-                      <button onClick={() => setShowBookingModal(false)} className="mt-8 w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">
-                        {t('done')}
-                      </button>
+              {bookingSuccess ? (
+                <div className="flex flex-col items-center justify-center text-center py-6">
+                  <FaCheckCircle className="text-emerald-500 text-6xl mb-4 animate-bounce" />
+                  <h4 className="text-xl font-bold text-slate-900 mb-2">{listing.category === 'service' ? t('order_placed') : t('booking_validated')}</h4>
+                  <p className="text-sm text-slate-500 px-4">{listing.category === 'service' ? t('service_provider_contact') : t('space_owner_contact')}</p>
+                  <button onClick={() => setShowBookingModal(false)} className="mt-8 w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-md">
+                    {t('done')}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">{t('select_date')}</label>
+                    <input
+                      type="date"
+                      min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]}
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all"
+                    />
+                  </div>
+
+                  {listing.category === 'property' ? (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">{t('optional_features')}</h4>
+                      <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <span className="text-sm font-semibold text-slate-700">{t('catering_service')} (+50 {t('currency')})</span>
+                        <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.catering} onChange={(e) => setBookingFeatures({ ...bookingFeatures, catering: e.target.checked })} />
+                      </label>
+                      <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <span className="text-sm font-semibold text-slate-700">{t('projector_setup')} (+20 {t('currency')})</span>
+                        <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.projector} onChange={(e) => setBookingFeatures({ ...bookingFeatures, projector: e.target.checked })} />
+                      </label>
+                      <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <span className="text-sm font-semibold text-slate-700">{t('extra_chairs')} (+10 {t('currency')})</span>
+                        <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.extraChairs} onChange={(e) => setBookingFeatures({ ...bookingFeatures, extraChairs: e.target.checked })} />
+                      </label>
                     </div>
                   ) : (
-                    <>
-                       <div className="mb-6">
-                         <label className="text-xs font-bold text-slate-500 mb-2 block uppercase tracking-wider">{t('select_date')}</label>
-                         <input 
-                            type="date"
-                            min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0]}
-                            value={bookingDate}
-                            onChange={(e) => setBookingDate(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all"
-                         />
-                       </div>
+                    <div className="mb-4 text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <p className="text-sm text-slate-500 italic">{t('no_additional_options')}</p>
+                    </div>
+                  )}
 
-                       {listing.category === 'property' ? (
-                          <div className="mb-4">
-                            <h4 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">{t('optional_features')}</h4>
-                            <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                              <span className="text-sm font-semibold text-slate-700">{t('catering_service')} (+50 {t('currency')})</span>
-                              <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.catering} onChange={(e) => setBookingFeatures({...bookingFeatures, catering: e.target.checked})} />
-                            </label>
-                            <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                              <span className="text-sm font-semibold text-slate-700">{t('projector_setup')} (+20 {t('currency')})</span>
-                              <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.projector} onChange={(e) => setBookingFeatures({...bookingFeatures, projector: e.target.checked})} />
-                            </label>
-                            <label className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl mb-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
-                              <span className="text-sm font-semibold text-slate-700">{t('extra_chairs')} (+10 {t('currency')})</span>
-                              <input type="checkbox" className="accent-slate-900 w-4 h-4 shadow-sm" checked={bookingFeatures.extraChairs} onChange={(e) => setBookingFeatures({...bookingFeatures, extraChairs: e.target.checked})} />
-                            </label>
-                          </div>
-                       ) : (
-                          <div className="mb-4 text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                             <p className="text-sm text-slate-500 italic">{t('no_additional_options')}</p>
-                          </div>
-                       )}
-                    
-                    <div className="flex justify-between items-center py-5 border-t border-slate-100 mb-4 bg-slate-50 -mx-6 px-6 shadow-inner">
-                      <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">{t('final_total')}</span>
-                      <span className="text-3xl font-extrabold text-slate-900">{calculateFinalPrice()} {t('currency')}</span>
-                    </div>
-                    
-                    <div className="flex flex-col gap-3">
-                       <button disabled={bookingLoading} onClick={handleValidateBooking} className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
-                         {bookingLoading ? t('processing') : (listing.category === 'service' ? t('confirm_order') : t('validate_booking_cash'))}
-                       </button>
-                      <button disabled className="w-full flex items-center justify-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-400 font-bold py-3.5 rounded-xl cursor-not-allowed">
-                        {t('pay_with_stripe')} <span className="text-[10px] bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-widest text-indigo-500">{t('coming_soon')}</span>
-                      </button>
-                    </div>
-                 </>
-               )}
+                  <div className="flex justify-between items-center py-5 border-t border-slate-100 mb-4 bg-slate-50 -mx-6 px-6 shadow-inner">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">{t('final_total')}</span>
+                    <span className="text-3xl font-extrabold text-slate-900">{calculateFinalPrice()} {t('currency')}</span>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <button disabled={bookingLoading} onClick={handleValidateBooking} className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+                      {bookingLoading ? t('processing') : (listing.category === 'service' ? t('confirm_order') : t('validate_booking_cash'))}
+                    </button>
+                    <button disabled className="w-full flex items-center justify-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-400 font-bold py-3.5 rounded-xl cursor-not-allowed">
+                      {t('pay_with_stripe')} <span className="text-[10px] bg-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-widest text-indigo-500">{t('coming_soon')}</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

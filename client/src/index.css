@@ -29,3 +29,20 @@ html {
   background-color: #cbd5e1;
   border-radius: 10px;
 }
+
+/* Leaflet Popup Customization */
+.custom-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+.custom-popup .leaflet-popup-tip-container {
+  display: none !important;
+}

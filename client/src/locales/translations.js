@@ -675,6 +675,16 @@ export const translations = {
     da: "DA",
     you_label: "You: ",
     most_active: "Most Active",
+    
+    // Map Page
+    locating_you: "Locating you...",
+    you_map: "You",
+    spaces_map: "Spaces",
+    locate_me: "Locate Me",
+    you_are_here: "You are here",
+    price: "Price",
+    view_details: "View Details",
+    location: "Location",
   },
 
   fr: {
@@ -1322,6 +1332,16 @@ export const translations = {
     da: "DA",
     you_label: "Vous : ",
     most_active: "Plus actif",
+    
+    // Map Page
+    locating_you: "Localisation en cours...",
+    you_map: "Vous",
+    spaces_map: "Espaces",
+    locate_me: "Me localiser",
+    you_are_here: "Vous êtes ici",
+    price: "Prix",
+    view_details: "Voir les Détails",
+    location: "Emplacement",
   },
 
   ar: {
@@ -1969,6 +1989,16 @@ export const translations = {
     failed_deny_request_admin: "فشل رفض الطلب.",
     no_admin_found: "لم يتم العثور على مسؤول",
     message_sent_superadmin: "تم إرسال الرسالة إلى المشرف العام بنجاح!",
+    
+    // Map Page
+    locating_you: "جاري تحديد موقعك...",
+    you_map: "أنت",
+    spaces_map: "مساحات",
+    locate_me: "حدد موقعي",
+    you_are_here: "أنت هنا",
+    price: "السعر",
+    view_details: "عرض التفاصيل",
+    location: "الموقع",
   },
 
   gr: {
@@ -2602,5 +2632,15 @@ export const translations = {
     failed_deny_request_admin: "Ablehnen der Anfrage fehlgeschlagen.",
     no_admin_found: "Kein Admin gefunden",
     message_sent_superadmin: "Nachricht erfolgreich an SuperAdmin gesendet!",
+    
+    // Map Page
+    locating_you: "Lokalisierung...",
+    you_map: "Sie",
+    spaces_map: "Räume",
+    locate_me: "Finde mich",
+    you_are_here: "Sie sind hier",
+    price: "Preis",
+    view_details: "Details anzeigen",
+    location: "Standort",
   }
 };
