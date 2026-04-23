@@ -27,7 +27,7 @@ const UserIcon = L.divIcon({
   iconAnchor: [12, 12]
 });
 
-// Custom Listing Icon with dynamic label and color
+// Custom Listing Icon with dynamic label and color (XSS Safe)
 const createListingIcon = (listing) => {
   let label = "";
   let color = "#10b981"; // Default Green for property
@@ -39,11 +39,16 @@ const createListingIcon = (listing) => {
     label = `${listing.availableRooms || 0} Rooms`;
   }
 
+  // Basic HTML escaping for security
+  const safeLabel = label.replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[m]);
+
   return L.divIcon({
     className: 'custom-listing-marker',
-    html: `<div style="background-color: ${color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); white-space: nowrap;">${label}</div>`,
-    iconSize: [label.length * 8 + 20, 28],
-    iconAnchor: [(label.length * 8 + 20) / 2, 14]
+    html: `<div style="background-color: ${color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); white-space: nowrap;">${safeLabel}</div>`,
+    iconSize: [safeLabel.length * 8 + 20, 28],
+    iconAnchor: [(safeLabel.length * 8 + 20) / 2, 14]
   });
 };
 
