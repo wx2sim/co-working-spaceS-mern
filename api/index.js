@@ -25,14 +25,13 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-app.set('trust proxy', 1); // Trust Render's proxy
+app.set('trust proxy', 1);
 
 const allowedOrigins = [
-  'https://co-working-space-s-mern.vercel.app', //prod
-  'http://localhost:5173',                      // (Vite)
-  'http://localhost:3001'                       // api
+  'https://co-working-space-s-mern.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3001'
 ];
-// Security Middleware
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -44,7 +43,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(helmet());
-app.use(express.json({ limit: '50kb' })); // Body size limit - safe for high-res profile data
+app.use(express.json({ limit: '50kb' }));
 app.use((req, res, next) => {
   mongoSanitize(req.body);
   mongoSanitize(req.query);
@@ -64,7 +63,6 @@ mongoose.connect(process.env.MONGO).then(() => {
   });
 }).catch((err) => { console.log('Error Connecting to Mongodb', err) });
 
-// Fast shutdown for development efficiency
 process.on('SIGUSR2', () => {
   server.close(() => {
     process.exit(0);
@@ -95,13 +93,11 @@ app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   
-  // Log the full error to the console for easier debugging on production (Render/Vercel)
   console.error(`[Error] ${req.method} ${req.url}:`, err);
 
   return res.status(statusCode).json({
     success: false,
     statusCode,
     message,
-    // Note: Do not expose stack trace in JSON response for security
   });
 });

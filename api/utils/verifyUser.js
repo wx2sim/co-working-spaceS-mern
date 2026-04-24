@@ -20,7 +20,6 @@ export const verifyUserToken = (req, res, next) => {
         return next(errorHandler(404, 'User not found'));
       }
       
-      // Ensure req.user has a stable string ID and the full user document
       req.user = user;
       req.user.id = user._id.toString(); 
       

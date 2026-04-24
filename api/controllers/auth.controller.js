@@ -9,9 +9,8 @@ export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
   const HashedPassword = bcryptjs.hashSync(password, 10);
 
-  // Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
   const newUser = new User({
     username,
@@ -94,7 +93,6 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
 
     if (user) {
-      console.log(`[GoogleAuth] Existing user found: ${user.email}`);
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = user._doc;
 
@@ -107,7 +105,6 @@ export const google = async (req, res, next) => {
         .status(200)
         .json(rest);
     } else {
-      console.log(`[GoogleAuth] Creating new user for email: ${req.body.email}`);
       const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
 
