@@ -44,7 +44,21 @@ jobs:
         with:
           node-version: 20.x
           cache: 'npm'
-      - name: Install dependencies
+          cache-dependency-path: './client/package-lock.json' 
+          
+      - name: Install Client dependencies
+        working-directory: ./client
         run: npm install
-      - name: Build project
+        
+      - name: Build React project
+        working-directory: ./client
         run: npm run build
+
+  deploy:
+    needs: [test, build] 
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' 
+
+    steps:
+      - name: Trigger Render Deployment
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
