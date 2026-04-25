@@ -10,12 +10,12 @@ import { verifyUserToken, checkVerification } from './api/utils/verifyUser.js';
 import { requireRole } from './api/utils/verifyRole.js';
 import { getMe, updateUser, deleteUser } from './api/controllers/user.controller.js';
 import { verifyEmail, resendOTP } from './api/controllers/auth.controller.js';
-import userReducer, { 
+import userReducer, {
   signInStart, signInSuccess, signInFailure,
   updateUserStart, updateUserSuccess, updateUserFailure,
   deleteUserStart, deleteUserSuccess, deleteUserFailure,
   signOutUserStart, signOutUserSuccess, signOutUserFailure,
-  clearError 
+  clearError
 } from './client/src/redux/user/userSlice.js';
 import jwt from 'jsonwebtoken';
 import User from './api/models/user.model.js';
@@ -35,7 +35,7 @@ describe('--- CO-WORKING SPACES MERN: UNIT TESTS ---', () => {
   // BACKEND UTILITY TESTS
   // ==========================================
   describe('Backend Utilities', () => {
-    
+
     /**
      * Test Case: Custom Error Handler
      * Ensures errors are created with correct status codes and messages.
@@ -57,7 +57,7 @@ describe('--- CO-WORKING SPACES MERN: UNIT TESTS ---', () => {
      */
     describe('sendEmail Service', () => {
       beforeEach(() => {
-        process.env.EMAIL_USER = 'test@example.com';
+        process.env.FAKE_USER = 'test@example.com';
         process.env.EMAIL_PASS = 'password';
         jest.clearAllMocks();
       });
@@ -116,8 +116,8 @@ describe('--- CO-WORKING SPACES MERN: UNIT TESTS ---', () => {
 
     beforeEach(() => {
       req = { user: { id: 'user123' }, params: { id: 'user123' }, body: {} };
-      res = { 
-        status: jest.fn().mockReturnThis(), 
+      res = {
+        status: jest.fn().mockReturnThis(),
         json: jest.fn().mockReturnThis(),
         clearCookie: jest.fn()
       };
@@ -175,7 +175,7 @@ describe('--- CO-WORKING SPACES MERN: UNIT TESTS ---', () => {
       it('verifyEmail: should return 400 if OTP is incorrect', async () => {
         req.body = { email: 'test@test.com', otp: 'wrong' };
         User.findOne.mockResolvedValue({ email: 'test@test.com', verificationOTP: '123456' });
-        
+
         await verifyEmail(req, res, next);
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
       });
@@ -184,7 +184,7 @@ describe('--- CO-WORKING SPACES MERN: UNIT TESTS ---', () => {
         req.body = { email: 'test@test.com' };
         const mockUser = { email: 'test@test.com', isVerified: false, save: jest.fn() };
         User.findOne.mockResolvedValue(mockUser);
-        
+
         await resendOTP(req, res, next);
         expect(mockUser.save).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(200);
