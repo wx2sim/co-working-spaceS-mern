@@ -57,7 +57,7 @@ describe('--- CO-WORKING SPACES MERN: UNIT TESTS ---', () => {
      */
     describe('sendEmail Service', () => {
       beforeEach(() => {
-        process.env.FAKE_USER = 'test@example.com';
+        process.env.EMAIL_USER = 'test@example.com';
         process.env.EMAIL_PASS = 'password';
         jest.clearAllMocks();
       });
